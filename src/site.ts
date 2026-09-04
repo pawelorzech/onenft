@@ -11,7 +11,6 @@ import { dayByNumber, secondsLeft, type Day } from "./chain.ts";
 import type { ChainState } from "./contract.ts";
 
 export const SITE = "onenft.click";
-export const AUTHOR = "Paweł Orzech";
 const REPO = "https://github.com/pawelorzech/onenft";
 
 export function shortAddr(a: string): string {
@@ -250,7 +249,7 @@ ${today.n === 1 ? `<p class="small">This is day one. Tomorrow a second row appea
 <section class="format">${TILES}<p style="max-width:520px;margin:0">The whole knot is these four shapes, two bits per cell. The format is public. You can build it yourself. <a href="/how">See how the machine works</a></p></section>
 ${rows.join("\n")}
 ${older}
-<footer><span>${AUTHOR}, Warsaw.</span><span>This is not an investment and never will be.</span></footer>
+<footer><span>This is not an investment and never will be.</span></footer>
 </main>
 </div>
 ${chain && !todayOwner && !authorDay ? mintScript(chain) : ""}
@@ -302,7 +301,7 @@ counter = next(epoch)
 palette = top8(next(++counter)) mod 8
 cell[i] = top2(next(++counter))   for i in 0..63</code></pre>
 <p>If you build it, write to me. That is the one thing I am waiting for here.</p>
-<p class="small">${AUTHOR}, Warsaw. <a href="/">Back to the fabric</a></p>
+<p class="small"><a href="/">Back to the fabric</a></p>
 </main>`;
   return layout(`How it works | ${SITE}`, k.palette, body);
 }
