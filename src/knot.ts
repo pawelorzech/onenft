@@ -47,14 +47,14 @@ export type Palette = {
  * bez żadnej akcji autora — to jedyny mechanizm nawyku, który wykonuje się sam.
  */
 export const PALETTES: Palette[] = [
-  { name: "atrament",  bg: "#12131a", cord: "#e8e4d9", shade: "#5b6478" },
-  { name: "miedź",     bg: "#1a1210", cord: "#e0a060", shade: "#7a4426" },
-  { name: "mech",      bg: "#101a14", cord: "#9fd8a8", shade: "#2f5c3f" },
-  { name: "popiół",    bg: "#e8e6e1", cord: "#22242c", shade: "#9a9891" },
-  { name: "ultramaryna", bg: "#0e1430", cord: "#d8dcf0", shade: "#3a4a8c" },
-  { name: "rdza",      bg: "#f0e8dc", cord: "#8c3a20", shade: "#c8a882" },
-  { name: "sól",       bg: "#f4f4f2", cord: "#3a4450", shade: "#b8bcc4" },
-  { name: "smoła",     bg: "#08080a", cord: "#c8c4bc", shade: "#3a3a40" },
+  { name: "ink",  bg: "#12131a", cord: "#e8e4d9", shade: "#5b6478" },
+  { name: "copper",     bg: "#1a1210", cord: "#e0a060", shade: "#7a4426" },
+  { name: "moss",      bg: "#101a14", cord: "#9fd8a8", shade: "#2f5c3f" },
+  { name: "ash",    bg: "#e8e6e1", cord: "#22242c", shade: "#9a9891" },
+  { name: "ultramarine", bg: "#0e1430", cord: "#d8dcf0", shade: "#3a4a8c" },
+  { name: "rust",      bg: "#f0e8dc", cord: "#8c3a20", shade: "#c8a882" },
+  { name: "salt",       bg: "#f4f4f2", cord: "#3a4450", shade: "#b8bcc4" },
+  { name: "tar",     bg: "#08080a", cord: "#c8c4bc", shade: "#3a3a40" },
 ];
 
 /** Długość epoki w blokach. Base ~2 s/blok → 43200 bloków ≈ doba. */

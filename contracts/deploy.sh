@@ -13,7 +13,7 @@ AUTHOR=$(python3 -c "import json;print(json.load(open('$HOME/.config/onenft/auth
 PK=$(security find-generic-password -a onenft-deployer -s onenft-deployer -w)
 DEPLOYER=$(cast wallet address --private-key "$PK")
 BAL=$(cast balance "$DEPLOYER" --rpc-url "$RPC" --ether)
-echo "sieć $NET  deployer $DEPLOYER  saldo $BAL ETH  autor $AUTHOR"
+echo "network $NET  deployer $DEPLOYER  balance $BAL ETH  author $AUTHOR"
 if [ -z "${START_EPOCH:-}" ]; then
   if [ "$NET" = mainnet ]; then START_EPOCH=1178; else START_EPOCH=$(( $(cast block-number --rpc-url "$RPC") / 43200 )); fi
 fi
@@ -25,4 +25,4 @@ NFT=$(grep -E "^\s*OneNFT " "/tmp/onenft-deploy-$NET.log" | awk '{print $2}'); R
 mkdir -p "$HOME/.config/onenft"
 printf '{"network":"%s","chainId":%s,"OneNFT":"%s","KnotRenderer":"%s","startEpoch":%s,"author":"%s","deployer":"%s","at":"%s"}\n' \
   "$NET" "$CHAIN" "$NFT" "$REN" "$START_EPOCH" "$AUTHOR" "$DEPLOYER" "$(date -u +%FT%TZ)" > "$HOME/.config/onenft/deploy-$NET.json"
-echo "zapisane: ~/.config/onenft/deploy-$NET.json"
+echo "saved: ~/.config/onenft/deploy-$NET.json"

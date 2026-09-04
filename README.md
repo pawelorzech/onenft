@@ -1,44 +1,40 @@
 # onenft.click
 
-Jeden splot Truchet na dobę, wyliczony z numeru bloku Base. Nikt go nie rysuje i nikt nie może go opóźnić.
+One Truchet knot a day, computed from the Base block number. Nobody draws it and nobody can delay it.
 
-## Jak to działa
+## How it works
 
-- **Doba** = `blockNumber / 43200` (całkowicie). Przy ~2 s/blok to około dzień, ale granica wędruje względem zegara ściennego.
-- **Ziarno** = doba przez splitmix64. Osiem bitów na paletę, potem po dwa bity na każdą z 64 komórek siatki 8×8.
-- **Cztery stany komórki**: ćwierćłuki w dwóch orientacjach, przelot pionowy, przelot poziomy.
-- **Wyjście**: jedna ścieżka SVG narysowana dwa razy (cień + sznur), ~5 kB, docelowo zwracane z kontraktu jako `data:` URI.
-- **Strona nie ma własnej palety.** Bierze kolory z palety dzisiejszej doby, więc wygląda inaczej w każdej z ośmiu epok.
+- **A day** is `blockNumber / 43200`, rounded down. At about 2 s per block that is close to a day, but the boundary drifts against wall-clock time. The chain is the clock.
+- **The seed** is the day run through splitmix64. Eight bits pick the palette, then two bits per cell for an 8×8 grid.
+- **Four cell states**: quarter-arcs in two orientations, a vertical pass, a horizontal pass.
+- **Output**: one SVG path drawn twice (shadow and cord), about 5 kB, returned by the contract as a `data:` URI.
+- **The page has no palette of its own.** It takes colors from today's palette, so it looks different in each of the eight epochs.
 
-Cały strumień losowy jest opisany na `/format`, żeby dało się go przepisać w dowolnym języku. Cała arytmetyka mieści się w uint64 pod przyszłe przepisanie na Solidity.
+The full random stream is described on `/how`, so you can port it to any language. All arithmetic fits in uint64; the Solidity renderer reproduces the TypeScript output byte for byte.
 
-## Uruchomienie
+## Run
 
 ```sh
 bun test
 PORT=3000 bun run src/server.ts
 ```
 
-Zmienne: `PORT`, `BASE_RPC_URL` (domyślnie `https://mainnet.base.org`), `START_EPOCH` (epoka doby 1; domyślnie 1178).
+Env: `PORT`, `BASE_RPC_URL` (default `https://mainnet.base.org`), `START_EPOCH` (epoch of day 1, default 1178), `CONTRACT_ADDRESS` and `CHAIN_ID` (8453 mainnet, 84532 Sepolia) to read state from the contract and enable claiming. Without a contract the site runs as a plain renderer.
 
-## Trasy
+## Routes
 
-- `/` tkanina: dzisiejsza doba i wszystkie wcześniejsze
-- `/doba/N` pojedyncza doba, `/doba/N.svg` surowy plik (przeszłe doby cache'owane na rok)
-- `/dzis.svg` dzisiejszy splot
-- `/format` opis formatu
-- `/zdrowie` healthcheck
+- `/` the fabric: today and every earlier day
+- `/day/N` one day, `/day/N.svg` the raw file (past days cached for a year)
+- `/today.svg` today's knot
+- `/how` the format
+- `/health` healthcheck
+
+## Contracts (`contracts/`, Foundry)
+
+- `KnotRenderer.sol` ports `src/knot.ts` one to one. `test_SvgMatchesTypeScriptByteForByte` compares keccak of the SVG against fixtures from `bun run contracts/fixtures.ts`. TypeScript is the source of truth.
+- `OneNFT.sol` is the ERC-721. `claim()` takes today's day (tokenId = day number). A day nobody claims stays empty forever. Every tenth day up to 1000 goes to the author. The renderer address is stored per token at claim time, so `setRenderer` touches future days only; `lockRenderer` is one-way. It uses `_mint`, not `_safeMint`: after EIP-7702 a normal wallet can be an account with delegation code that does not answer `onERC721Received`.
+- Deploy: `contracts/deploy.sh sepolia|mainnet` (deployer key from Keychain, author address from `~/.config/onenft/author.json`, Sourcify verification).
 
 ## Plan
 
-Bramki z projektu: (1) renderer publicznie bez portfela ← tu jesteśmy, (2) 90 dób pod nazwiskiem, (3) format jako specyfikacja, (4) Base Sepolia, (5) mainnet, gdy kilkunastu nieznajomych spyta „da się to mieć".
-
-Kontrakt tokenu będzie niezmienny. Renderer będzie osobnym kontraktem, którego adres zapisuje się per token w chwili odbioru, więc poprawki dotykają tylko przyszłych dób.
-
-## Kontrakty (`contracts/`, Foundry)
-
-- `KnotRenderer.sol` — przepisanie `src/knot.ts` 1:1. Test `test_SvgMatchesTypeScriptByteForByte` porównuje keccak SVG z wzorcami z `bun run contracts/fixtures.ts`; TS jest źródłem prawdy.
-- `OneNFT.sol` — ERC-721, `claim()` bierze dzisiejszą dobę (tokenId = numer doby), nieodebrana doba zostaje pusta, co dziesiąta do 1000. idzie do autora. Adres renderera zapisywany per token przy odbiorze; `setRenderer` dotyka tylko przyszłych dób, `lockRenderer` jednokierunkowe. `_mint`, nie `_safeMint`: po EIP-7702 portfele bywają kontami z kodem, które nie odpowiadają na `onERC721Received`.
-- Deploy: `START_EPOCH=1178 AUTHOR=0x… forge script script/Deploy.s.sol --rpc-url base_sepolia --broadcast --verify`.
-
-Strona czyta stan z kontraktu, gdy ustawisz `CONTRACT_ADDRESS` i `CHAIN_ID` (8453 mainnet, 84532 Sepolia). Bez tego działa jako sam renderer.
+Gates: (1) public renderer without a wallet, (2) 90 days under my own name, (3) the format as a spec with code, (4) Base Sepolia, (5) mainnet, once a dozen strangers ask "can I have this".

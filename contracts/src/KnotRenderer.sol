@@ -25,14 +25,14 @@ contract KnotRenderer is IKnotRenderer {
     }
 
     function palettes(uint256 i) internal pure returns (Palette memory) {
-        if (i == 0) return Palette(unicode"atrament", "#12131a", "#e8e4d9", "#5b6478");
-        if (i == 1) return Palette(unicode"miedź", "#1a1210", "#e0a060", "#7a4426");
-        if (i == 2) return Palette(unicode"mech", "#101a14", "#9fd8a8", "#2f5c3f");
-        if (i == 3) return Palette(unicode"popiół", "#e8e6e1", "#22242c", "#9a9891");
-        if (i == 4) return Palette(unicode"ultramaryna", "#0e1430", "#d8dcf0", "#3a4a8c");
-        if (i == 5) return Palette(unicode"rdza", "#f0e8dc", "#8c3a20", "#c8a882");
-        if (i == 6) return Palette(unicode"sól", "#f4f4f2", "#3a4450", "#b8bcc4");
-        return Palette(unicode"smoła", "#08080a", "#c8c4bc", "#3a3a40");
+        if (i == 0) return Palette("ink", "#12131a", "#e8e4d9", "#5b6478");
+        if (i == 1) return Palette("copper", "#1a1210", "#e0a060", "#7a4426");
+        if (i == 2) return Palette("moss", "#101a14", "#9fd8a8", "#2f5c3f");
+        if (i == 3) return Palette("ash", "#e8e6e1", "#22242c", "#9a9891");
+        if (i == 4) return Palette("ultramarine", "#0e1430", "#d8dcf0", "#3a4a8c");
+        if (i == 5) return Palette("rust", "#f0e8dc", "#8c3a20", "#c8a882");
+        if (i == 6) return Palette("salt", "#f4f4f2", "#3a4450", "#b8bcc4");
+        return Palette("tar", "#08080a", "#c8c4bc", "#3a3a40");
     }
 
     /// @dev splitmix64: jeden krok. W uint64 z zawijaniem, jak `nextRandom` w TS.
@@ -114,13 +114,13 @@ contract KnotRenderer is IKnotRenderer {
         (uint256 pi,) = cells(epoch);
         string memory image = string.concat("data:image/svg+xml;base64,", Base64.encode(bytes(svg(epoch))));
         string memory json = string.concat(
-            '{"name":"Doba ', day.toString(),
-            unicode'","description":"Jeden splot Truchet na dobę, wyliczony z numeru bloku Base. Doba ',
-            day.toString(), ", epoka ", epoch.toString(), unicode". Nieodebrana doba zostaje pusta na zawsze.",
+            '{"name":"Day ', day.toString(),
+            '","description":"One Truchet knot a day, computed from the Base block number. Day ',
+            day.toString(), ", epoch ", epoch.toString(), ". A day nobody claims stays empty forever.",
             '","image":"', image,
-            '","attributes":[{"trait_type":"Doba","value":', day.toString(),
-            '},{"trait_type":"Epoka","value":', epoch.toString(),
-            '},{"trait_type":"Paleta","value":"', palettes(pi).name, '"}]}'
+            '","attributes":[{"trait_type":"Day","value":', day.toString(),
+            '},{"trait_type":"Epoch","value":', epoch.toString(),
+            '},{"trait_type":"Palette","value":"', palettes(pi).name, '"}]}'
         );
         return string.concat("data:application/json;base64,", Base64.encode(bytes(json)));
     }
