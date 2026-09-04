@@ -1,2 +1,6 @@
 node_modules/
 out/*.svg
+design/build/
+design2/build/
+design/*.html
+design2/*.html

@@ -1,0 +1,27 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html",      "x": 0,    "y": 0,    "w": 1280, "h": 900, "title": "1 · Galeria" },
+    { "file": "Terminal.dc.html",  "x": 1400, "y": 0,    "w": 1280, "h": 900, "title": "2 · Terminal" },
+    { "file": "Brutalist.dc.html", "x": 2800, "y": 0,    "w": 1280, "h": 900, "title": "3 · Brutalizm" },
+    { "file": "Archiwum.dc.html",  "x": 4200, "y": 0,    "w": 1280, "h": 900, "title": "4 · Archiwum dziur" },
+    { "file": "Washi.dc.html",     "x": 5600, "y": 0,    "w": 1280, "h": 900, "title": "5 · Washi" },
+    { "file": "Plansza.dc.html",   "x": 0,    "y": 1160, "w": 1280, "h": 900, "title": "6 · Arkusz techniczny" },
+    { "file": "Zine.dc.html",      "x": 1400, "y": 1160, "w": 1280, "h": 900, "title": "7 · Zin" },
+    { "file": "Mechanizm.dc.html", "x": 2800, "y": 1160, "w": 1280, "h": 900, "title": "8 · Zegar" },
+    { "file": "Fosfor.dc.html",    "x": 4200, "y": 1160, "w": 1280, "h": 900, "title": "9 · Fosfor" },
+    { "file": "Magazyn.dc.html",   "x": 5600, "y": 1160, "w": 1280, "h": 900, "title": "10 · Magazyn" }
+  ],
+  "annotations": [
+    { "id": "k1", "x": 0,    "y": -210, "w": 520, "text": "1 · GALERIA\nObiekt traktowany jak eksponat, nie jak towar: dużo światła, etykieta muzealna, garamond.\nZa: najsilniej odcina od kasyna, dobrze się starzeje.\nPrzeciw: może czytać się jako pretensjonalne i wolne — nie ma w tym pilności." },
+    { "id": "k2", "x": 1400, "y": -210, "w": 520, "text": "2 · TERMINAL\nStrona udaje konsolę: adresy, wywołania, log ostatnich dób.\nZa: mówi językiem ludzi, którzy realnie mintują; zero ściemy.\nPrzeciw: wyklucza wszystkich pozostałych, a to właśnie oni mieli być publicznością." },
+    { "id": "k3", "x": 2800, "y": -210, "w": 520, "text": "3 · BRUTALIZM\nGruba siatka, Archivo Black, czerwień. Dziury pokazane jako kreskowane pola.\nZa: zapamiętywalne po jednym spojrzeniu, świetne na screenshota.\nPrzeciw: krzyczy — a projekt z założenia nie sprzedaje." },
+    { "id": "k4", "x": 4200, "y": -210, "w": 520, "text": "4 · ARCHIWUM DZIUR\nCała strona to siatka wszystkich dób; dzisiejszy węzeł jest tylko marginesem.\nZa: robi z braku główny bohater, dokładnie jak mówi plan.\nPrzeciw: dzień pierwszy wygląda pusto; działa dopiero po miesiącach." },
+    { "id": "k5", "x": 5600, "y": -210, "w": 520, "text": "5 · WASHI\nPionowy rytm, mincho, pieczęć, ogrom powietrza.\nZa: cisza i rzemiosło zamiast cryptowej gorączki.\nPrzeciw: japońszczyzna nie wynika z niczego w projekcie — ryzyko kostiumu." },
+    { "id": "k6", "x": 0,    "y": 960, "w": 520, "text": "6 · ARKUSZ TECHNICZNY\nPapier milimetrowy, legenda czterech stanów komórki, parametry wydania.\nZa: tłumaczy format, czyli buduje bramkę 3 (obca implementacja).\nPrzeciw: chłodne; pokazuje mechanizm zamiast wrażenia." },
+    { "id": "k7", "x": 1400, "y": 960, "w": 520, "text": "7 · ZIN\nKserówka, ziarno, przekrzywione bloki, Anton i Courier.\nZa: najbardziej ludzkie z całej dziesiątki, anty-korpo.\nPrzeciw: bałagan gryzie się z geometryczną czystością samego węzła." },
+    { "id": "k8", "x": 2800, "y": 960, "w": 520, "text": "8 · ZEGAR\nDominuje odliczanie do zamknięcia doby, obraz jest drugi.\nZa: jedyny kierunek, który wprost tworzy nawyk powrotu.\nPrzeciw: pilność to mechanika kasyna — dokładnie to, czego nie chciałeś." },
+    { "id": "k9", "x": 4200, "y": 960, "w": 520, "text": "9 · FOSFOR\nZielony CRT, scanline, węzeł przefarbowany na monitor.\nZa: mocna atmosfera, natychmiast rozpoznawalne.\nPrzeciw: filtr zabija autentyczną paletę doby — kłóci się z sensem generatora." },
+    { "id": "k10", "x": 5600, "y": 960, "w": 520, "text": "10 · MAGAZYN\nLead jak w gazecie: tekst o dziurach jest treścią, obraz ilustracją.\nZa: daje miejsce na twoje pisanie, buduje kanał poza łańcuchem.\nPrzeciw: wymaga, żebyś naprawdę pisał — inaczej pusta forma." }
+  ],
+  "launch": { "view": "canvas" }
+}

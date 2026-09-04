@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap">
+  <style>
+    body { margin: 0; background: #0b0c0d; color: #d6d3cc;
+           font-family: "JetBrains Mono", ui-monospace, monospace; }
+    a { color: #7fd88f; } a:hover { color: #b7ecc0; }
+  </style>
+</helmet>
+
+<div style="width: 1280px; height: 900px; box-sizing: border-box; padding: 32px 40px; display: flex; flex-direction: column; gap: 22px">
+
+  <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #6a6f6b">
+    <span>onenft.click<span style="color:#3d423e"> — jeden węzeł na dobę, Base mainnet</span></span>
+    <span>chainId 8453 · block 24 913 220 · epoch 412</span>
+  </div>
+
+  <div style="flex-grow: 1; display: grid; grid-template-columns: 460px minmax(0, 1fr); gap: 40px">
+
+    <div style="display: flex; flex-direction: column; gap: 14px">
+      <div style="border: 1px solid #22262a; padding: 12px; background: #101214"><div style="width: 434px; height: 434px"><!--KNOT-A--></div></div>
+      <div style="font-size: 11px; line-height: 1.7; color: #5f655f">
+        tokenURI(412) → data:image/svg+xml;base64, 6 030 B<br>
+        renderer 0x4c1f…a209 · <span style="color:#d0a24a">niezamrożony</span>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 24px; min-width: 0">
+      <div>
+        <div style="font-size: 13px; color: #6a6f6b">$ knot mint --epoch 412</div>
+        <div style="font-size: 40px; font-weight: 700; line-height: 1.15; margin-top: 12px; color: #f0ede6">Doba 412<br>jest jeszcze wolna.</div>
+      </div>
+
+      <div style="border: 1px solid #22262a; background: #101214">
+        <div style="display: grid; grid-template-columns: 150px minmax(0, 1fr); font-size: 13px">
+          <div style="padding: 11px 14px; border-bottom: 1px solid #1a1e21; color: #6a6f6b">cena</div><div style="padding: 11px 14px; border-bottom: 1px solid #1a1e21">0 ETH + gaz (~0,00004)</div>
+          <div style="padding: 11px 14px; border-bottom: 1px solid #1a1e21; color: #6a6f6b">okno</div><div style="padding: 11px 14px; border-bottom: 1px solid #1a1e21">zamyka się za 06:41:12</div>
+          <div style="padding: 11px 14px; border-bottom: 1px solid #1a1e21; color: #6a6f6b">podaż</div><div style="padding: 11px 14px; border-bottom: 1px solid #1a1e21">388 z 412 dób odebranych</div>
+          <div style="padding: 11px 14px; color: #6a6f6b">dziesiąty</div><div style="padding: 11px 14px">410 przypadł autorowi (do doby 1000)</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px; align-items: center">
+        <a href="#" style="display: inline-flex; align-items: center; height: 48px; padding: 0 26px; background: #7fd88f; color: #0b0c0d; text-decoration: none; font-weight: 700; font-size: 14px">POŁĄCZ PORTFEL I ODBIERZ</a>
+        <span style="font-size: 12px; color: #5f655f">nic nie zapisujemy poza łańcuchem</span>
+      </div>
+
+      <div style="border-top: 1px solid #1a1e21; padding-top: 16px">
+        <div style="font-size: 11px; color: #5f655f; margin-bottom: 10px">OSTATNIE WYWOŁANIA</div>
+        <div style="display: flex; flex-direction: column; gap: 7px; font-size: 12px">
+          <div style="display: flex; gap: 18px"><span style="color:#5f655f; width: 62px">411</span><span style="color:#7fd88f; width: 92px">claimed</span><span style="color:#8b918a">0x91a4…3d70</span></div>
+          <div style="display: flex; gap: 18px"><span style="color:#5f655f; width: 62px">410</span><span style="color:#d0a24a; width: 92px">author</span><span style="color:#8b918a">0x7e02…11cc</span></div>
+          <div style="display: flex; gap: 18px"><span style="color:#5f655f; width: 62px">409</span><span style="color:#7fd88f; width: 92px">claimed</span><span style="color:#8b918a">0x2f8b…9a41</span></div>
+          <div style="display: flex; gap: 18px"><span style="color:#5f655f; width: 62px">408</span><span style="color:#4a4f4a; width: 92px">— nikt —</span><span style="color:#3d423e">luka trwała</span></div>
+          <div style="display: flex; gap: 18px"><span style="color:#5f655f; width: 62px">407</span><span style="color:#7fd88f; width: 92px">claimed</span><span style="color:#8b918a">0xdd31…5e08</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

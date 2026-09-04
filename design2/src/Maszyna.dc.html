@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=Newsreader:opsz,wght@6..72,300;6..72,400&display=swap">
+  <style>
+    body { margin: 0; background: #08080a; color: #c8c4bc; font-family: "Newsreader", Georgia, serif; }
+    a { color: #c8c4bc; } a:hover { color: #ffffff; }
+    .syne { font-family: "Syne", sans-serif; }
+  </style>
+</helmet>
+
+<div style="width: 1280px; height: 900px; box-sizing: border-box; padding: 40px 46px; display: flex; flex-direction: column; gap: 30px">
+
+  <div style="display: flex; justify-content: space-between; align-items: baseline">
+    <span class="syne" style="font-weight: 800; font-size: 19px; color: #ffffff">onenft.click</span>
+    <span style="font-size: 15px; color: #6e6b66">obraz nie jest przechowywany nigdzie, tylko liczony na żądanie</span>
+  </div>
+
+  <div class="syne" style="font-weight: 800; font-size: 54px; line-height: 0.98; letter-spacing: -0.03em; color: #ffffff; max-width: 760px">
+    Z jednej liczby do jednego splotu, w czterech krokach
+  </div>
+
+  <div style="flex-grow: 1; display: grid; grid-template-columns: 200px 200px 200px minmax(0, 1fr); gap: 30px; align-items: stretch; min-height: 0">
+
+    <div style="display: flex; flex-direction: column; gap: 14px">
+      <div style="flex-grow: 1; border: 1px solid #26262a; display: flex; align-items: center; justify-content: center; padding: 16px">
+        <div class="syne" style="font-size: 27px; font-weight: 700; color: #ffffff; line-height: 1.2; word-break: break-all; text-align: center">24<br>913<br>220</div>
+      </div>
+      <div>
+        <div class="syne" style="font-size: 17px; font-weight: 700; color: #ffffff">Numer bloku</div>
+        <div style="font-size: 15px; line-height: 1.45; color: #6e6b66; margin-top: 4px">Jedyne wejście. Nikt go nie ustawia.</div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 14px">
+      <div style="flex-grow: 1; border: 1px solid #26262a; display: flex; align-items: center; justify-content: center; padding: 16px">
+        <div class="syne" style="font-size: 56px; font-weight: 700; color: #ffffff">412</div>
+      </div>
+      <div>
+        <div class="syne" style="font-size: 17px; font-weight: 700; color: #ffffff">Doba</div>
+        <div style="font-size: 15px; line-height: 1.45; color: #6e6b66; margin-top: 4px">Blok podzielony przez 43 200.</div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 14px">
+      <div style="flex-grow: 1; border: 1px solid #26262a; padding: 14px; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 3px">
+        <div style="background:#1a1a1d"></div><div style="background:#3a3a40"></div><div style="background:#26262a"></div><div style="background:#4e4e56"></div>
+        <div style="background:#3a3a40"></div><div style="background:#1a1a1d"></div><div style="background:#4e4e56"></div><div style="background:#26262a"></div>
+        <div style="background:#4e4e56"></div><div style="background:#26262a"></div><div style="background:#1a1a1d"></div><div style="background:#3a3a40"></div>
+        <div style="background:#26262a"></div><div style="background:#4e4e56"></div><div style="background:#3a3a40"></div><div style="background:#1a1a1d"></div>
+      </div>
+      <div>
+        <div class="syne" style="font-size: 17px; font-weight: 700; color: #ffffff">64 komórki</div>
+        <div style="font-size: 15px; line-height: 1.45; color: #6e6b66; margin-top: 4px">Dwa bity każda, cztery kształty.</div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 14px">
+      <div style="flex-grow: 1; min-height: 0; display: flex; justify-content: flex-end"><div style="height: 100%; aspect-ratio: 1"><!--KNOT-A--></div></div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 20px">
+        <div>
+          <div class="syne" style="font-size: 17px; font-weight: 700; color: #ffffff">Splot</div>
+          <div style="font-size: 15px; line-height: 1.45; color: #6e6b66; margin-top: 4px">6 030 bajtów, całe w kontrakcie.</div>
+        </div>
+        <a href="#" class="syne" style="display: inline-flex; align-items: center; height: 52px; padding: 0 28px; background: #c8c4bc; color: #08080a; text-decoration: none; font-weight: 700; font-size: 17px; white-space: nowrap">Weź dobę 412</a>
+      </div>
+    </div>
+  </div>
+
+  <div style="border-top: 1px solid #26262a; padding-top: 18px; display: flex; gap: 40px">
+    <div style="font-size: 16px; line-height: 1.55; max-width: 480px">
+      Ten sam numer bloku zawsze da ten sam splot. Za dziesięć lat, przy wyłączonej
+      tej stronie, z samego kontraktu.
+    </div>
+    <div style="font-size: 15px; line-height: 1.55; color: #6e6b66; max-width: 420px">
+      Format jest opisany i wolno go zaimplementować u siebie. Jeśli to zrobisz,
+      napisz — to jedyna rzecz, na którą tu czekam.
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

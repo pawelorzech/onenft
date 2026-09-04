@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #dbe4e6; color: #16242b; font-family: "IBM Plex Sans Condensed", sans-serif; }
+    a { color: #16242b; } a:hover { color: #1d5f7a; }
+    .m { font-family: "IBM Plex Mono", monospace; }
+  </style>
+</helmet>
+
+<div style="width: 1280px; height: 900px; box-sizing: border-box; padding: 26px; background-image: linear-gradient(#c9d6d9 1px, transparent 1px), linear-gradient(90deg, #c9d6d9 1px, transparent 1px); background-size: 24px 24px">
+  <div style="height: 100%; border: 2px solid #16242b; background: rgba(233,238,239,0.86); display: flex; flex-direction: column">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #16242b; padding: 14px 22px">
+      <div class="m" style="font-size: 14px; font-weight: 600; letter-spacing: 0.08em">ONENFT.CLICK — ARKUSZ KONSTRUKCYJNY</div>
+      <div class="m" style="font-size: 12px; color: #4d626b">ark. 412 / skala 1:1 / płytki Truchet, 2 bity</div>
+    </div>
+
+    <div style="flex-grow: 1; display: grid; grid-template-columns: minmax(0, 1fr) 348px">
+      <div style="border-right: 2px solid #16242b; padding: 26px; display: flex; align-items: center; justify-content: center; position: relative">
+        <div style="width: 100%; max-width: 480px; aspect-ratio: 1; border: 1px solid #16242b"><!--KNOT-A--></div>
+        <div class="m" style="position: absolute; left: 26px; top: 26px; font-size: 10px; color: #4d626b">A1</div>
+        <div class="m" style="position: absolute; right: 26px; bottom: 26px; font-size: 10px; color: #4d626b">512 × 512 jedn. SVG</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column">
+        <div style="padding: 22px; border-bottom: 2px solid #16242b">
+          <div class="m" style="font-size: 11px; letter-spacing: 0.14em; color: #4d626b">LEGENDA STANU KOMÓRKI</div>
+          <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 14px">
+            <div><svg viewBox="0 0 64 64" style="width:100%;border:1px solid #9fb3b8"><path d="M0 32A32 32 0 0 1 32 0M32 64A32 32 0 0 0 64 32" fill="none" stroke="#16242b" stroke-width="9"/></svg><div class="m" style="font-size:10px;margin-top:5px">00</div></div>
+            <div><svg viewBox="0 0 64 64" style="width:100%;border:1px solid #9fb3b8"><path d="M32 0A32 32 0 0 1 64 32M0 32A32 32 0 0 0 32 64" fill="none" stroke="#16242b" stroke-width="9"/></svg><div class="m" style="font-size:10px;margin-top:5px">01</div></div>
+            <div><svg viewBox="0 0 64 64" style="width:100%;border:1px solid #9fb3b8"><path d="M32 0L32 64" fill="none" stroke="#16242b" stroke-width="9"/></svg><div class="m" style="font-size:10px;margin-top:5px">10</div></div>
+            <div><svg viewBox="0 0 64 64" style="width:100%;border:1px solid #9fb3b8"><path d="M0 32L64 32" fill="none" stroke="#16242b" stroke-width="9"/></svg><div class="m" style="font-size:10px;margin-top:5px">11</div></div>
+          </div>
+        </div>
+
+        <div style="padding: 22px; border-bottom: 2px solid #16242b" class="m">
+          <div style="font-size: 11px; letter-spacing: 0.14em; color: #4d626b; margin-bottom: 12px">PARAMETRY WYDANIA</div>
+          <div style="display: grid; grid-template-columns: 118px minmax(0, 1fr); row-gap: 8px; font-size: 12px">
+            <div style="color:#4d626b">epoka</div><div>412 (blok 24 913 220)</div>
+            <div style="color:#4d626b">ziarno</div><div>splitmix64(epoka)</div>
+            <div style="color:#4d626b">paleta</div><div>miedź, 5 z 8</div>
+            <div style="color:#4d626b">wyjście</div><div>data:image/svg+xml, 6 030 B</div>
+            <div style="color:#4d626b">nakład</div><div>1, jeśli ktoś odbierze</div>
+          </div>
+        </div>
+
+        <div style="padding: 22px; display: flex; flex-direction: column; gap: 14px; flex-grow: 1; justify-content: flex-end">
+          <a href="#" style="display: flex; align-items: center; justify-content: center; height: 52px; background: #16242b; color: #e9eeef; text-decoration: none; font-weight: 700; font-size: 15px; letter-spacing: 0.06em">ODBIERZ ARKUSZ 412</a>
+          <div class="m" style="font-size: 11px; line-height: 1.7; color: #4d626b">
+            Okno zamyka się za 06:41. Arkusz nieodebrany nie jest drukowany
+            ponownie — numer zostaje pusty. Co dziesiąty egzemplarz do autora.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

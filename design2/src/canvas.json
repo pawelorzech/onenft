@@ -1,0 +1,22 @@
+{
+  "pages": [
+    { "id": "page-1", "name": "Tkanina" },
+    { "id": "page-2", "name": "Odrzucone szkice" }
+  ],
+  "artboards": [
+    { "file": "Main.dc.html",           "x": 0,    "y": 0,    "w": 1280, "h": 1560, "title": "Tkanina — pełna strona", "print": "flow", "page": "page-1" },
+    { "file": "TkaninaTelefon.dc.html", "x": 1400, "y": 0,    "w": 390,  "h": 1220, "title": "Telefon", "print": "flow", "page": "page-1" },
+    { "file": "TkaninaNoc.dc.html",     "x": 1910, "y": 0,    "w": 1280, "h": 900,  "title": "Ta sama strona w dobie 409", "page": "page-1" },
+    { "file": "SamObiekt.dc.html",      "x": 0,    "y": 0,    "w": 1280, "h": 900, "title": "A · Sam obiekt", "page": "page-2" },
+    { "file": "Tasma.dc.html",          "x": 1400, "y": 0,    "w": 1280, "h": 900, "title": "B · Taśma dób", "page": "page-2" },
+    { "file": "Negatyw.dc.html",        "x": 2800, "y": 0,    "w": 1280, "h": 900, "title": "C · Negatyw", "page": "page-2" },
+    { "file": "Maszyna.dc.html",        "x": 4200, "y": 0,    "w": 1280, "h": 900, "title": "E · Maszyna", "page": "page-2" }
+  ],
+  "annotations": [
+    { "id": "wybor", "x": 0, "y": -300, "w": 620, "page": "page-1", "text": "TKANINA, ROZWINIĘTA\nNaprawiona wada szkicu: dzisiejsza doba nie jest już jednym z pasków. Dostała własny blok u góry, z pełnym splotem i akcją; rytm 128 px zaczyna się dopiero pod nią.\n\nDwie rzeczy doszły względem szkicu:\n— lewa kolumna jest przyklejona przy przewijaniu, więc licznik dób i przycisk zostają na ekranie przez całą tkaninę;\n— w materiał wpleciony jest pasek o czterech kształtach płytki, który prowadzi do opisu formatu. To bramka 3 z twojego planu, wpuszczona do strony zamiast osobnej podstrony." },
+    { "id": "telefon", "x": 1400, "y": -300, "w": 460, "page": "page-1", "text": "TELEFON\nUkład nie zmienia struktury, tylko traci lewą kolumnę: tkanina jest już pionowa, więc telefon dostaje ją bez przebudowy. Przycisk 56 px, wiersze 64 px, wszystko powyżej progu dotyku." },
+    { "id": "noc", "x": 1910, "y": -300, "w": 620, "page": "page-1", "text": "TA SAMA STRONA, INNA DOBA\nDoba 412 wypadła na paletę popiół, więc strona jest dziś jasna. Doba 409 wypadła na smołę i strona jest czarna. Nie ma przełącznika trybu i nie powinno go być: kolor nie jest preferencją użytkownika, tylko własnością dnia.\n\nOsiem palet w kontrakcie znaczy osiem możliwych wyglądów strony. Kontrast tekstu sprawdzony w obu skrajnych." },
+    { "id": "odrzucone", "x": 0, "y": -230, "w": 620, "page": "page-2", "text": "Cztery pozostałe kierunki z rundy drugiej, zostawione do porównania. Szkic Tkaniny zastąpiony rozwiniętą wersją na pierwszej stronie." }
+  ],
+  "launch": { "view": "canvas", "page": "page-1" }
+}

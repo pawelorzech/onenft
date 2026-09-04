@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inconsolata:wght@400;600&display=swap">
+  <style>
+    body { margin: 0; background: #f2efe9; color: #1b1a17;
+           font-family: "EB Garamond", Georgia, serif; }
+    a { color: #1b1a17; } a:hover { color: #8a5a2b; }
+    .mono { font-family: "Inconsolata", ui-monospace, monospace; }
+  </style>
+</helmet>
+
+<div style="width: 1280px; height: 900px; display: flex; flex-direction: column; box-sizing: border-box; padding: 44px 64px 36px">
+
+  <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #cdc7ba; padding-bottom: 14px">
+    <div style="font-size: 21px; letter-spacing: 0.02em">onenft<span style="color:#8a5a2b">.click</span></div>
+    <div class="mono" style="display: flex; gap: 28px; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #6b6559">
+      <span>Archiwum</span><span>Format</span><span>Kontrakt</span><span>Paweł Orzech</span>
+    </div>
+  </div>
+
+  <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 40px; align-items: center; padding: 28px 0">
+
+    <div style="grid-column: span 6; display: flex; justify-content: center">
+      <div style="width: 452px; height: 452px; box-shadow: 0 1px 0 #d8d2c6, 0 24px 60px -30px rgba(30,26,20,0.45)"><!--KNOT-A--></div>
+    </div>
+
+    <div style="grid-column: span 6; display: flex; flex-direction: column; gap: 26px; max-width: 430px">
+      <div>
+        <div class="mono" style="font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: #8a8275">Doba 412</div>
+        <div style="font-size: 46px; line-height: 1.06; margin-top: 10px">Węzeł zawiązany<br>o świcie 412. doby</div>
+      </div>
+      <div style="font-size: 18px; line-height: 1.55; color: #45413a">
+        Płytki Truchet, dwa bity na komórkę. Paleta i ziarno wyprowadzone
+        z numeru bloku Base, więc rysunek istnieje, zanim ktokolwiek go odbierze,
+        i istniałby, gdyby ta strona zniknęła.
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; align-items: center; gap: 16px">
+          <a href="#" style="display: inline-flex; align-items: center; justify-content: center; height: 52px; padding: 0 34px; background: #1b1a17; color: #f2efe9; text-decoration: none; font-size: 17px; letter-spacing: 0.03em">Odbierz tę dobę</a>
+          <span class="mono" style="font-size: 13px; color: #6b6559">bez ceny · płacisz gaz · zostaje 6 h 41 min</span>
+        </div>
+        <div class="mono" style="font-size: 12px; line-height: 1.6; color: #8a8275">
+          Nieodebrana doba nie wraca. Numer 412 zostaje pusty na zawsze.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="border-top: 1px solid #cdc7ba; padding-top: 18px; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 40px; align-items: end">
+    <div style="grid-column: span 7">
+      <div class="mono" style="font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #8a8275; margin-bottom: 12px">Ostatnie doby</div>
+      <div style="display: flex; gap: 10px">
+        <div style="width: 74px"><div style="height: 74px; border: 1px solid #d8d2c6"><!--KNOT-B--></div><div class="mono" style="font-size: 11px; color: #6b6559; margin-top: 5px">411</div></div>
+        <div style="width: 74px"><div style="height: 74px; border: 1px dashed #cdc7ba; background: #eae6dd"></div><div class="mono" style="font-size: 11px; color: #b3ab9c; margin-top: 5px">410</div></div>
+        <div style="width: 74px"><div style="height: 74px; border: 1px solid #d8d2c6"><!--KNOT-G--></div><div class="mono" style="font-size: 11px; color: #6b6559; margin-top: 5px">409</div></div>
+        <div style="width: 74px"><div style="height: 74px; border: 1px dashed #cdc7ba; background: #eae6dd"></div><div class="mono" style="font-size: 11px; color: #b3ab9c; margin-top: 5px">408</div></div>
+        <div style="width: 74px"><div style="height: 74px; border: 1px solid #d8d2c6"><!--KNOT-F--></div><div class="mono" style="font-size: 11px; color: #6b6559; margin-top: 5px">406</div></div>
+        <div style="width: 74px"><div style="height: 74px; border: 1px solid #d8d2c6"><!--KNOT-E--></div><div class="mono" style="font-size: 11px; color: #6b6559; margin-top: 5px">403</div></div>
+      </div>
+    </div>
+    <div style="grid-column: span 5">
+      <div style="font-size: 15px; line-height: 1.5; color: #45413a; font-style: italic">
+        Co dziesiąty węzeł trafia do autora, automatycznie i obok kolejki,
+        do 1000. doby. Napisane tu pierwszego dnia, żeby nikt nie musiał tego odkrywać.
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

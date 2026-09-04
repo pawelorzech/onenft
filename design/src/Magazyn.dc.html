@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Source+Sans+3:wght@400;600&display=swap">
+  <style>
+    body { margin: 0; background: #fbfaf7; color: #17181a; font-family: "Source Sans 3", sans-serif; }
+    a { color: #17181a; } a:hover { color: #7a2e3a; }
+    .pf { font-family: "Playfair Display", Georgia, serif; }
+  </style>
+</helmet>
+
+<div style="width: 1280px; height: 900px; box-sizing: border-box; padding: 40px 60px; display: flex; flex-direction: column; gap: 24px">
+
+  <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #17181a; padding-bottom: 12px">
+    <div class="pf" style="font-size: 26px; font-weight: 700">onenft.click</div>
+    <div style="font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #6d6e72">Doba 412 · wydanie codzienne · Warszawa</div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1.35fr 1fr; gap: 46px; flex-grow: 1; min-height: 0">
+
+    <div style="display: flex; flex-direction: column; gap: 22px; min-height: 0">
+      <div class="pf" style="font-size: 62px; line-height: 1.02; font-weight: 700; letter-spacing: -0.015em">
+        Dwadzieścia cztery<br>doby, w których<br><span style="font-style: italic; color: #7a2e3a">nikt nie przyszedł</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px; font-size: 14.5px; line-height: 1.62; color: #35373b">
+        <div style="text-wrap: pretty">
+          Kontrakt zawiązuje jeden splot Truchet na dobę i nie pyta nikogo o zdanie.
+          Paleta i ziarno biorą się z numeru bloku, więc rysunek powstaje sam,
+          o świcie, niezależnie od tego, czy ktoś w ogóle otworzy tę stronę.
+        </div>
+        <div style="text-wrap: pretty">
+          Jeśli do zamknięcia doby nikt go nie odbierze, numer zostaje pusty
+          na zawsze. Podaż nie jest planem marketingowym, tylko zapisem obecności.
+          Dziury są w tym projekcie najciekawsze i nie zamierzam ich tłumaczyć.
+        </div>
+      </div>
+      <div style="margin-top: auto; display: flex; gap: 18px; align-items: center; border-top: 1px solid #dedbd3; padding-top: 20px">
+        <a href="#" style="display: inline-flex; align-items: center; height: 54px; padding: 0 32px; background: #17181a; color: #fbfaf7; text-decoration: none; font-size: 16px; font-weight: 600">Odbierz dobę 412</a>
+        <div style="font-size: 13px; color: #6d6e72; line-height: 1.5">
+          Bez ceny, płacisz tylko gaz.<br>Okno zamyka się za 6 h 41 min.
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 16px; min-height: 0">
+      <div style="aspect-ratio: 1; box-shadow: 0 20px 50px -34px rgba(23,24,26,0.6)"><!--KNOT-A--></div>
+      <div class="pf" style="font-size: 15px; font-style: italic; color: #55575c; line-height: 1.45">
+        Doba 412. Paleta miedziana, piąta z ośmiu. Splot zamknięty w dwóch pętlach.
+      </div>
+      <div style="border-top: 1px solid #dedbd3; padding-top: 14px">
+        <div style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #6d6e72; margin-bottom: 10px">Poprzednie doby</div>
+        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px">
+          <div><div style="aspect-ratio:1"><!--KNOT4-B--></div><div style="font-size:11px;color:#6d6e72;margin-top:4px">411</div></div>
+          <div><div style="aspect-ratio:1; background:#f0eee8; border:1px dashed #d3d0c8"></div><div style="font-size:11px;color:#b3b0a8;margin-top:4px">410</div></div>
+          <div><div style="aspect-ratio:1"><!--KNOT4-G--></div><div style="font-size:11px;color:#6d6e72;margin-top:4px">409</div></div>
+          <div><div style="aspect-ratio:1"><!--KNOT4-F--></div><div style="font-size:11px;color:#6d6e72;margin-top:4px">407</div></div>
+        </div>
+      </div>
+      <div style="font-size: 12px; color: #6d6e72; line-height: 1.55; margin-top: auto">
+        Co dziesiąty węzeł przypada autorowi, automatycznie i obok kolejki, do doby 1000.
+        Zapisane pierwszego dnia.
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

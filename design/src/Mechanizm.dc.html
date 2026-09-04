@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <style>
+    body { margin: 0; background: #101418; color: #eceff2; font-family: "IBM Plex Mono", monospace; }
+    a { color: #eceff2; } a:hover { color: #e5533d; }
+    .bebas { font-family: "Bebas Neue", sans-serif; letter-spacing: 0.01em; }
+  </style>
+</helmet>
+
+<div style="width: 1280px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column">
+
+  <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 44px; border-bottom: 1px solid #232a31; font-size: 12px; color: #79838d">
+    <span style="color:#eceff2">onenft.click</span><span>zegar jest w kontrakcie · nie na tym serwerze</span>
+  </div>
+
+  <div style="flex-grow: 1; display: grid; grid-template-columns: minmax(0, 1fr) 430px">
+
+    <div style="padding: 44px; display: flex; flex-direction: column; justify-content: center; gap: 34px; border-right: 1px solid #232a31">
+      <div>
+        <div style="font-size: 12px; letter-spacing: 0.18em; color: #79838d">DO ZAMKNIĘCIA DOBY 412</div>
+        <div class="bebas" style="font-size: 148px; line-height: 0.82; margin-top: 12px; display: flex; align-items: baseline; gap: 6px">
+          06<span style="color:#e5533d">:</span>41<span style="color:#e5533d">:</span>12
+        </div>
+      </div>
+
+      <div style="height: 3px; background: #232a31; position: relative">
+        <div style="position: absolute; inset: 0 27.6% 0 0; background: #e5533d"></div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px">
+        <div><div class="bebas" style="font-size: 44px; line-height: 1">412</div><div style="font-size: 11.5px; color: #79838d; margin-top: 2px">dób od startu</div></div>
+        <div><div class="bebas" style="font-size: 44px; line-height: 1">388</div><div style="font-size: 11.5px; color: #79838d; margin-top: 2px">odebranych</div></div>
+        <div><div class="bebas" style="font-size: 44px; line-height: 1; color: #e5533d">24</div><div style="font-size: 11.5px; color: #79838d; margin-top: 2px">dziur, trwale</div></div>
+      </div>
+
+      <div style="font-size: 13px; line-height: 1.7; color: #a4adb6; max-width: 520px">
+        Paleta i ziarno liczone są z numeru bloku, więc obraz zmienia się co dobę
+        sam z siebie. Nikt go nie wgrywa, nikt nie może opóźnić.
+      </div>
+    </div>
+
+    <div style="padding: 44px 36px; display: flex; flex-direction: column; gap: 26px; justify-content: center">
+      <div style="aspect-ratio: 1; border: 1px solid #232a31"><!--KNOT-A--></div>
+      <a href="#" class="bebas" style="display: flex; align-items: center; justify-content: center; height: 62px; background: #e5533d; color: #101418; text-decoration: none; font-size: 26px">ODBIERZ, ZANIM SPADNIE</a>
+      <div style="font-size: 11.5px; line-height: 1.75; color: #79838d">
+        0 ETH, płacisz tylko gaz. Po zamknięciu doby numer 412 zostaje
+        pusty na stałe. Co dziesiąty węzeł przypada autorowi, do doby 1000.
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
