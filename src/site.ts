@@ -53,7 +53,7 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--fg);outline-offset:
 aside{border-right:1px solid var(--line);padding:38px 32px}
 aside .stick{position:sticky;top:38px;display:flex;flex-direction:column;gap:28px}
 .mark{font-weight:800;font-size:20px;letter-spacing:-.01em;text-decoration:none}
-h1{font-weight:800;font-size:42px;line-height:.92;letter-spacing:-.04em;margin:0}
+h1{font-weight:800;font-size:37px;line-height:.94;letter-spacing:-.045em;margin:0}
 .lead{color:var(--muted);margin:0}
 hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
 .big{font-weight:700;font-size:40px;line-height:1}
