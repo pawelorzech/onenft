@@ -130,8 +130,8 @@ export function renderKnot(blockNumber: bigint, opts: KnotOptions = {}): Knot {
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">` +
     `<rect width="${size}" height="${size}" fill="${palette.bg}"/>` +
     `<g fill="none" stroke-linecap="round">` +
-    `<path d="${path}" stroke="${palette.shade}" stroke-width="${cell / 3}"/>` +
-    `<path d="${path}" stroke="${palette.cord}" stroke-width="${cell / 7}"/>` +
+    `<path d="${path}" stroke="${palette.shade}" stroke-width="${Math.floor(cell / 3)}"/>` +
+    `<path d="${path}" stroke="${palette.cord}" stroke-width="${Math.floor(cell / 7)}"/>` +
     `</g></svg>`;
 
   return { svg, palette, epoch, seed: epoch, cells };
