@@ -46,3 +46,61 @@ test("pierwsza doba dostaje osobne zdanie zamiast pustej listy", () => {
   expect(h).toContain("To pierwsza doba");
   expect(h).not.toContain('class="row"');
 });
+
+import type { ChainState } from "./contract.ts";
+
+function fakeChain(day: number, owners: Record<number, string>, extra: Partial<ChainState> = {}): ChainState {
+  return {
+    address: "0x1111111111111111111111111111111111111111",
+    chainId: 84532,
+    day,
+    startEpoch: 1178n,
+    author: "0xAAAA000000000000000000000000000000000001",
+    rendererLocked: false,
+    blocksLeft: 1000,
+    owners: new Map(Object.entries(owners).map(([k, v]) => [Number(k), v as `0x${string}`])),
+    ...extra,
+  };
+}
+
+test("z kontraktem: wolna doba ma przycisk mintu i skrypt", () => {
+  const t = dayByNumber(5)!;
+  const h = homePage(t, t.firstBlock, fakeChain(5, { 1: "0x2222222222222222222222222222222222222222", 3: "0xAAAA000000000000000000000000000000000001" }));
+  expect(h).toContain('id="mint"');
+  expect(h).toContain("0x4e71d92d");
+  expect(h).toContain("wallet_switchEthereumChain");
+  expect(h).toContain("jeszcze niczyja");
+  expect(h).not.toContain("Odbieranie na łańcuchu jeszcze nie działa");
+});
+
+test("z kontraktem: dziury i właściciele w paskach", () => {
+  const t = dayByNumber(5)!;
+  const h = homePage(t, t.firstBlock, fakeChain(5, { 1: "0x2222222222222222222222222222222222222222", 3: "0xAAAA000000000000000000000000000000000001" }));
+  expect(h).toContain("wzięta przez 0x2222…2222");
+  expect(h).toContain("u autora");
+  expect((h.match(/class="row hole"/g) ?? []).length).toBe(2);
+  expect(h).toMatch(/>2<\/span><br><span class="small">nikt nie przyszedł/);
+});
+
+test("z kontraktem: wzięta dziś doba wyłącza przycisk", () => {
+  const t = dayByNumber(5)!;
+  const h = homePage(t, t.firstBlock, fakeChain(5, { 5: "0x3333333333333333333333333333333333333333" }));
+  expect(h).toContain("jest już wzięta");
+  expect(h).not.toContain('id="mint"');
+  expect(h).toContain("wzięta przez 0x3333…3333");
+});
+
+test("z kontraktem: doba autora nie ma przycisku dla ludzi", () => {
+  const t = dayByNumber(10)!;
+  const h = homePage(t, t.firstBlock, fakeChain(10, {}));
+  expect(h).toContain("należy do autora");
+  expect(h).not.toContain('id="mint"');
+});
+
+test("strona doby pokazuje właściciela albo przerwę", () => {
+  const t = dayByNumber(5)!;
+  const c = fakeChain(5, { 2: "0x2222222222222222222222222222222222222222" });
+  expect(dayPage(dayByNumber(2)!, t, c)).toContain("wzięta przez");
+  expect(dayPage(dayByNumber(3)!, t, c)).toContain("nikt nie przyszedł");
+  expect(dayPage(t, t, c)).toContain("jeszcze niczyja");
+});

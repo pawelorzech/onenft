@@ -4,3 +4,6 @@ design/build/
 design2/build/
 design/*.html
 design2/*.html
+contracts/out/
+contracts/cache/
+contracts/broadcast/

@@ -11,7 +11,11 @@ export const RPC_URL = process.env.BASE_RPC_URL ?? "https://mainnet.base.org";
 export const BLOCK_SECONDS = 2;
 
 /** Epoka, w której projekt wystartował — to jest doba 1. */
-export const START_EPOCH = BigInt(process.env.START_EPOCH ?? "1178");
+export let START_EPOCH = BigInt(process.env.START_EPOCH ?? "1178");
+/** Gdy działa kontrakt, jego startEpoch jest prawdą; serwer ustawia to raz na starcie. */
+export function setStartEpoch(e: bigint): void {
+  START_EPOCH = e;
+}
 
 /** Ostatnia zaobserwowana para (blok, unix s). Startowo: kotwica z dnia wdrożenia. */
 let anchor = { block: 50_886_859n, at: 1_788_563_065 };

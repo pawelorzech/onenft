@@ -1,0 +1,138 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.28;
+
+import {Test} from "forge-std/Test.sol";
+import {OneNFT} from "../src/OneNFT.sol";
+import {KnotRenderer} from "../src/KnotRenderer.sol";
+import {IKnotRenderer} from "../src/IKnotRenderer.sol";
+
+contract StubRenderer is IKnotRenderer {
+    function svg(uint256) external pure returns (string memory) { return "stub"; }
+    function paletteName(uint256) external pure returns (string memory) { return "stub"; }
+    function tokenURI(uint256, uint256) external pure returns (string memory) { return "stub-uri"; }
+}
+
+contract OneNFTTest is Test {
+    uint256 constant START = 1178;
+    uint256 constant EB = 43200;
+    address author = makeAddr("author");
+    address alice = makeAddr("alice");
+    address bob = makeAddr("bob");
+    KnotRenderer renderer;
+    OneNFT nft;
+
+    function setUp() public {
+        renderer = new KnotRenderer();
+        nft = new OneNFT("onenft.click", "ONAD", START, author, address(renderer));
+    }
+
+    function rollToDay(uint256 day, uint256 offset) internal {
+        vm.roll((START + day - 1) * EB + offset);
+    }
+
+    function test_BeforeFirstDayNothingToClaim() public {
+        vm.roll(START * EB - 1);
+        assertEq(nft.currentDay(), 0);
+        vm.prank(alice);
+        vm.expectRevert(OneNFT.BeforeFirstDay.selector);
+        nft.claim();
+    }
+
+    function test_ClaimMintsTokenNumberedByDay() public {
+        rollToDay(1, 100);
+        vm.prank(alice);
+        uint256 day = nft.claim();
+        assertEq(day, 1);
+        assertEq(nft.ownerOf(1), alice);
+        assertEq(nft.rendererOf(1), address(renderer));
+        assertEq(nft.epochOf(1), START);
+    }
+
+    function test_OnlyOneClaimPerDay() public {
+        rollToDay(3, 5);
+        vm.prank(alice);
+        nft.claim();
+        vm.prank(bob);
+        vm.expectRevert(abi.encodeWithSelector(OneNFT.DayAlreadyClaimed.selector, 3));
+        nft.claim();
+    }
+
+    function test_MissedDayStaysEmptyForever() public {
+        rollToDay(2, 0);
+        rollToDay(4, 0);
+        vm.prank(alice);
+        nft.claim();
+        assertEq(nft.ownerOf(4), alice);
+        assertFalse(nft.claimed(2));
+        assertFalse(nft.claimed(3));
+        vm.expectRevert();
+        nft.ownerOf(3);
+    }
+
+    function test_EveryTenthDayGoesToAuthor() public {
+        rollToDay(10, 1);
+        vm.prank(alice);
+        nft.claim();
+        assertEq(nft.ownerOf(10), author);
+        rollToDay(1000, 1);
+        vm.prank(bob);
+        nft.claim();
+        assertEq(nft.ownerOf(1000), author);
+        rollToDay(1010, 1);
+        vm.prank(bob);
+        nft.claim();
+        assertEq(nft.ownerOf(1010), bob, "po dobie 1000 autor nic nie dostaje");
+    }
+
+    function test_RendererChangeTouchesOnlyFutureDays() public {
+        rollToDay(1, 0);
+        vm.prank(alice);
+        nft.claim();
+        StubRenderer stub = new StubRenderer();
+        vm.prank(author);
+        nft.setRenderer(address(stub));
+        rollToDay(2, 0);
+        vm.prank(bob);
+        nft.claim();
+        assertEq(nft.rendererOf(1), address(renderer));
+        assertEq(nft.rendererOf(2), address(stub));
+        assertEq(nft.tokenURI(2), "stub-uri");
+        assertTrue(bytes(nft.tokenURI(1)).length > 5000, "doba 1 dalej z prawdziwego renderera");
+    }
+
+    function test_LockIsOneWay() public {
+        address stub = address(new StubRenderer());
+        vm.prank(author);
+        nft.lockRenderer();
+        assertTrue(nft.rendererLocked());
+        vm.prank(author);
+        vm.expectRevert(OneNFT.RendererIsLocked.selector);
+        nft.setRenderer(stub);
+    }
+
+    function test_OnlyOwnerTouchesRenderer() public {
+        address stub = address(new StubRenderer());
+        vm.prank(alice);
+        vm.expectRevert();
+        nft.setRenderer(stub);
+        vm.prank(alice);
+        vm.expectRevert();
+        nft.lockRenderer();
+        assertEq(nft.renderer(), address(renderer));
+        assertFalse(nft.rendererLocked());
+    }
+
+    function test_TokenUriOfUnclaimedReverts() public {
+        rollToDay(5, 0);
+        vm.expectRevert();
+        nft.tokenURI(5);
+        assertTrue(bytes(nft.preview(5)).length > 3000, "podglad dziala bez tokenu");
+    }
+
+    function test_BlocksLeftCountsDownToEpochEdge() public {
+        rollToDay(1, 0);
+        assertEq(nft.blocksLeft(), EB);
+        rollToDay(1, EB - 1);
+        assertEq(nft.blocksLeft(), 1);
+    }
+}

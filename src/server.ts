@@ -1,5 +1,6 @@
 import { renderKnot } from "./knot.ts";
-import { currentBlock, dayOfBlock, dayByNumber, secondsToStart } from "./chain.ts";
+import { currentBlock, dayOfBlock, dayByNumber, secondsToStart, setStartEpoch } from "./chain.ts";
+import { chainState, contractEnabled, CONTRACT, CHAIN_ID } from "./contract.ts";
 import { homePage, dayPage, formatPage, notFound, beforeStart } from "./site.ts";
 
 const PORT = Number(process.env.PORT ?? 3000);
@@ -15,12 +16,26 @@ const svg = (s: string, immutable: boolean) =>
     },
   });
 
+if (contractEnabled()) {
+  const st = await chainState();
+  if (st) {
+    setStartEpoch(st.startEpoch);
+    console.log(`kontrakt ${CONTRACT} na chain ${CHAIN_ID}, startEpoch ${st.startEpoch}, doba ${st.day}`);
+  }
+}
+
 Bun.serve({
   port: PORT,
   async fetch(req) {
     const url = new URL(req.url);
     const { block } = await currentBlock();
-    const today = dayOfBlock(block);
+    let chain = null as Awaited<ReturnType<typeof chainState>>;
+    try {
+      chain = await chainState();
+    } catch (e) {
+      console.error("stan kontraktu niedostępny:", (e as Error).message);
+    }
+    const today = chain ? (chain.day > 0 ? dayByNumber(chain.day) : null) : dayOfBlock(block);
     if (!today) {
       const dayOne = dayByNumber(1)!;
       if (url.pathname === "/zdrowie") return new Response(`ok przed startem, blok ${block}`);
@@ -29,10 +44,10 @@ Bun.serve({
       return html(beforeStart(secondsToStart(block), dayOne));
     }
 
-    if (url.pathname === "/") return html(homePage(today, block));
+    if (url.pathname === "/") return html(homePage(today, block, chain));
     if (url.pathname === "/format") return html(formatPage(today));
     if (url.pathname === "/dzis.svg") return svg(renderKnot(today.firstBlock).svg, false);
-    if (url.pathname === "/zdrowie") return new Response(`ok doba ${today.n} blok ${block}`);
+    if (url.pathname === "/zdrowie") return new Response(`ok doba ${today.n} blok ${block}${chain ? ` kontrakt ${chain.address}` : ""}`);
 
     const m = url.pathname.match(/^\/doba\/(\d{1,6})(\.svg)?$/);
     if (m) {
@@ -40,7 +55,7 @@ Bun.serve({
       const d = dayByNumber(n);
       if (!d || n > today.n) return html(notFound(today), 404);
       if (m[2]) return svg(renderKnot(d.firstBlock).svg, n < today.n);
-      return html(dayPage(d, today));
+      return html(dayPage(d, today, chain));
     }
     return html(notFound(today), 404);
   },

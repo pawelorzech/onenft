@@ -34,3 +34,11 @@ Zmienne: `PORT`, `BASE_RPC_URL` (domyślnie `https://mainnet.base.org`), `START_
 Bramki z projektu: (1) renderer publicznie bez portfela ← tu jesteśmy, (2) 90 dób pod nazwiskiem, (3) format jako specyfikacja, (4) Base Sepolia, (5) mainnet, gdy kilkunastu nieznajomych spyta „da się to mieć".
 
 Kontrakt tokenu będzie niezmienny. Renderer będzie osobnym kontraktem, którego adres zapisuje się per token w chwili odbioru, więc poprawki dotykają tylko przyszłych dób.
+
+## Kontrakty (`contracts/`, Foundry)
+
+- `KnotRenderer.sol` — przepisanie `src/knot.ts` 1:1. Test `test_SvgMatchesTypeScriptByteForByte` porównuje keccak SVG z wzorcami z `bun run contracts/fixtures.ts`; TS jest źródłem prawdy.
+- `OneNFT.sol` — ERC-721, `claim()` bierze dzisiejszą dobę (tokenId = numer doby), nieodebrana doba zostaje pusta, co dziesiąta do 1000. idzie do autora. Adres renderera zapisywany per token przy odbiorze; `setRenderer` dotyka tylko przyszłych dób, `lockRenderer` jednokierunkowe. `_mint`, nie `_safeMint`: po EIP-7702 portfele bywają kontami z kodem, które nie odpowiadają na `onERC721Received`.
+- Deploy: `START_EPOCH=1178 AUTHOR=0x… forge script script/Deploy.s.sol --rpc-url base_sepolia --broadcast --verify`.
+
+Strona czyta stan z kontraktu, gdy ustawisz `CONTRACT_ADDRESS` i `CHAIN_ID` (8453 mainnet, 84532 Sepolia). Bez tego działa jako sam renderer.

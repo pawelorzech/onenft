@@ -5,6 +5,17 @@
  */
 import { renderKnot, type Palette, PALETTES } from "./knot.ts";
 import { dayByNumber, secondsLeft, type Day } from "./chain.ts";
+import type { ChainState } from "./contract.ts";
+
+export function shortAddr(a: string): string {
+  return `${a.slice(0, 6)}…${a.slice(-4)}`;
+}
+function explorer(chainId: number): string {
+  return chainId === 8453 ? "https://basescan.org" : "https://sepolia.basescan.org";
+}
+function chainName(chainId: number): string {
+  return chainId === 8453 ? "Base" : "Base Sepolia";
+}
 
 export const SITE = "onenft.click";
 export const AUTHOR = "Paweł Orzech";
@@ -50,6 +61,13 @@ hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
 .num{font-weight:800;font-size:62px;line-height:.95;letter-spacing:-.03em}
 .row{display:flex;align-items:center;gap:22px;padding:0 34px;height:128px;border-bottom:1px solid var(--line);text-decoration:none}
 .row:hover{background:var(--soft)}
+.row.hole{background:repeating-linear-gradient(90deg,transparent 0 20px,var(--soft) 20px 40px);color:var(--muted)}
+.row.hole:hover{background:repeating-linear-gradient(90deg,transparent 0 20px,var(--soft) 20px 40px)}
+.row .ph{width:92px;height:92px;flex-shrink:0}
+button.cta{border:0;cursor:pointer;width:100%;font-family:"Syne",system-ui,sans-serif}
+button.cta[disabled]{opacity:.55;cursor:default}
+.msg{font-size:15px;color:var(--muted);min-height:1.5em}
+.testnet{display:inline-block;padding:3px 8px;border:1px solid var(--line);font-size:13px;color:var(--muted)}
 .row img{width:92px;height:92px;display:block;flex-shrink:0}
 .row .n{font-weight:700;font-size:23px}
 .format{padding:30px 34px;border-bottom:1px solid var(--line);background:var(--soft);display:flex;gap:26px;align-items:center}
@@ -74,7 +92,7 @@ footer{padding:26px 34px;display:flex;justify-content:space-between;gap:24px;fle
  .today .knot{width:100%;height:auto;aspect-ratio:1}
  .num{font-size:44px}
  .row{height:auto;min-height:64px;padding:14px 20px;gap:16px}
- .row img{width:56px;height:56px}
+ .row img,.row .ph{width:56px;height:56px}
  .format{flex-direction:column;align-items:flex-start;padding:20px}
  footer,.prose,.single{padding:20px}
 }
@@ -125,14 +143,47 @@ function stripSize(svg: string): string {
   return svg.replace(/ width="\d+" height="\d+"/, "");
 }
 
-export function homePage(today: Day, block: bigint): string {
+export function homePage(today: Day, block: bigint, chain: ChainState | null = null): string {
   const k = renderKnot(today.firstBlock);
-  const left = secondsLeft(block);
+  const left = chain ? chain.blocksLeft * 2 : secondsLeft(block);
   const rows: string[] = [];
   for (let n = today.n - 1; n >= Math.max(1, today.n - 60); n--) {
     const d = dayByNumber(n)!;
     const kn = renderKnot(d.firstBlock);
-    rows.push(`<a class="row" href="/doba/${n}"><img src="/doba/${n}.svg" alt="" loading="lazy" width="92" height="92"><span><span class="n syne">${n}</span><br><span class="small">paleta ${kn.palette.name}</span></span></a>`);
+    if (chain && !chain.owners.has(n)) {
+      rows.push(`<a class="row hole" href="/doba/${n}"><span class="ph"></span><span><span class="n syne">${n}</span><br><span class="small">nikt nie przyszedł, przerwa zostaje</span></span></a>`);
+      continue;
+    }
+    const owner = chain?.owners.get(n);
+    const who = owner ? (owner.toLowerCase() === chain!.author.toLowerCase() ? "u autora" : `wzięta przez ${shortAddr(owner)}`) : `paleta ${kn.palette.name}`;
+    rows.push(`<a class="row" href="/doba/${n}"><img src="/doba/${n}.svg" alt="" loading="lazy" width="92" height="92"><span><span class="n syne">${n}</span><br><span class="small">${who}</span></span></a>`);
+  }
+  const taken = chain ? chain.owners.size : 0;
+  const holes = chain ? Math.max(0, today.n - 1 - [...chain.owners.keys()].filter((n) => n < today.n).length) : 0;
+  const todayOwner = chain?.owners.get(today.n);
+  const authorDay = today.n % 10 === 0 && today.n <= 1000;
+  let todayState = "";
+  let cta = `<a class="cta syne" href="/doba/${today.n}.svg" download="onenft-doba-${today.n}.svg">Pobierz dzisiejszy splot</a>
+<a class="cta ghost syne" href="/format">Jak to działa</a>
+<p class="small">Odbieranie na łańcuchu jeszcze nie działa. Najpierw dziewięćdziesiąt dób, żeby było co odbierać.</p>`;
+  if (chain) {
+    if (todayOwner) {
+      todayState = todayOwner.toLowerCase() === chain.author.toLowerCase() ? "dzisiaj, u autora" : `dzisiaj, wzięta przez ${shortAddr(todayOwner)}`;
+      cta = `<button class="cta syne" disabled>Doba ${today.n} jest już wzięta</button>
+<a class="cta ghost syne" href="/format">Jak to działa</a>
+<p class="small">Jutro zawiąże się następna. Zostało ${fmtLeft(left)}.</p>`;
+    } else if (authorDay) {
+      todayState = "dzisiaj, doba autora";
+      cta = `<button class="cta syne" disabled>Co dziesiąta doba należy do autora</button>
+<a class="cta ghost syne" href="/format">Jak to działa</a>
+<p class="small">Zapisane w kontrakcie od pierwszego dnia, do doby 1000. Jutro znów jest dla ciebie.</p>`;
+    } else {
+      todayState = "dzisiaj, jeszcze niczyja";
+      cta = `<button class="cta syne" id="mint">Weź dzisiejszą dobę</button>
+<p class="msg" id="msg" aria-live="polite"></p>
+<a class="cta ghost syne" href="/format">Jak to działa</a>
+<p class="small">Bez ceny, płacisz tylko gaz. Zostało ${fmtLeft(left)}.${chain.chainId === 8453 ? "" : ` <span class="testnet">sieć testowa ${chainName(chain.chainId)}</span>`}</p>`;
+    }
   }
   const older = today.n - 61 > 0 ? `<a class="row" href="/doba/${today.n - 61}"><span class="small">wcześniejsze doby</span></a>` : "";
   const first = today.n === 1
@@ -146,20 +197,19 @@ export function homePage(today: Day, block: bigint): string {
 <p class="lead">Co dobę powstaje jeden splot Truchet, wyliczony z numeru bloku Base. Nikt go nie rysuje i nikt nie może go opóźnić. Wszystkie wychodzą z tej samej maszyny, więc materiał biegnie bez szwu.</p>
 <hr>
 <div><div class="big syne">${today.n}</div><div class="small">${slowo(today.n, "doba utkana", "doby utkane", "dób utkanych")}</div></div>
+${chain ? `<div style="display:flex;gap:34px"><div><div class="syne" style="font-weight:700;font-size:26px;line-height:1">${taken}</div><div class="small">${slowo(taken, "wzięta", "wzięte", "wziętych")}</div></div><div><div class="syne" style="font-weight:700;font-size:26px;line-height:1">${holes}</div><div class="small">${slowo(holes, "przerwa", "przerwy", "przerw")}</div></div></div>` : ""}
 <div style="display:flex;flex-direction:column;gap:12px">
-<a class="cta syne" href="/doba/${today.n}.svg" download="onenft-doba-${today.n}.svg">Pobierz dzisiejszy splot</a>
-<a class="cta ghost syne" href="/format">Jak to działa</a>
-<p class="small">Odbieranie na łańcuchu jeszcze nie działa. Najpierw dziewięćdziesiąt dób, żeby było co odbierać.</p>
+${cta}
 </div>
 </div></aside>
 <main>
 <section class="today">
 <div class="knot">${stripSize(k.svg)}</div>
 <div style="display:flex;flex-direction:column;gap:18px;padding-top:6px">
-<div><div class="num syne">${today.n}</div><div class="lead" style="margin-top:8px;font-size:19px">dzisiaj</div></div>
+<div><div class="num syne">${today.n}</div><div class="lead" style="margin-top:8px;font-size:19px">${todayState || "dzisiaj"}</div></div>
 <p class="lead" style="max-width:330px">Ten splot powstał na bloku ${today.firstBlock.toLocaleString("pl-PL")}. Następny zawiąże się za <span data-left="${left}">${fmtLeft(left)}</span>.</p>
 <hr>
-<p class="small" style="line-height:1.7">paleta ${k.palette.name}, ${paletteIndex(k.palette)} z ${PALETTES.length}<br>${k.svg.length.toLocaleString("pl-PL")} bajtów SVG<br>epoka ${today.epoch}</p>
+<p class="small" style="line-height:1.7">paleta ${k.palette.name}, ${paletteIndex(k.palette)} z ${PALETTES.length}<br>${k.svg.length.toLocaleString("pl-PL")} bajtów SVG<br>epoka ${today.epoch}${chain ? `<br>kontrakt <a href="${explorer(chain.chainId)}/address/${chain.address}">${shortAddr(chain.address)}</a>, renderer ${chain.rendererLocked ? "zamrożony" : "wymienny dla przyszłych dób"}` : ""}</p>
 ${first}
 </div>
 </section>
@@ -169,20 +219,54 @@ ${older}
 <footer><span>${AUTHOR}, Warszawa.</span><span>To nie jest inwestycja i nigdy nie będzie.</span></footer>
 </main>
 </div>
+${chain && !todayOwner && !authorDay ? mintScript(chain) : ""}
 <script>
 (function(){var el=document.querySelector('[data-left]');if(!el)return;var s=+el.getAttribute('data-left');var t0=Date.now();function f(x){var h=Math.floor(x/3600),m=Math.floor(x%3600/60);return h?h+' h '+m+' min':m+' min'}setInterval(function(){var r=s-Math.floor((Date.now()-t0)/1000);if(r<0){location.reload();return}el.textContent=f(r)},15000)})();
 </script>`;
   return layout(`${SITE} — doba ${today.n}`, k.palette, body);
 }
 
-export function dayPage(d: Day, today: Day): string {
+function mintScript(chain: ChainState): string {
+  const cfg = JSON.stringify({
+    address: chain.address,
+    chainHex: "0x" + chain.chainId.toString(16),
+    name: chainName(chain.chainId),
+    rpc: chain.chainId === 8453 ? "https://mainnet.base.org" : "https://sepolia.base.org",
+    explorer: explorer(chain.chainId),
+  });
+  return `<script>
+(function(){
+var CFG=${cfg};var btn=document.getElementById('mint');var out=document.getElementById('msg');
+function say(t){out.textContent=t}
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
+btn.addEventListener('click',async function(){
+  var eth=window.ethereum;
+  if(!eth){say('Potrzebny portfel w przeglądarce, na przykład Rabby, MetaMask albo Coinbase Wallet.');return}
+  btn.disabled=true;
+  try{
+    var accs=await eth.request({method:'eth_requestAccounts'});var from=accs[0];
+    try{await eth.request({method:'wallet_switchEthereumChain',params:[{chainId:CFG.chainHex}]})}
+    catch(e){if(e&&e.code===4902){await eth.request({method:'wallet_addEthereumChain',params:[{chainId:CFG.chainHex,chainName:CFG.name,rpcUrls:[CFG.rpc],nativeCurrency:{name:'Ether',symbol:'ETH',decimals:18},blockExplorerUrls:[CFG.explorer]}]})}else{throw e}}
+    say('Potwierdź w portfelu. Płacisz tylko gaz.');
+    var hash=await eth.request({method:'eth_sendTransaction',params:[{from:from,to:CFG.address,data:'0x4e71d92d'}]});
+    say('Wysłane. Czekam na potwierdzenie.');
+    for(var i=0;i<90;i++){await sleep(2000);var r=await eth.request({method:'eth_getTransactionReceipt',params:[hash]});
+      if(r){if(r.status==='0x1'){say('Doba jest twoja.');await sleep(1200);location.reload()}else{say('Sieć odrzuciła transakcję. Możliwe, że ktoś był szybszy.');btn.disabled=false}return}}
+    say('Potwierdzenie się przeciąga. Odśwież stronę za chwilę.');
+  }catch(e){say(e&&e.code===4001?'Anulowane w portfelu.':'Nie udało się: '+((e&&e.message)||e));btn.disabled=false}
+});
+})();
+</script>`;
+}
+
+export function dayPage(d: Day, today: Day, chain: ChainState | null = null): string {
   const k = renderKnot(d.firstBlock);
   const prev = d.n > 1 ? `<a href="/doba/${d.n - 1}">poprzednia</a>` : "";
   const next = d.n < today.n ? `<a href="/doba/${d.n + 1}">następna</a>` : "";
   const body = `<main class="single">
 <a class="mark syne" href="/">${SITE}</a>
 <div class="knot">${stripSize(k.svg)}</div>
-<div><div class="num syne">${d.n}</div><p class="lead">${d.n === today.n ? "dzisiaj" : `doba ${d.n} z ${today.n}`}</p></div>
+<div><div class="num syne">${d.n}</div><p class="lead">${d.n === today.n ? "dzisiaj" : `doba ${d.n} z ${today.n}`}${chain ? (chain.owners.has(d.n) ? (chain.owners.get(d.n)!.toLowerCase() === chain.author.toLowerCase() ? ", u autora" : `, wzięta przez <a href="${explorer(chain.chainId)}/address/${chain.owners.get(d.n)}">${shortAddr(chain.owners.get(d.n)!)}</a>`) : (d.n < today.n ? ", nikt nie przyszedł" : ", jeszcze niczyja")) : ""}</p></div>
 <p class="small" style="line-height:1.7">paleta ${k.palette.name}, ${paletteIndex(k.palette)} z ${PALETTES.length}<br>pierwszy blok ${d.firstBlock.toLocaleString("pl-PL")}<br>epoka ${d.epoch}<br>${k.svg.length.toLocaleString("pl-PL")} bajtów SVG</p>
 <nav class="nav">${prev}<a href="/doba/${d.n}.svg" download="onenft-doba-${d.n}.svg">pobierz SVG</a>${next}<a href="/">cała tkanina</a></nav>
 </main>`;
