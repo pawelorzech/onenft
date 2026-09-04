@@ -1,0 +1,10 @@
+{
+  "name": "onenftaday",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "render": "bun run src/cli.ts",
+    "test": "bun test"
+  }
+}
