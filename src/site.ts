@@ -10,11 +10,20 @@ import { renderKnot, type Palette, PALETTES } from "./knot.ts";
 import { dayByNumber, secondsLeft, dateOf, type Day } from "./chain.ts";
 import type { ChainState } from "./contract.ts";
 
+export type Names = Map<string, string>;
+const NO_NAMES: Names = new Map();
+
 export const SITE = "onenft.click";
 const REPO = "https://github.com/pawelorzech/onenft";
 
 export function shortAddr(a: string): string {
   return `${a.slice(0, 6)}…${a.slice(-4)}`;
+}
+function label(a: string, names: Names): string {
+  return names.get(a.toLowerCase()) ?? shortAddr(a);
+}
+function opensea(chain: ChainState, id: number): string {
+  return chain.chainId === 8453 ? `https://opensea.io/assets/base/${chain.address}/${id}` : `https://testnets.opensea.io/assets/base_sepolia/${chain.address}/${id}`;
 }
 function explorer(chainId: number): string {
   return chainId === 8453 ? "https://basescan.org" : "https://sepolia.basescan.org";
@@ -69,6 +78,7 @@ button.cta[disabled]{opacity:.55;cursor:default}
 .num{font-weight:800;font-size:62px;line-height:.95;letter-spacing:-.03em}
 .row{display:flex;align-items:center;gap:22px;padding:0 34px;height:128px;border-bottom:1px solid var(--line);text-decoration:none}
 .row:hover{background:var(--soft)}
+.row.yours .n::after{content:" yours";font-size:14px;font-weight:400;color:var(--muted)}
 .row.hole{background:repeating-linear-gradient(90deg,transparent 0 20px,var(--soft) 20px 40px);color:var(--muted)}
 .row img,.row .ph{width:92px;height:92px;display:block;flex-shrink:0}
 .row .n{font-weight:700;font-size:23px}
@@ -104,7 +114,7 @@ footer{padding:26px 34px;display:flex;justify-content:space-between;gap:24px;fle
 
 const FONTS = `<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Newsreader:opsz,wght@6..72,400&display=swap">`;
 
-function layout(title: string, p: Palette, body: string): string {
+function layout(title: string, p: Palette, body: string, image = "/today.png", path = "/"): string {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -114,6 +124,14 @@ function layout(title: string, p: Palette, body: string): string {
 <meta name="description" content="One Truchet knot a day, computed from the clock of the Base chain. The drawing exists before anyone sees it.">
 <meta name="theme-color" content="${p.bg}">
 <link rel="icon" href="/today.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="onenft.click, one knot a day" href="/feed.xml">
+<link rel="canonical" href="https://${SITE}${path}">
+<meta property="og:title" content="${title}">
+<meta property="og:description" content="One Truchet knot a day, computed from the clock of the Base chain.">
+<meta property="og:image" content="https://${SITE}${image}">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta property="og:url" content="https://${SITE}${path}">
+<meta name="twitter:card" content="summary_large_image">
 ${FONTS}
 <style>${css(p)}</style>
 </head>
@@ -137,6 +155,11 @@ function stripSize(svg: string): string {
 }
 const COUNTDOWN = `<script>
 (function(){var el=document.querySelector('[data-left]');if(!el)return;var s=+el.getAttribute('data-left');var t0=Date.now();function f(x){var h=Math.floor(x/3600),m=Math.floor(x%3600/60);return h?h+' h '+m+' min':m+' min'}setInterval(function(){var r=s-Math.floor((Date.now()-t0)/1000);if(r<0){location.reload();return}el.textContent=f(r)},15000)})();
+</script>`;
+
+/** Marks rows owned by the wallet already connected to this site. Never prompts. */
+const YOURS = `<script>
+(function(){var eth=window.ethereum;if(!eth||!eth.request)return;eth.request({method:'eth_accounts'}).then(function(accs){if(!accs||!accs.length)return;var mine={};accs.forEach(function(a){mine[a.toLowerCase()]=1});var n=0;document.querySelectorAll('[data-owner]').forEach(function(el){if(mine[el.getAttribute('data-owner')]){el.classList.add('yours');n++}});var box=document.getElementById('yours');if(box&&n){box.hidden=false;box.querySelector('.syne').textContent=n}}).catch(function(){})})();
 </script>`;
 
 function isAuthor(chain: ChainState, a?: string): boolean {
@@ -176,7 +199,7 @@ btn.addEventListener('click',async function(){
 </script>`;
 }
 
-export function homePage(today: Day, now: bigint, chain: ChainState | null = null): string {
+export function homePage(today: Day, now: bigint, chain: ChainState | null = null, names: Names = NO_NAMES): string {
   const k = renderKnot(today.epoch);
   const left = chain ? chain.secondsLeft : secondsLeft(now);
 
@@ -188,8 +211,8 @@ export function homePage(today: Day, now: bigint, chain: ChainState | null = nul
       continue;
     }
     const owner = chain?.owners.get(n);
-    const who = owner ? (isAuthor(chain!, owner) ? "the author's" : `taken by ${shortAddr(owner)}`) : `palette ${renderKnot(d.epoch).palette.name}`;
-    rows.push(`<a class="row" href="/day/${n}"><img src="/day/${n}.svg" alt="" loading="lazy" width="92" height="92"><span><span class="n syne">${n}</span><br><span class="small">${who}</span></span></a>`);
+    const who = owner ? (isAuthor(chain!, owner) ? "the author's" : `taken by ${label(owner, names)}`) : `palette ${renderKnot(d.epoch).palette.name}`;
+    rows.push(`<a class="row" href="/day/${n}"${owner ? ` data-owner="${owner.toLowerCase()}"` : ""}><img src="/day/${n}.svg" alt="" loading="lazy" width="92" height="92"><span><span class="n syne">${n}</span><br><span class="small">${who}</span></span></a>`);
   }
   const older = today.n - 61 > 0 ? `<a class="row" href="/day/${today.n - 61}"><span class="small">earlier days</span></a>` : "";
 
@@ -205,7 +228,7 @@ export function homePage(today: Day, now: bigint, chain: ChainState | null = nul
   if (chain) {
     const badge = chain.chainId === 8453 ? "" : ` <span class="testnet">${chainName(chain.chainId)} testnet</span>`;
     if (todayOwner) {
-      todayState = isAuthor(chain, todayOwner) ? "today, the author's" : `today, taken by ${shortAddr(todayOwner)}`;
+      todayState = isAuthor(chain, todayOwner) ? "today, the author's" : `today, taken by ${label(todayOwner, names)}`;
       cta = `<button class="cta syne" disabled>Day ${today.n} is taken</button>
 <a class="cta ghost syne" href="/how">How it works</a>
 <p class="small">The next one ties tomorrow. ${fmtLeft(left)} left.${badge}</p>`;
@@ -230,7 +253,7 @@ export function homePage(today: Day, now: bigint, chain: ChainState | null = nul
 <p class="lead">Every day at midnight UTC the contract ties one Truchet knot from the day number. Nobody draws it and nobody can delay it. Every knot comes out of the same machine, so the fabric runs without a seam.</p>
 <hr>
 <div><div class="big syne">${today.n}</div><div class="small">${plural(today.n, "day woven", "days woven")}</div></div>
-${chain ? `<div style="display:flex;gap:34px"><div><div class="syne" style="font-weight:700;font-size:26px;line-height:1">${taken}</div><div class="small">taken</div></div><div><div class="syne" style="font-weight:700;font-size:26px;line-height:1">${gaps}</div><div class="small">${plural(gaps, "gap", "gaps")}</div></div></div>` : ""}
+${chain ? `<div style="display:flex;gap:34px"><div><div class="syne" style="font-weight:700;font-size:26px;line-height:1">${taken}</div><div class="small">taken</div></div><div><div class="syne" style="font-weight:700;font-size:26px;line-height:1">${gaps}</div><div class="small">${plural(gaps, "gap", "gaps")}</div></div><div id="yours" hidden><div class="syne" style="font-weight:700;font-size:26px;line-height:1">0</div><div class="small">yours</div></div></div>` : ""}
 <div style="display:flex;flex-direction:column;gap:12px">
 ${cta}
 </div>
@@ -239,7 +262,7 @@ ${cta}
 <section class="today">
 <div class="knot">${stripSize(k.svg)}</div>
 <div style="display:flex;flex-direction:column;gap:18px;padding-top:6px">
-<div><div class="num syne">${today.n}</div><div class="lead" style="margin-top:8px;font-size:19px">${todayState}</div></div>
+<div${todayOwner ? ` data-owner="${todayOwner.toLowerCase()}"` : ""}><div class="num syne">${today.n}</div><div class="lead" style="margin-top:8px;font-size:19px">${todayState}</div></div>
 <p class="lead" style="max-width:330px">The contract tied this knot at midnight UTC, ${dateOf(today.epoch)}. It ties the next one in <span data-left="${left}">${fmtLeft(left)}</span>.</p>
 <hr>
 <p class="small" style="line-height:1.7">palette ${k.palette.name}, ${paletteIndex(k.palette)} of ${PALETTES.length}<br>${num(k.svg.length)} bytes of SVG<br>day number ${today.epoch} since 1970${chain ? `<br>contract <a href="${explorer(chain.chainId)}/address/${chain.address}">${shortAddr(chain.address)}</a>, renderer ${chain.rendererLocked ? "frozen for good" : "can still change for future days"}` : ""}</p>
@@ -253,18 +276,19 @@ ${older}
 </main>
 </div>
 ${chain && !todayOwner && !authorDay ? mintScript(chain) : ""}
+${chain ? YOURS : ""}
 ${COUNTDOWN}`;
-  return layout(`Day ${today.n} | ${SITE}`, k.palette, body);
+  return layout(`Day ${today.n} | ${SITE}`, k.palette, body, `/day/${today.n}.png`, "/");
 }
 
-export function dayPage(d: Day, today: Day, chain: ChainState | null = null): string {
+export function dayPage(d: Day, today: Day, chain: ChainState | null = null, names: Names = NO_NAMES): string {
   const k = renderKnot(d.epoch);
   const prev = d.n > 1 ? `<a href="/day/${d.n - 1}">previous</a>` : "";
   const next = d.n < today.n ? `<a href="/day/${d.n + 1}">next</a>` : "";
   let state = d.n === today.n ? "today" : `day ${d.n} of ${today.n}`;
   if (chain) {
     const o = chain.owners.get(d.n);
-    if (o) state += isAuthor(chain, o) ? ", the author's" : `, taken by <a href="${explorer(chain.chainId)}/address/${o}">${shortAddr(o)}</a>`;
+    if (o) state += isAuthor(chain, o) ? ", the author's" : `, taken by <a href="${explorer(chain.chainId)}/address/${o}">${label(o, names)}</a>`;
     else state += d.n < today.n ? ", nobody came" : ", still nobody's";
   }
   const body = `<main class="single">
@@ -272,9 +296,10 @@ export function dayPage(d: Day, today: Day, chain: ChainState | null = null): st
 <div class="knot">${stripSize(k.svg)}</div>
 <div><div class="num syne">${d.n}</div><p class="lead">${state}</p></div>
 <p class="small" style="line-height:1.7">palette ${k.palette.name}, ${paletteIndex(k.palette)} of ${PALETTES.length}<br>${dateOf(d.epoch)}, UTC<br>day number ${d.epoch} since 1970<br>${num(k.svg.length)} bytes of SVG</p>
-<nav class="nav">${prev}<a href="/day/${d.n}.svg" download="onenft-day-${d.n}.svg">download SVG</a>${next}<a href="/">whole fabric</a></nav>
+<nav class="nav">${prev}${next}<a href="/">whole fabric</a></nav>
+<nav class="nav small">${chain && chain.owners.has(d.n) ? `<a href="${opensea(chain, d.n)}">OpenSea</a><a href="${explorer(chain.chainId)}/nft/${chain.address}/${d.n}">Basescan</a>` : ""}<a href="/day/${d.n}.svg" download="onenft-day-${d.n}.svg">SVG</a><a href="/day/${d.n}.png">PNG</a></nav>
 </main>`;
-  return layout(`Day ${d.n} | ${SITE}`, k.palette, body);
+  return layout(`Day ${d.n} | ${SITE}`, k.palette, body, `/day/${d.n}.png`, `/day/${d.n}`);
 }
 
 export function howPage(today: Day): string {
@@ -303,7 +328,7 @@ cell[i] = top2(next(++counter))   for i in 0..63</code></pre>
 <p>If you build it, write to me. That is the one thing I am waiting for here.</p>
 <p class="small"><a href="/">Back to the fabric</a></p>
 </main>`;
-  return layout(`How it works | ${SITE}`, k.palette, body);
+  return layout(`How it works | ${SITE}`, k.palette, body, "/today.png", "/how");
 }
 
 export function beforeStart(seconds: number, dayOne: Day): string {
@@ -321,4 +346,20 @@ ${COUNTDOWN}`;
 export function notFound(today: Day): string {
   const k = renderKnot(today.epoch);
   return layout(`No such day | ${SITE}`, k.palette, `<main class="single"><a class="mark syne" href="/">${SITE}</a><h2 class="syne" style="font-size:34px;margin:0">No such day</h2><p class="lead">Today is day ${today.n}. Earlier days run from 1 to ${today.n}. Later ones do not exist yet.</p><a href="/">Back to the fabric</a></main>`);
+}
+
+export function feedXml(today: Day, chain: ChainState | null): string {
+  const items: string[] = [];
+  for (let n = today.n; n >= Math.max(1, today.n - 30); n--) {
+    const d = dayByNumber(n)!;
+    const k = renderKnot(d.epoch);
+    const owner = chain?.owners.get(n);
+    const state = !chain ? "" : owner ? (isAuthor(chain, owner) ? " The author's." : ` Taken by ${shortAddr(owner)}.`) : (n < today.n ? " Nobody came; the gap stays." : " Still nobody's.");
+    const date = new Date(Number(d.startsAt) * 1000).toUTCString();
+    items.push(`<item><title>Day ${n}</title><link>https://${SITE}/day/${n}</link><guid isPermaLink="true">https://${SITE}/day/${n}</guid><pubDate>${date}</pubDate><description>&lt;img src="https://${SITE}/day/${n}.png" alt=""&gt;&lt;p&gt;Day ${n}, ${dateOf(d.epoch)} UTC, palette ${k.palette.name}.${state}&lt;/p&gt;</description><enclosure url="https://${SITE}/day/${n}.png" type="image/png" length="0"/></item>`);
+  }
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel><title>onenft.click</title><link>https://${SITE}/</link><description>One Truchet knot a day, computed from the clock of the Base chain.</description><language>en</language>
+${items.join("\n")}
+</channel></rss>`;
 }

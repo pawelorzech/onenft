@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { homePage, dayPage, howPage, mix } from "./site.ts";
+import { homePage, dayPage, howPage, feedXml, mix } from "./site.ts";
 import { dayByNumber } from "./chain.ts";
 import { EPOCH_SECONDS } from "./knot.ts";
 
@@ -103,4 +103,36 @@ test("strona doby pokazuje właściciela albo przerwę", () => {
   expect(dayPage(dayByNumber(2)!, t, c)).toContain("taken by");
   expect(dayPage(dayByNumber(3)!, t, c)).toContain("nobody came");
   expect(dayPage(t, t, c)).toContain("still nobody's");
+});
+
+test("owner rows carry data-owner and ENS names replace hex when known", () => {
+  const t = dayByNumber(5)!;
+  const c = fakeChain(5, { 2: "0x2222222222222222222222222222222222222222" });
+  const names = new Map([["0x2222222222222222222222222222222222222222", "pawel.eth"]]);
+  const h = homePage(t, t.startsAt, c, names);
+  expect(h).toContain('data-owner="0x2222222222222222222222222222222222222222"');
+  expect(h).toContain("taken by pawel.eth");
+  expect(h).toContain('id="yours"');
+});
+
+test("day page links to OpenSea and Basescan only for claimed days", () => {
+  const t = dayByNumber(5)!;
+  const c = fakeChain(5, { 2: "0x2222222222222222222222222222222222222222" });
+  expect(dayPage(dayByNumber(2)!, t, c)).toContain("opensea.io/assets/base_sepolia/");
+  expect(dayPage(dayByNumber(3)!, t, c)).not.toContain("opensea.io");
+  expect(dayPage(dayByNumber(3)!, t, c)).toContain('href="/day/3.png"');
+});
+
+test("feed lists days newest first with a PNG enclosure", () => {
+  const t = dayByNumber(3)!;
+  const x = feedXml(t, fakeChain(3, { 1: "0x2222222222222222222222222222222222222222" }));
+  expect(x.indexOf("<title>Day 3</title>")).toBeLessThan(x.indexOf("<title>Day 1</title>"));
+  expect(x).toContain('enclosure url="https://onenft.click/day/2.png"');
+  expect(x).toContain("Nobody came");
+});
+
+test("every page carries og:image and the feed link", () => {
+  const t = dayByNumber(2)!;
+  expect(homePage(t, t.startsAt)).toContain('og:image" content="https://onenft.click/day/2.png"');
+  expect(howPage(t)).toContain('type="application/rss+xml"');
 });
