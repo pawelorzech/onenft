@@ -5,16 +5,17 @@ import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IKnotRenderer} from "./IKnotRenderer.sol";
 
-/// @title KnotRendererV3
-/// @notice A one-to-one port of `src/knot.ts` (version 3): the same splitmix64
+/// @title KnotRendererV4
+/// @notice A one-to-one port of `src/knot.ts` (version 4): the same splitmix64
 /// stream, the same trait tables, the same SVG string. The equality test compares
 /// keccak hashes against fixtures generated from TypeScript. Changing anything
 /// here without the same change in TS is a bug.
 ///
 /// Traits drawn from the day number: palette (16), grid (6, 8, 10 or 12), weave
 /// (arcs, passes, loose, cross), symmetry (none, mirror, quad, turn), weight
-/// (thin, regular, heavy), caps (butt, round) and a rare accent color.
-contract KnotRendererV3 is IKnotRenderer {
+/// (thin, regular, heavy), caps (butt, round), a rare accent color, style (cord,
+/// double, dashed, solid), ground (flat, dots, lattice) and an inverted palette.
+contract KnotRendererV4 is IKnotRenderer {
     using Strings for uint256;
 
     uint256 internal constant CELL = 64;
@@ -35,6 +36,9 @@ contract KnotRendererV3 is IKnotRenderer {
         uint8 weight; // 0 thin, 1 regular, 2 heavy
         uint8 caps; // 0 butt, 1 round
         int8 accent; // -1 none, else 0..3
+        uint8 style; // 0 cord, 1 double, 2 dashed, 3 solid
+        uint8 ground; // 0 flat, 1 dots, 2 lattice
+        bool inverted;
     }
 
     function palettes(uint256 i) internal pure returns (Palette memory) {
@@ -91,6 +95,19 @@ contract KnotRendererV3 is IKnotRenderer {
         return "heavy";
     }
 
+    function styleName(uint8 s) public pure returns (string memory) {
+        if (s == 0) return "cord";
+        if (s == 1) return "double";
+        if (s == 2) return "dashed";
+        return "solid";
+    }
+
+    function groundName(uint8 g) public pure returns (string memory) {
+        if (g == 0) return "flat";
+        if (g == 1) return "dots";
+        return "lattice";
+    }
+
     /// @dev splitmix64, one step, wrapping in uint64 like `nextRandom` in TS.
     function mix(uint64 x) internal pure returns (uint64) {
         unchecked {
@@ -129,6 +146,16 @@ contract KnotRendererV3 is IKnotRenderer {
     function weightOf(uint256 v) internal pure returns (uint8) {
         uint8[4] memory w = [0, 1, 1, 2];
         return w[v];
+    }
+
+    function styleOf(uint256 v) internal pure returns (uint8) {
+        uint8[8] memory s = [0, 0, 0, 0, 1, 2, 3, 0];
+        return s[v];
+    }
+
+    function groundOf(uint256 v) internal pure returns (uint8) {
+        uint8[8] memory g = [0, 0, 0, 0, 1, 2, 0, 0];
+        return g[v];
     }
 
     /// @dev Three drawn bits to a cell state, by weave. States: 0,1 arcs; 2 vertical;
@@ -175,6 +202,12 @@ contract KnotRendererV3 is IKnotRenderer {
             (counter, v) = draw(counter, 2);
             t.accent = int8(uint8(v));
         }
+        (counter, v) = draw(counter, 3);
+        t.style = styleOf(v);
+        (counter, v) = draw(counter, 3);
+        t.ground = groundOf(v);
+        (counter, v) = draw(counter, 2);
+        t.inverted = v == 0;
 
         uint256 grid = t.grid;
         uint256 half = grid / 2;
@@ -251,27 +284,74 @@ contract KnotRendererV3 is IKnotRenderer {
         return string.concat("M", xh, " ", ys, "L", xh, " ", ys2, "M", xs, " ", yh, "L", xs2, " ", yh);
     }
 
-    /// @dev The three path strings: every cell (shade layer), plain cells (cord), accent cells.
-    function paths(uint8[] memory states, bool[] memory marks, uint256 grid)
+    /// @dev Style solid: the classic Truchet tile, a triangle filling half the cell.
+    function cellTriangle(uint8 state, uint256 x, uint256 y) internal pure returns (string memory) {
+        if (state == 4) return "";
+        string memory xs = x.toString();
+        string memory ys = y.toString();
+        string memory xs2 = (x + CELL).toString();
+        string memory ys2 = (y + CELL).toString();
+        uint8 o = state & 3;
+        if (o == 0) return string.concat("M", xs, " ", ys, "L", xs2, " ", ys, "L", xs, " ", ys2, "Z");
+        if (o == 1) return string.concat("M", xs, " ", ys, "L", xs2, " ", ys, "L", xs2, " ", ys2, "Z");
+        if (o == 2) return string.concat("M", xs2, " ", ys, "L", xs2, " ", ys2, "L", xs, " ", ys2, "Z");
+        return string.concat("M", xs, " ", ys, "L", xs2, " ", ys2, "L", xs, " ", ys2, "Z");
+    }
+
+    /// @dev The path strings: every cell (shade layer), plain cells (cord), accent cells.
+    /// For style solid the first is unused and the other two hold triangles.
+    function paths(uint8[] memory states, bool[] memory marks, uint256 grid, bool solid)
         internal
         pure
         returns (string memory all, string memory cord, string memory loud)
     {
         for (uint256 i = 0; i < states.length; i++) {
-            string memory c = cellPath(states[i], (i % grid) * CELL, (i / grid) * CELL);
-            all = string.concat(all, c);
+            uint256 x = (i % grid) * CELL;
+            uint256 y = (i / grid) * CELL;
+            string memory c = solid ? cellTriangle(states[i], x, y) : cellPath(states[i], x, y);
+            if (!solid) all = string.concat(all, c);
             if (marks[i]) loud = string.concat(loud, c);
             else cord = string.concat(cord, c);
         }
+    }
+
+    function bgColor(Traits memory t, Palette memory p) internal pure returns (string memory) {
+        return t.inverted ? p.cord : p.bg;
+    }
+
+    function inkColor(Traits memory t, Palette memory p) internal pure returns (string memory) {
+        return t.inverted ? p.bg : p.cord;
     }
 
     function head(Traits memory t, Palette memory p) internal pure returns (string memory) {
         string memory size = (t.grid * CELL).toString();
         return string.concat(
             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ', size, " ", size, '" width="512" height="512">',
-            '<rect width="', size, '" height="', size, '" fill="', p.bg, '"/>',
-            '<g fill="none" stroke-linecap="', t.caps == 0 ? "butt" : "round", '">'
+            '<rect width="', size, '" height="', size, '" fill="', bgColor(t, p), '"/>'
         );
+    }
+
+    function under(Traits memory t, Palette memory p) internal pure returns (string memory out) {
+        uint256 grid = t.grid;
+        if (t.ground == 1) {
+            for (uint256 i = 0; i < grid * grid; i++) {
+                out = string.concat(
+                    out, '<circle cx="', ((i % grid) * CELL + HALF).toString(), '" cy="', ((i / grid) * CELL + HALF).toString(), '" r="3" fill="', p.shade, '"/>'
+                );
+            }
+        } else if (t.ground == 2) {
+            string memory size = (grid * CELL).toString();
+            string memory d;
+            for (uint256 i = 1; i < grid; i++) {
+                string memory k = (i * CELL).toString();
+                d = string.concat(d, "M", k, " 0V", size, "M0 ", k, "H", size);
+            }
+            out = string.concat('<path d="', d, '" stroke="', p.shade, '" stroke-width="1" fill="none"/>');
+        }
+    }
+
+    function cordWidth(uint8 weight) internal pure returns (string memory) {
+        return weight == 0 ? "5" : weight == 1 ? "9" : "15";
     }
 
     function strokes(Traits memory t, Palette memory p, string memory all, string memory cord, string memory loud)
@@ -279,21 +359,42 @@ contract KnotRendererV3 is IKnotRenderer {
         pure
         returns (string memory)
     {
-        string memory wCord = t.weight == 0 ? "5" : t.weight == 1 ? "9" : "15";
+        string memory wCord = cordWidth(t.weight);
         string memory wShade = t.weight == 0 ? "13" : t.weight == 1 ? "21" : "30";
+        string memory dash = t.style == 2 ? string.concat(' stroke-dasharray="', dashLen(t.weight), '"') : "";
         string memory body = string.concat(
+            '<g fill="none" stroke-linecap="', t.caps == 0 ? "butt" : "round", '">',
             '<path d="', all, '" stroke="', p.shade, '" stroke-width="', wShade, '"/>',
-            '<path d="', cord, '" stroke="', p.cord, '" stroke-width="', wCord, '"/>'
+            '<path d="', cord, '" stroke="', inkColor(t, p), '" stroke-width="', wCord, '"', dash, "/>"
         );
-        if (bytes(loud).length == 0) return string.concat(body, "</g></svg>");
-        return string.concat(body, '<path d="', loud, '" stroke="', accentColor(t.accent), '" stroke-width="', wCord, '"/></g></svg>');
+        if (bytes(loud).length > 0) {
+            body = string.concat(body, '<path d="', loud, '" stroke="', accentColor(t.accent), '" stroke-width="', wCord, '"', dash, "/>");
+        }
+        if (t.style == 1) {
+            string memory hair = t.weight == 0 ? "1" : t.weight == 1 ? "3" : "5";
+            body = string.concat(body, '<path d="', all, '" stroke="', bgColor(t, p), '" stroke-width="', hair, '"/>');
+        }
+        return string.concat(body, "</g></svg>");
+    }
+
+    /// @dev "10 10", "18 18" or "30 30": twice the cord width, as in TS.
+    function dashLen(uint8 weight) internal pure returns (string memory) {
+        return weight == 0 ? "10 10" : weight == 1 ? "18 18" : "30 30";
+    }
+
+    function solidFill(Traits memory t, Palette memory p, string memory fill, string memory loud) internal pure returns (string memory) {
+        string memory body = string.concat('<path d="', fill, '" fill="', inkColor(t, p), '"/>');
+        if (bytes(loud).length > 0) body = string.concat(body, '<path d="', loud, '" fill="', accentColor(t.accent), '"/>');
+        return string.concat(body, "</svg>");
     }
 
     function svg(uint256 epoch) public pure returns (string memory) {
         (Traits memory t, uint8[] memory states, bool[] memory marks) = cells(epoch);
         Palette memory p = palettes(t.palette);
-        (string memory all, string memory cord, string memory loud) = paths(states, marks, t.grid);
-        return string.concat(head(t, p), strokes(t, p, all, cord, loud));
+        bool solid = t.style == 3;
+        (string memory all, string memory cord, string memory loud) = paths(states, marks, t.grid, solid);
+        string memory art = solid ? solidFill(t, p, cord, loud) : strokes(t, p, all, cord, loud);
+        return string.concat(head(t, p), under(t, p), art);
     }
 
     function paletteName(uint256 epoch) public pure returns (string memory) {
@@ -313,6 +414,9 @@ contract KnotRendererV3 is IKnotRenderer {
             '"},{"trait_type":"Weight","value":"', weightName(t.weight),
             '"},{"trait_type":"Caps","value":"', t.caps == 0 ? "butt" : "round",
             '"},{"trait_type":"Accent","value":"', accentName(t.accent),
+            '"},{"trait_type":"Style","value":"', styleName(t.style),
+            '"},{"trait_type":"Ground","value":"', groundName(t.ground),
+            '"},{"trait_type":"Inverted","value":"', t.inverted ? "yes" : "no",
             '"}]'
         );
     }

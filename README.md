@@ -12,11 +12,11 @@ Live: **https://onenft.click** · Contract: [`0xb3b8…E783` on Base](https://ba
 ## How it works
 
 - **A day** is `block.timestamp / 86400`, rounded down: one calendar day in UTC. Day one is 20701 (2026-09-05).
-- **The seed** is that day number run through splitmix64. The first draws set seven traits: palette (16), grid (6, 8, 10 or 12), weave, symmetry, weight, caps, and a rare accent color. Then three bits per cell fill the grid.
+- **The seed** is that day number run through splitmix64. The first draws set ten traits: palette (16), grid (6, 8, 10 or 12), weave, symmetry, weight, caps, a rare accent color, style (cord, double, dashed or solid triangles), ground (flat, dots, lattice) and, one day in four, an inverted palette. Then three bits per cell fill the grid.
 - **Six cell states**: quarter-arcs in two orientations, a vertical pass, a horizontal pass, empty, crossing. Which ones a day may use depends on its weave.
 - **The image** is one SVG path drawn twice (shadow and cord), plus an accent path on accent days, a few kB, returned by the contract as a `data:` URI. No server in the loop.
 - **The site has no palette of its own.** It takes colors from today's palette, so it looks different in each of the sixteen epochs.
-- **Day 1** was tied by renderer v2 (eight palettes, 8 by 8, no traits). The renderer is stored per token, so day 1 never changes. Every day from day 2 uses v3.
+- **Day 1** came from the first renderer (eight palettes, 8 by 8, no traits). Each token stores the renderer that drew it, so a claimed day never changes. Every day from day 2 uses the current renderer, `KnotRendererV4.sol`.
 - **Everything is CC0**: images, generator, contracts, site. See [`/assets`](https://onenft.click/assets), [`/explore`](https://onenft.click/explore), [`/traits`](https://onenft.click/traits) and the JSON at [`/api/today`](https://onenft.click/api/today).
 
 The full random stream is written out on [`/how`](https://onenft.click/how) so you can port it to any language. The TypeScript generator and the Solidity renderer produce the same bytes; a test enforces it.
@@ -25,8 +25,8 @@ The full random stream is written out on [`/how`](https://onenft.click/how) so y
 
 | Path | What |
 |---|---|
-| `src/` | The site (Bun + TypeScript): generator (`knot.ts` v3, `knot_v2.ts` frozen), clock, pages, API, server, chain reads, autoclaim, PNG cards, ENS. |
-| `contracts/` | Foundry project: `OneNFT.sol`, `KnotRenderer.sol` (v2, day 1), `KnotRendererV3.sol`, tests, deploy scripts. |
+| `src/` | The site (Bun + TypeScript): generator (`knot.ts` v4, `knot_v2.ts` frozen), clock, pages, API, server, chain reads, autoclaim, PNG cards, ENS. |
+| `contracts/` | Foundry project: `OneNFT.sol`, `KnotRenderer.sol` (v2, day 1), `KnotRendererV4.sol`, tests, deploy scripts. |
 | `assets/fonts/` | Static TTFs used for PNG cards (Syne ExtraBold, Newsreader; OFL). |
 | `design/`, `design2/` | The two design rounds as Claude Design canvases. |
 | `docs/` | [Architecture](docs/ARCHITECTURE.md) · [Decisions](docs/DECISIONS.md) · [Deployments](docs/DEPLOYMENTS.md) · [Operations](docs/OPERATIONS.md) · [Audit](docs/AUDIT.md) · [Roadmap](docs/ROADMAP.md) |

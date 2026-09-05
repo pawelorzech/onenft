@@ -37,7 +37,7 @@ test("day page navigates both ways only when neighbours exist", () => {
 
 test("how page explains the traits and points at the spec", () => {
   const f = howPage(today);
-  for (const w of ["palette", "grid", "weave", "symmetry", "weight", "caps", "accent", "/spec.json", "CC0"]) expect(f).toContain(w);
+  for (const w of ["palette", "grid", "weave", "symmetry", "weight", "caps", "accent", "style", "ground", "inverted", "/spec.json", "CC0"]) expect(f).toContain(w);
 });
 
 test("day one gets a sentence instead of an empty list", () => {

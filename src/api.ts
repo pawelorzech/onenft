@@ -2,7 +2,7 @@
  * JSON for other people's code, the spec, and the calendar feed.
  * Everything here is derived; nothing is stored.
  */
-import { knotFor, PALETTES, ACCENTS, GRIDS, WEAVES, SYMMETRIES, WEIGHTS, CAPS, V3_FROM_EPOCH } from "./knot.ts";
+import { knotFor, PALETTES, ACCENTS, GRIDS, WEAVES, SYMMETRIES, WEIGHTS, CAPS, STYLES, GROUNDS, V4_FROM_EPOCH } from "./knot.ts";
 import { dayByNumber, dateOf, type Day } from "./chain.ts";
 import type { ChainState } from "./contract.ts";
 import { SITE, isAuthor, opensea, explorer, type Names, NO_NAMES } from "./site.ts";
@@ -51,18 +51,20 @@ export function holderJson(who: Address, today: Day, chain: ChainState, names: N
 export function specJson() {
   return {
     site: SITE,
-    version: 3,
-    v3FromEpoch: Number(V3_FROM_EPOCH),
+    version: 4,
+    v4FromEpoch: Number(V4_FROM_EPOCH),
     license: "CC0-1.0",
     clock: "epoch = block.timestamp / 86400; day = epoch - startEpoch + 1; startEpoch = 20701 (2026-09-05 UTC)",
     random: "splitmix64: x += 0x9e3779b97f4a7c15; x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9; x = (x ^ (x >> 27)) * 0x94d049bb133111eb; return x ^ (x >> 31). Counter starts at mix(epoch); each draw increments the counter and takes the top bits.",
-    draws: ["palette: 8 bits mod 16", "grid: 4 bits into GRIDS", "weave: 3 bits into WEAVES", "symmetry: 3 bits into SYMMETRIES", "weight: 2 bits into WEIGHTS", "caps: 2 bits, 0 is butt", "accent: 4 bits, 0 means an accent, then 2 bits into ACCENTS", "cells: 3 bits per free cell in row order, then 4 bits per non-empty cell on accent days (0 marks the cell)"],
+    draws: ["palette: 8 bits mod 16", "grid: 4 bits into GRIDS", "weave: 3 bits into WEAVES", "symmetry: 3 bits into SYMMETRIES", "weight: 2 bits into WEIGHTS", "caps: 2 bits, 0 is butt", "accent: 4 bits, 0 means an accent, then 2 bits into ACCENTS", "style: 3 bits into STYLES", "ground: 3 bits into GROUNDS", "inverted: 2 bits, 0 swaps bg and cord", "cells: 3 bits per free cell in row order, then 4 bits per non-empty cell on accent days (0 marks the cell)"],
     cell: 64,
     states: { 0: "arcs, left to top and bottom to right", 1: "arcs, top to right and left to bottom", 2: "vertical pass", 3: "horizontal pass", 4: "empty", 5: "crossing" },
     stateOf: { arcs: "v & 1", passes: "v & 3", loose: "v < 4 ? v : v < 6 ? v - 4 : 4", cross: "v < 4 ? v : v < 6 ? v - 4 : 5" },
     symmetry: { mirror: "right half copies the left, arcs flip", quad: "three quarters copy the top left, arcs flip when exactly one axis is mirrored", turn: "three quarters are the top left turned 90, 180 and 270 degrees; arcs and passes flip on 90 and 270" },
     widths: { thin: [5, 13], regular: [9, 21], heavy: [15, 30] },
-    tables: { GRIDS, WEAVES, SYMMETRIES, WEIGHTS, CAPS, PALETTES, ACCENTS },
+    styles: { cord: "shadow under cord", double: "cord with a bg hairline of width floor(cord/3) on top", dashed: "cord with stroke-dasharray 2w 2w", solid: "no strokes; each non-empty cell is a filled triangle, orientation state & 3" },
+    grounds: { flat: "nothing", dots: "a circle r=3 in shade at every cell center", lattice: "1px shade lines between cells" },
+    tables: { GRIDS, WEAVES, SYMMETRIES, WEIGHTS, CAPS, STYLES, GROUNDS, PALETTES, ACCENTS },
     v2: { note: "day 1 only: 8 palettes (the first eight), grid 8, weave passes (2 bits per cell), no symmetry, regular, round", source: "src/knot_v2.ts" },
   };
 }

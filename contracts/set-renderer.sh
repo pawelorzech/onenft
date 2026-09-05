@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Switches the token contract to KnotRendererV3 from the author wallet (the owner).
+# Switches the token contract to KnotRendererV4 from the author wallet (the owner).
 # Usage: contracts/set-renderer.sh sepolia|mainnet
 # The author secret comes from 1Password for the duration of one transaction.
 set -euo pipefail
@@ -11,7 +11,7 @@ case "$NET" in
 esac
 D="$HOME/.config/onenft/deploy-$NET.json"
 NFT=$(python3 -c "import json;print(json.load(open('$D'))['OneNFT'])")
-REN=$(python3 -c "import json;print(json.load(open('$D'))['KnotRenderer_v3'])")
+REN=$(python3 -c "import json;print(json.load(open('$D'))['KnotRenderer_v4'])")
 echo "network $NET  token $NFT  renderer v3 $REN"
 echo "current renderer: $(cast call "$NFT" 'renderer()(address)' --rpc-url "$RPC")"
 # Probe the new renderer with today's epoch before spending gas.

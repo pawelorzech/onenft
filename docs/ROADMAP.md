@@ -8,7 +8,7 @@ What is done, what is open, in the order it matters. Last verified: 2026-09-05.
 - Site live: fabric layout, claim button (EIP-1193, no wallet library), chain-aware rows with gaps and owners, ENS names, "yours" marker, PNG link cards, RSS, legacy redirects.
 - Author-day autoclaim in the site container.
 - Day 1 claimed.
-- Renderer v3 (seven traits, sixteen palettes) in TypeScript and Solidity, byte-equal, tested. Switched on-chain on day 1; day 1 stays v2.
+- Renderer v4 (ten traits, sixteen palettes) in TypeScript and Solidity, byte-equal, tested. Switched on-chain on day 1; day 1 stays v2.
 - Pages: `/day/N` with claim transaction, traits, share and embed; `/explore` calendar with gaps and a seven-day preview; `/traits`; holder pages `/0x…` and `/name.eth`; `/assets` (CC0); `/embed`; JSON API (`/api/today`, `/api/day/N`, `/api/days`, `/api/holder/A`, `/spec.json`); `/calendar.ics`.
 - Past-day owners cached for 10 minutes; the `Claimed` log scanned in the background for transactions.
 

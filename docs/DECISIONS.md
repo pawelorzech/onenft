@@ -40,3 +40,6 @@ Every knot, the generator, the contracts and the site are CC0. Stated on `/asset
 
 ## 2026-09-05 — Site pages after Nouns and Gnars
 Added: day pages with the claim transaction and time after midnight, share links and an embed snippet; `/explore` (a calendar of every day, gaps hatched, the next seven days previewed); `/traits` (odds and counts); holder pages at `/0x…` and `/name.eth`; `/assets`; JSON at `/api/*` and `/spec.json`; `/embed`; `/calendar.ics`. Deferred: a Farcaster or Base mini-app (needs a developer account and a signed manifest). Not added: the live vote feed and treasury of a DAO; there is no treasury.
+
+## 2026-09-05 — Renderer v4 replaces v3 the same day
+v3 (seven traits) went on chain at 12:00 UTC and was judged not varied enough within the hour. v4 adds three traits: style (cord, double, dashed, solid Truchet triangles), ground (flat, dots, lattice) and an inverted palette one day in four. Masks (circle, diamond, frame) were prototyped and declined. v3 never minted a token, so it was replaced in place rather than frozen; its addresses stay in DEPLOYMENTS.md as superseded.

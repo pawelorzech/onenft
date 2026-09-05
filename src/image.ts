@@ -21,7 +21,7 @@ export function cardSvg(day: Day): string {
   const inner = k.svg.replace(/^<svg [^>]*>/, "").replace(/<\/svg>$/, "");
   const fg = k.palette.cord, bg = k.palette.bg, muted = k.palette.shade;
   const t = k.traits;
-  const line = k.version === 1 ? `palette ${t.palette}` : `${t.palette}, ${t.grid} by ${t.grid}, ${t.weave}, ${t.symmetry === "none" ? "no symmetry" : t.symmetry}`;
+  const line = k.version === 1 ? `palette ${t.palette}` : `${t.palette}${t.inverted ? " inverted" : ""}, ${t.grid} by ${t.grid}, ${t.weave}, ${t.symmetry === "none" ? "no symmetry" : t.symmetry}${t.style === "cord" ? "" : `, ${t.style}`}`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
 <rect width="1200" height="630" fill="${bg}"/>
 <svg x="30" y="30" width="570" height="570" viewBox="${viewBox}">${inner}</svg>

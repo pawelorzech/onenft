@@ -204,7 +204,7 @@ const YOURS = `<script>
 (function(){var eth=window.ethereum;if(!eth||!eth.request)return;eth.request({method:'eth_accounts'}).then(function(accs){if(!accs||!accs.length)return;var mine={};accs.forEach(function(a){mine[a.toLowerCase()]=1});var n=0;document.querySelectorAll('[data-owner]').forEach(function(el){if(mine[el.getAttribute('data-owner')]){el.classList.add('yours');n++}});var box=document.getElementById('yours');if(box&&n){box.hidden=false;box.querySelector('.syne').textContent=n}}).catch(function(){})})();
 </script>`;
 
-/** The seven traits as a definition list. Day 1 came from the first renderer and reads as plain 8 by 8. */
+/** The ten traits as a definition list. Day 1 came from the first renderer and reads as plain 8 by 8. Version numbers stay off the page; a collector has no use for them. */
 export function traitList(k: Knot): string {
   const t = k.traits;
   const rows: [string, string][] = [
@@ -215,7 +215,9 @@ export function traitList(k: Knot): string {
     ["weight", `<a href="/traits#weight">${t.weight}</a>`],
     ["caps", `<a href="/traits#caps">${t.caps}</a>`],
     ["accent", `<a href="/traits#accent">${t.accent}</a>`],
-    ["renderer", `v${k.version}`],
+    ["style", `<a href="/traits#style">${t.style}</a>`],
+    ["ground", `<a href="/traits#ground">${t.ground}</a>`],
+    ["inverted", `<a href="/traits#inverted">${t.inverted ? "yes" : "no"}</a>`],
   ];
   return `<dl class="traits">${rows.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join("")}</dl>`;
 }
@@ -340,11 +342,11 @@ ${cta}
 <p class="lead" style="max-width:330px">The contract tied this knot at midnight UTC, ${dateOf(today.epoch)}. It ties the next one in <span data-left="${left}">${fmtLeft(left)}</span>.</p>
 <hr>
 ${traitList(k)}
-<p class="small" style="line-height:1.7">${num(k.svg.length)} bytes of SVG<br>day number ${today.epoch} since 1970${chain ? `<br>contract <a href="${explorer(chain.chainId)}/address/${chain.address}">${shortAddr(chain.address)}</a>, renderer ${chain.rendererLocked ? "frozen for good" : "can still change for future days"}` : ""}</p>
+<p class="small" style="line-height:1.7">The image lives in the contract, not on a server.${chain ? `<br>Contract <a href="${explorer(chain.chainId)}/address/${chain.address}">${shortAddr(chain.address)}</a> on ${chainName(chain.chainId)}. A claimed day keeps its image forever${chain.rendererLocked ? ", and the drawing rules are locked for good" : "; the drawing rules can still change for days not yet claimed"}.` : ""}</p>
 ${today.n === 1 ? `<p class="small">This is day one. Tomorrow a second row appears under it, and so on, with no end.</p>` : ""}
 </div>
 </section>
-<section class="format">${TILES}<p style="max-width:520px;margin:0">The whole knot is these shapes on a grid, plus seven traits drawn from the day number. The format is public and CC0. You can build it yourself. <a href="/how">See how the machine works</a></p></section>
+<section class="format">${TILES}<p style="max-width:520px;margin:0">Every knot is these shapes on a grid, plus ten traits, all drawn from the day number. The format is public and CC0. <a href="/how">See how the machine works</a></p></section>
 ${rows.join("\n")}
 ${older}
 <footer><span>This is not an investment and never will be. Images and code are CC0.</span><nav><a href="/explore">Explore</a><a href="/traits">Traits</a><a href="/assets">Assets</a>${chain ? `<a href="${openseaCollection(chain)}">OpenSea</a><a href="${explorer(chain.chainId)}/address/${chain.address}">Basescan</a>` : ""}<a href="/feed.xml">RSS</a><a href="/calendar.ics">Calendar</a><a href="${REPO}">Code</a></nav></footer>
@@ -379,7 +381,7 @@ ${topBar()}
 <div><div class="num syne">${d.n}</div><p class="lead">${state}</p></div>
 ${came}
 ${traitList(k)}
-<p class="small" style="line-height:1.7">${dateOf(d.epoch)}, UTC<br>day number ${d.epoch} since 1970<br>${num(k.svg.length)} bytes of SVG${chain ? `<br>token ${d.n} of <a href="${explorer(chain.chainId)}/address/${chain.address}">${shortAddr(chain.address)}</a> on ${chainName(chain.chainId)}` : ""}</p>
+<p class="small" style="line-height:1.7">${dateOf(d.epoch)}, UTC${chain ? `<br>Token ${d.n} of <a href="${explorer(chain.chainId)}/address/${chain.address}">${shortAddr(chain.address)}</a> on ${chainName(chain.chainId)}. The image lives in the contract.` : ""}</p>
 <nav class="nav">${prev}${next}<a href="/">whole fabric</a><a href="/explore">calendar</a></nav>
 <nav class="nav small">${chain && chain.owners.has(d.n) ? `<a href="${opensea(chain, d.n)}">OpenSea</a><a href="${explorer(chain.chainId)}/nft/${chain.address}/${d.n}">Basescan</a>` : ""}<a href="/day/${d.n}.svg" download="onenft-day-${d.n}.svg">SVG</a><a href="/day/${d.n}.png">PNG</a></nav>
 ${share}
@@ -399,13 +401,13 @@ ${topBar()}
 <h2 class="syne">From one number to one knot</h2>
 <p>The only input is the clock of the Base chain: the timestamp of the current block. Nobody sets it and nobody can roll it back.</p>
 <p><strong>A day</strong> is that timestamp divided by 86,400, rounded down. That gives one calendar day in UTC, with the boundary at midnight UTC. The number itself counts days since 1 January 1970; day one of this project is day number 20701.</p>
-<p><strong>The seed</strong> is that day number run through splitmix64. From it you pull a stream of bits. The first draws set seven traits; the rest fill the grid, one cell at a time.</p>
-<p><strong>The traits:</strong> a palette out of sixteen; a grid of 6, 8, 10 or 12 cells a side; a weave, which is the set of shapes a cell can take; a symmetry, which is none, a mirror, a fourfold medallion or a quarter turn; a weight for the cord; round or cut ends; and, one day in sixteen, an accent color on a few cells.</p>
+<p><strong>The seed</strong> is that day number run through splitmix64. From it you pull a stream of bits. The first draws set ten traits; the rest fill the grid, one cell at a time.</p>
+<p><strong>The traits:</strong> a palette out of sixteen; a grid of 6, 8, 10 or 12 cells a side; a weave, which is the set of shapes a cell can take; a symmetry, which is none, a mirror, a fourfold medallion or a quarter turn; a weight for the cord; round or cut ends; one day in sixteen, an accent color on a few cells; a style, which draws the cord as one line, a split line, dashes, or drops it for filled Truchet triangles; a ground under the knot, flat, dots or a lattice; and, one day in four, the palette inverted.</p>
 ${TILES}
 <p><strong>Six cell states:</strong> two quarter-arcs in one of two orientations, a vertical pass, a horizontal pass, an empty cell (weave "loose") and a crossing (weave "cross"). Classic Truchet has arcs and nothing else. The passes break it into longer runs.</p>
-<p><strong>The drawing</strong> is one SVG path drawn twice: a thicker shadow and a thinner cord, plus a third path in the accent color when the day has one. The whole file is a few kilobytes. The contract returns it as a <code>data:</code> URI, with no server in between.</p>
+<p><strong>The drawing</strong> is one SVG path drawn twice: a thicker shadow and a thinner cord, plus a third path in the accent color when the day has one. Style solid replaces the strokes with one filled path. The whole file is a few kilobytes. The contract returns it as a <code>data:</code> URI, with no server in between.</p>
 <p><strong>The palette</strong> is one of sixteen. This page takes its colors from today's palette, so it looks different in each epoch. Today: ${k.palette.name}. <a href="/traits">See all traits and how often they come up.</a></p>
-<p><strong>Day 1</strong> was tied by the first renderer: eight palettes, always 8 by 8, arcs and passes, no symmetry. The renderer address is stored on each token when it is claimed, so day 1 never changes. Every day from day 2 uses v3, described here.</p>
+<p><strong>Day 1</strong> came out of the first version of the machine: eight palettes, always 8 by 8, arcs and passes, no symmetry. Each token remembers the machine that drew it, so a claimed day never changes, even when the machine does. Every day from day 2 follows the rules on this page.</p>
 <h2 class="syne">Build it yourself</h2>
 <p>The same day number gives the same knot every time, ten years from now and with this page switched off. The generator is in <a href="${REPO}">the repository</a>, in TypeScript and in Solidity, with a test that keeps the two byte for byte equal. The random stream is below; the trait tables are in <a href="/spec.json">spec.json</a>.</p>
 <pre><code>u64 next(u64 x):
@@ -422,6 +424,9 @@ symmetry = SYMMETRIES[top3(next(++counter))]
 weight   = WEIGHTS[top2(next(++counter))]
 caps     = top2(next(++counter)) == 0 ? butt : round
 accent   = top4(next(++counter)) == 0 ? ACCENTS[top2(next(++counter))] : none
+style    = STYLES[top3(next(++counter))]
+ground   = GROUNDS[top3(next(++counter))]
+inverted = top2(next(++counter)) == 0
 for each free cell in row order:
   state = stateOf(weave, top3(next(++counter)))
   if accent and state is not empty: mark = top4(next(++counter)) == 0

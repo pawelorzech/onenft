@@ -2,7 +2,7 @@
  * The inner pages: calendar, traits, holder, assets, embed. Same copy rules
  * as site.ts: plain words, active voice, no adverbs, no em dashes.
  */
-import { knotFor, renderKnot, PALETTES, ACCENTS, GRIDS, WEAVES, SYMMETRIES, WEIGHTS, CAPS, type Knot } from "./knot.ts";
+import { knotFor, renderKnot, PALETTES, ACCENTS, GRIDS, WEAVES, SYMMETRIES, WEIGHTS, CAPS, STYLES, GROUNDS, type Knot } from "./knot.ts";
 import { dayByNumber, dateOf, type Day } from "./chain.ts";
 import type { ChainState } from "./contract.ts";
 import { SITE, REPO, layout, topBar, label, shortAddr, isAuthor, explorer, opensea, openseaCollection, chainName, num, plural, stripSize, esc, afterMidnight, type Names, NO_NAMES } from "./site.ts";
@@ -67,7 +67,7 @@ export function explorePage(today: Day, chain: ChainState | null = null): string
 ${topBar()}
 <div><h2 class="syne">Every day so far</h2><p class="lead" style="margin-top:8px">${today.n} ${plural(today.n, "day", "days")} woven${chain ? `, ${taken} taken, ${gaps} ${plural(gaps, "gap", "gaps")}` : ""}. Hatched days are gaps: nobody came, and the number stays empty forever. Dimmed days have not happened yet.</p></div>
 ${months.join("\n")}
-<section><h3 class="syne">The next ${PREVIEW_DAYS} days</h3><p class="small" style="margin:6px 0 14px">The drawing exists before anyone sees it. These are computed with the current renderer; if the renderer changes before a day arrives, that day changes with it.</p><div class="strip">${preview.join("")}</div></section>
+<section><h3 class="syne">The next ${PREVIEW_DAYS} days</h3><p class="small" style="margin:6px 0 14px">The drawing exists before anyone sees it. One caveat: the drawing rules can still change for days nobody has claimed yet, so a preview is a promise only once its day arrives.</p><div class="strip">${preview.join("")}</div></section>
 </main>`;
   return layout(`Explore | ${SITE}`, k.palette, body, `/day/${today.n}.png`, "/explore");
 }
@@ -90,17 +90,23 @@ function odds(): Record<string, [string, number][]> {
     weight: tally(WEIGHTS),
     caps: tally(CAPS),
     accent: [["none", 15 / 16], ...ACCENTS.map((a) => [a.name, 1 / 64] as [string, number])],
+    style: tally(STYLES),
+    ground: tally(GROUNDS),
+    inverted: [["no", 3 / 4], ["yes", 1 / 4]],
   };
 }
 
 const TRAIT_NOTES: Record<string, string> = {
-  palette: "Sixteen palettes. The first eight were there from day 1; the rest arrived with renderer v3.",
+  palette: "Sixteen palettes. Day 1 could only draw the first eight.",
   grid: "Cells per side. The image is always 512 pixels; a 12 by 12 day has a finer cord.",
   weave: "The shapes a cell may take. Arcs is classic Truchet. Passes adds straight runs. Loose leaves cells empty. Cross adds crossings.",
   symmetry: "Mirror copies the left half to the right. Quad copies one quarter four ways. Turn rotates one quarter around the center.",
   weight: "How thick the cord is.",
   caps: "Round or cut ends where a cord leaves the frame.",
   accent: "One day in sixteen paints a few cells in a third color.",
+  style: "How the cord is drawn. Double splits it with a hairline. Dashed cuts it into dashes. Solid drops the cord for the oldest Truchet tile: a filled triangle in each cell.",
+  ground: "What sits under the knot: nothing, a dot at every cell center, or a hairline lattice.",
+  inverted: "One day in four swaps background and cord, so a dark palette turns light and a light one turns dark.",
 };
 
 export function traitsPage(today: Day, chain: ChainState | null = null): string {
@@ -112,7 +118,7 @@ export function traitsPage(today: Day, chain: ChainState | null = null): string 
     const kk = knotFor(dayByNumber(n)!.epoch);
     const taken = !chain || chain.owners.has(n);
     for (const [key, raw] of Object.entries(kk.traits)) {
-      const v = key === "grid" ? `${raw} by ${raw}` : String(raw);
+      const v = key === "grid" ? `${raw} by ${raw}` : key === "inverted" ? (raw ? "yes" : "no") : String(raw);
       (seen[key] ??= new Map()).set(v, (seen[key].get(v) ?? 0) + 1);
       if (taken) (takenSeen[key] ??= new Map()).set(v, (takenSeen[key].get(v) ?? 0) + 1);
       const f = (firstDay[key] ??= new Map());
@@ -131,7 +137,7 @@ export function traitsPage(today: Day, chain: ChainState | null = null): string 
   });
   const body = `<main class="wide">
 ${topBar()}
-<div><h2 class="syne">Traits</h2><p class="lead" style="margin-top:8px">Seven traits, all drawn from the day number, all written into the token's metadata. Odds are the share of days each value gets in the long run. So far counts the ${today.n} ${plural(today.n, "day", "days")} woven to date${chain ? ", taken counts only claimed days" : ""}. Day 1 came from the first renderer and reads as 8 by 8, passes, no symmetry.</p></div>
+<div><h2 class="syne">Traits</h2><p class="lead" style="margin-top:8px">Ten traits, all drawn from the day number, all written into the token's metadata. Odds are the share of days each value gets in the long run. So far counts the ${today.n} ${plural(today.n, "day", "days")} woven to date${chain ? ", taken counts only claimed days" : ""}. Day 1 came from a simpler machine and reads as 8 by 8, passes, no symmetry, cord, flat.</p></div>
 ${sections.join("\n")}
 <p class="small">Tables from <a href="/spec.json">spec.json</a>. <a href="/how">How the machine works</a>.</p>
 </main>`;
@@ -169,7 +175,7 @@ ${topBar()}
 <h2 class="syne">Take it. It is yours.</h2>
 <p>Everything here is <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>: every knot, the generator, the contracts, the wordmark, this site. No credit needed, no permission to ask. Print it, remix it, mint it elsewhere, put it on a shirt. Owning a day gives you the token; the image belongs to everyone.</p>
 <h2 class="syne">Images</h2>
-<p>Any day as SVG at <code>/day/N.svg</code> and as a 1200 by 630 card at <code>/day/N.png</code>. Today: <a href="/today.svg" download="onenft-today.svg">SVG</a>, <a href="/today.png">card</a>. The SVG is the same bytes the contract returns. Past days never change and are cached for a year.</p>
+<p>Any day as SVG at <code>/day/N.svg</code> and as a 1200 by 630 card at <code>/day/N.png</code>. Today: <a href="/today.svg" download="onenft-today.svg">SVG</a>, <a href="/today.png">card</a>. The SVG is the same file the contract holds.</p>
 <h2 class="syne">Wordmark</h2>
 <p>The domain is the wordmark, set in Syne 800. <a href="/wordmark.svg" download="onenft-wordmark.svg">wordmark.svg</a> in today's colors.</p>
 <h2 class="syne">Put today's knot on your page</h2>
@@ -180,8 +186,8 @@ ${topBar()}
 <h2 class="syne">Data</h2>
 <p><a href="/api/today">/api/today</a> and <code>/api/day/N</code> return one day: number, date, traits, owner, claim transaction, image links. <a href="/api/days">/api/days</a> lists every day so far. <code>/api/holder/ADDRESS</code> lists one wallet's days. All JSON, open to any origin.</p>
 <p><a href="/spec.json">/spec.json</a> holds the trait tables and palettes, so you can port the generator. <a href="/feed.xml">RSS</a> carries one item a day. <a href="/calendar.ics">calendar.ics</a> is a daily event at midnight UTC you can subscribe to, so you never miss a day.</p>
-<h2 class="syne">Code and contracts</h2>
-<p>The generator in TypeScript and Solidity, the site and the contracts: <a href="${REPO}">${REPO.replace("https://", "")}</a>.${chain ? ` Token contract <a href="${explorer(chain.chainId)}/address/${chain.address}">${chain.address}</a> on ${chainName(chain.chainId)}, renderer <a href="${explorer(chain.chainId)}/address/${chain.renderer}">${shortAddr(chain.renderer)}</a>. <a href="${openseaCollection(chain)}">Collection on OpenSea</a>.` : ""}</p>
+<h2 class="syne">Code and contract</h2>
+<p>The generator in TypeScript and Solidity, the site and the contracts: <a href="${REPO}">${REPO.replace("https://", "")}</a>.${chain ? ` Token contract <a href="${explorer(chain.chainId)}/address/${chain.address}">${chain.address}</a> on ${chainName(chain.chainId)}. <a href="${openseaCollection(chain)}">Collection on OpenSea</a>.` : ""}</p>
 <p class="small"><a href="/">Back to the fabric</a></p>
 </main>`;
   return layout(`Assets | ${SITE}`, k.palette, body, `/day/${today.n}.png`, "/assets");

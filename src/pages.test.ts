@@ -43,7 +43,7 @@ test("explore spans every month from day 1 to today", () => {
 
 test("traits: every value of every trait, with odds and counts", () => {
   const h = traitsPage(dayByNumber(40)!, fakeChain(40, { 1: A }));
-  for (const w of ["ultramarine", "slate", "12 by 12", "loose", "turn", "heavy", "butt", "rose", "6.3%"]) expect(h).toContain(w);
+  for (const w of ["ultramarine", "slate", "12 by 12", "loose", "turn", "heavy", "butt", "rose", "6.3%", "solid", "lattice", "inverted"]) expect(h).toContain(w);
   expect(h).toContain('id="symmetry"');
 });
 
@@ -80,7 +80,7 @@ test("day JSON carries traits, owner and the claim", () => {
   expect(j.renderer).toBe(1);
   expect(dayJson(dayByNumber(2)!, t, fakeChain(3, { 1: A })).state).toBe("gap");
   expect(dayJson(t, t, fakeChain(3, { 1: A })).state).toBe("free");
-  expect(dayJson(dayByNumber(2)!, t, fakeChain(3, { 1: A })).renderer).toBe(3);
+  expect(dayJson(dayByNumber(2)!, t, fakeChain(3, { 1: A })).renderer).toBe(4);
 });
 
 test("days JSON has one entry per day and the spec has the tables", () => {

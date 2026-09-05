@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { renderKnot, knotFor, epochOf, EPOCH_SECONDS, PALETTES, V3_FROM_EPOCH } from "./knot.ts";
+import { renderKnot, knotFor, epochOf, EPOCH_SECONDS, PALETTES, V4_FROM_EPOCH } from "./knot.ts";
 import { renderKnotV2 } from "./knot_v2.ts";
 
 test("the same day gives the same image", () => {
@@ -54,6 +54,22 @@ test("every trait value shows up within a year", () => {
   expect(seen.accent.has("none")).toBe(true);
   expect(seen.accent.size).toBeGreaterThan(1);
   expect(seen.palette.size).toBe(PALETTES.length);
+  expect([...seen.style].sort()).toEqual(["cord", "dashed", "double", "solid"]);
+  expect([...seen.ground].sort()).toEqual(["dots", "flat", "lattice"]);
+  expect([...seen.inverted].sort()).toEqual([false, true]);
+});
+
+test("solid days have no strokes, dashed days have a dasharray, inverted days swap the colors", () => {
+  let solid = 0, dashed = 0, inv = 0;
+  for (let e = 0n; e < 300n; e++) {
+    const k = renderKnot(e);
+    if (k.traits.style === "solid") { expect(k.svg).not.toContain("stroke-linecap"); expect(k.svg).toContain("Z\" fill="); solid++; }
+    if (k.traits.style === "dashed") { expect(k.svg).toContain("stroke-dasharray"); dashed++; }
+    if (k.traits.inverted) { expect(k.svg).toContain(`<rect width="${k.traits.grid * 64}" height="${k.traits.grid * 64}" fill="${k.palette.cord}"/>`); inv++; }
+  }
+  expect(solid).toBeGreaterThan(10);
+  expect(dashed).toBeGreaterThan(10);
+  expect(inv).toBeGreaterThan(40);
 });
 
 test("cells match the grid and the weave", () => {
@@ -87,9 +103,8 @@ test("accent days carry a third color, others do not", () => {
   let withAccent = 0;
   for (let e = 0n; e < 400n; e++) {
     const k = renderKnot(e);
-    const paths = (k.svg.match(/<path /g) ?? []).length;
-    if (k.traits.accent === "none") expect(paths).toBe(2);
-    else { expect(paths).toBeLessThanOrEqual(3); withAccent++; }
+    if (k.traits.accent === "none") expect(k.svg).not.toMatch(/#e04040|#f0c040|#40c0e0|#e060b0/);
+    else withAccent++;
   }
   expect(withAccent).toBeGreaterThan(10);
 });
@@ -111,9 +126,9 @@ test("v2 stays frozen: day 1 as the chain rendered it", () => {
 });
 
 test("knotFor picks v2 before the switch and v3 from it", () => {
-  expect(V3_FROM_EPOCH).toBe(20702n);
+  expect(V4_FROM_EPOCH).toBe(20702n);
   expect(knotFor(20701n).version).toBe(1);
   expect(knotFor(20701n).svg).toBe(renderKnotV2(20701n).svg);
-  expect(knotFor(20702n).version).toBe(3);
+  expect(knotFor(20702n).version).toBe(4);
   expect(knotFor(20702n).svg).toBe(renderKnot(20702n).svg);
 });

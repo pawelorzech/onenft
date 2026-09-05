@@ -2,16 +2,16 @@
 pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
-import {KnotRendererV3} from "../src/KnotRendererV3.sol";
+import {KnotRendererV4} from "../src/KnotRendererV4.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
-contract KnotRendererV3Test is Test {
+contract KnotRendererV4Test is Test {
     using Strings for uint256;
 
-    KnotRendererV3 r;
+    KnotRendererV4 r;
 
     function setUp() public {
-        r = new KnotRendererV3();
+        r = new KnotRendererV4();
     }
 
     function parseUint(string memory s) internal pure returns (uint256 n) {
@@ -22,7 +22,7 @@ contract KnotRendererV3Test is Test {
     /// Fixtures from `bun run contracts/fixtures.ts`. TypeScript is the source of truth.
     /// Read one fixture at a time: decoding all sixty at once blows the EVM memory limit.
     function test_SvgMatchesTypeScriptByteForByte() public view {
-        string memory json = vm.readFile("test/fixtures/knots_v3.json");
+        string memory json = vm.readFile("test/fixtures/knots_v4.json");
         uint256 count = 0;
         while (vm.keyExistsJson(json, string.concat("$[", count.toString(), "].epoch"))) count++;
         assertGt(count, 40);
@@ -31,13 +31,16 @@ contract KnotRendererV3Test is Test {
             uint256 epoch = parseUint(vm.parseJsonString(json, string.concat(k, ".epoch")));
             assertEq(keccak256(bytes(r.svg(epoch))), keccak256(bytes(vm.parseJsonString(json, string.concat(k, ".svg")))), k);
             assertEq(r.paletteName(epoch), vm.parseJsonString(json, string.concat(k, ".palette")), k);
-            (KnotRendererV3.Traits memory t,,) = r.cells(epoch);
+            (KnotRendererV4.Traits memory t,,) = r.cells(epoch);
             assertEq(t.grid, vm.parseJsonUint(json, string.concat(k, ".traits.grid")), "grid");
             assertEq(r.weaveName(t.weave), vm.parseJsonString(json, string.concat(k, ".traits.weave")), "weave");
             assertEq(r.symmetryName(t.symmetry), vm.parseJsonString(json, string.concat(k, ".traits.symmetry")), "symmetry");
             assertEq(r.weightName(t.weight), vm.parseJsonString(json, string.concat(k, ".traits.weight")), "weight");
             assertEq(t.caps == 0 ? "butt" : "round", vm.parseJsonString(json, string.concat(k, ".traits.caps")), "caps");
             assertEq(r.accentName(t.accent), vm.parseJsonString(json, string.concat(k, ".traits.accent")), "accent");
+            assertEq(r.styleName(t.style), vm.parseJsonString(json, string.concat(k, ".traits.style")), "style");
+            assertEq(r.groundName(t.ground), vm.parseJsonString(json, string.concat(k, ".traits.ground")), "ground");
+            assertEq(t.inverted, vm.parseJsonBool(json, string.concat(k, ".traits.inverted")), "inverted");
         }
     }
 
@@ -49,7 +52,7 @@ contract KnotRendererV3Test is Test {
     }
 
     function testFuzz_StatesAndMarksAreWellFormed(uint64 epoch) public view {
-        (KnotRendererV3.Traits memory t, uint8[] memory st, bool[] memory marks) = r.cells(epoch);
+        (KnotRendererV4.Traits memory t, uint8[] memory st, bool[] memory marks) = r.cells(epoch);
         assertLt(t.palette, 16);
         assertEq(st.length, t.grid * t.grid);
         assertEq(marks.length, st.length);

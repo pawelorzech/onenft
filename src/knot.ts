@@ -1,14 +1,15 @@
 /**
- * Deterministic Truchet knot generator, version 3. Source of truth for
- * contracts/src/KnotRendererV3.sol.
+ * Deterministic Truchet knot generator, version 4. Source of truth for
+ * contracts/src/KnotRendererV4.sol.
  *
  * All arithmetic is integer and fits in uint64 so the exact same run can be
  * ported to Solidity. No floats, no Math.random. The SVG is a string meant to
  * be returned from `tokenURI` as `data:image/svg+xml;base64,...`, never as a
  * link to a server (see what happened to Blitmap).
  *
- * Version 2 (day 1) lives frozen in `knot_v2.ts`. `knotFor` picks the version
- * a day was, or will be, rendered with.
+ * The first renderer (day 1) lives frozen in `knot_v2.ts`. `knotFor` picks the
+ * version a day was, or will be, rendered with. Version 3 never minted a token
+ * and was replaced in place by version 4 on day 1.
  */
 import { renderKnotV2, PALETTES_V2 } from "./knot_v2.ts";
 
@@ -76,11 +77,17 @@ export const WEAVES = ["arcs", "arcs", "passes", "passes", "passes", "loose", "c
 export const SYMMETRIES = ["none", "none", "none", "none", "mirror", "mirror", "quad", "turn"] as const;
 export const WEIGHTS = ["thin", "regular", "regular", "heavy"] as const;
 export const CAPS = ["butt", "round", "round", "round"] as const;
+/** How the cord is drawn: one line, a split line, dashes, or filled Truchet triangles. */
+export const STYLES = ["cord", "cord", "cord", "cord", "double", "dashed", "solid", "cord"] as const;
+/** What sits under the knot: nothing, a dot per cell, or a hairline lattice. */
+export const GROUNDS = ["flat", "flat", "flat", "flat", "dots", "lattice", "flat", "flat"] as const;
 
 export type Weave = (typeof WEAVES)[number];
 export type Symmetry = (typeof SYMMETRIES)[number];
 export type Weight = (typeof WEIGHTS)[number];
 export type Cap = (typeof CAPS)[number];
+export type Style = (typeof STYLES)[number];
+export type Ground = (typeof GROUNDS)[number];
 
 export type Traits = {
   palette: string;
@@ -91,6 +98,10 @@ export type Traits = {
   caps: Cap;
   /** Accent name, or "none". */
   accent: string;
+  style: Style;
+  ground: Ground;
+  /** Background and cord swapped: dark on light instead of light on dark, or the reverse. */
+  inverted: boolean;
 };
 
 /** One epoch is one calendar day in UTC: unix seconds / 86400. Same on every chain. */
@@ -107,7 +118,7 @@ export type Knot = {
   seed: bigint;
   /** Cell states: the full description of the image. See `cellPath`. */
   cells: number[];
-  /** Renderer version that produced this knot: 1 (the frozen v2 image, day 1) or 3. */
+  /** Renderer version that produced this knot: 1 (the frozen v2 image, day 1) or 4. */
   version: number;
   traits: Traits;
 };
@@ -136,6 +147,16 @@ function cellPath(state: number, x: number, y: number, s: number): string {
     default:
       return `M${x + h} ${y}L${x + h} ${y + s}M${x} ${y + h}L${x + s} ${y + h}`;
   }
+}
+
+/** Style "solid": the classic Truchet tile, a triangle filling half the cell, four orientations. */
+function cellTriangle(state: number, x: number, y: number, s: number): string {
+  if (state === 4) return "";
+  const o = state & 3;
+  if (o === 0) return `M${x} ${y}L${x + s} ${y}L${x} ${y + s}Z`;
+  if (o === 1) return `M${x} ${y}L${x + s} ${y}L${x + s} ${y + s}Z`;
+  if (o === 2) return `M${x + s} ${y}L${x + s} ${y + s}L${x} ${y + s}Z`;
+  return `M${x} ${y}L${x + s} ${y + s}L${x} ${y + s}Z`;
 }
 
 /** Three drawn bits to a cell state, by weave. */
@@ -174,6 +195,9 @@ export function renderKnot(epoch: bigint): Knot {
   r = draw(state, 4); state = r.state;
   let accent = -1;
   if (r.value === 0) { r = draw(state, 2); state = r.state; accent = r.value; }
+  r = draw(state, 3); state = r.state; const style = STYLES[r.value];
+  r = draw(state, 3); state = r.state; const ground = GROUNDS[r.value];
+  r = draw(state, 2); state = r.state; const inverted = r.value === 0;
 
   const half = grid / 2;
   const n = grid * grid;
@@ -213,38 +237,64 @@ export function renderKnot(epoch: bigint): Knot {
     marks[i] = marks[sy * grid + sx];
   }
 
-  let all = "", cord = "", loud = "";
-  for (let i = 0; i < n; i++) {
-    const p = cellPath(cells[i], (i % grid) * CELL, Math.floor(i / grid) * CELL, CELL);
-    all += p;
-    if (marks[i]) loud += p; else cord += p;
-  }
-
   const size = grid * CELL;
+  const bg = inverted ? palette.cord : palette.bg;
+  const ink = inverted ? palette.bg : palette.cord;
   const wCord = weight === "thin" ? 5 : weight === "regular" ? 9 : 15;
   const wShade = weight === "thin" ? 13 : weight === "regular" ? 21 : 30;
+
+  let under = "";
+  if (ground === "dots") {
+    for (let i = 0; i < n; i++) under += `<circle cx="${(i % grid) * CELL + 32}" cy="${Math.floor(i / grid) * CELL + 32}" r="3" fill="${palette.shade}"/>`;
+  } else if (ground === "lattice") {
+    let d = "";
+    for (let i = 1; i < grid; i++) d += `M${i * CELL} 0V${size}M0 ${i * CELL}H${size}`;
+    under = `<path d="${d}" stroke="${palette.shade}" stroke-width="1" fill="none"/>`;
+  }
+
+  let art: string;
+  if (style === "solid") {
+    let fill = "", loud = "";
+    for (let i = 0; i < n; i++) {
+      const p = cellTriangle(cells[i], (i % grid) * CELL, Math.floor(i / grid) * CELL, CELL);
+      if (marks[i]) loud += p; else fill += p;
+    }
+    art = `<path d="${fill}" fill="${ink}"/>` + (loud ? `<path d="${loud}" fill="${ACCENTS[accent].color}"/>` : "");
+  } else {
+    let all = "", cord = "", loud = "";
+    for (let i = 0; i < n; i++) {
+      const p = cellPath(cells[i], (i % grid) * CELL, Math.floor(i / grid) * CELL, CELL);
+      all += p;
+      if (marks[i]) loud += p; else cord += p;
+    }
+    const dash = style === "dashed" ? ` stroke-dasharray="${wCord * 2} ${wCord * 2}"` : "";
+    art =
+      `<g fill="none" stroke-linecap="${caps}">` +
+      `<path d="${all}" stroke="${palette.shade}" stroke-width="${wShade}"/>` +
+      `<path d="${cord}" stroke="${ink}" stroke-width="${wCord}"${dash}/>` +
+      (loud ? `<path d="${loud}" stroke="${ACCENTS[accent].color}" stroke-width="${wCord}"${dash}/>` : "") +
+      (style === "double" ? `<path d="${all}" stroke="${bg}" stroke-width="${Math.max(1, Math.floor(wCord / 3))}"/>` : "") +
+      `</g>`;
+  }
+
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="512" height="512">` +
-    `<rect width="${size}" height="${size}" fill="${palette.bg}"/>` +
-    `<g fill="none" stroke-linecap="${caps}">` +
-    `<path d="${all}" stroke="${palette.shade}" stroke-width="${wShade}"/>` +
-    `<path d="${cord}" stroke="${palette.cord}" stroke-width="${wCord}"/>` +
-    (loud ? `<path d="${loud}" stroke="${ACCENTS[accent].color}" stroke-width="${wCord}"/>` : "") +
-    `</g></svg>`;
+    `<rect width="${size}" height="${size}" fill="${bg}"/>` +
+    under + art + `</svg>`;
 
-  const traits: Traits = { palette: palette.name, grid, weave, symmetry, weight, caps, accent: accent >= 0 ? ACCENTS[accent].name : "none" };
-  return { svg, palette, epoch, seed: epoch, cells, version: 3, traits };
+  const traits: Traits = { palette: palette.name, grid, weave, symmetry, weight, caps, accent: accent >= 0 ? ACCENTS[accent].name : "none", style, ground, inverted };
+  return { svg, palette, epoch, seed: epoch, cells, version: 4, traits };
 }
 
-/** First epoch rendered with v3 on the chain. Day 1 (20701) keeps the first renderer. */
-export const V3_FROM_EPOCH = BigInt(process.env.V3_FROM_EPOCH ?? "20702");
+/** First epoch rendered with v4 on the chain. Day 1 (20701) keeps the first renderer. */
+export const V4_FROM_EPOCH = BigInt(process.env.V4_FROM_EPOCH ?? "20702");
 
-/** The knot as the chain shows it: v2 before the switch, v3 from then on. */
+/** The knot as the chain shows it: the first renderer before the switch, v4 from then on. */
 export function knotFor(epoch: bigint): Knot {
-  if (epoch >= V3_FROM_EPOCH) return renderKnot(epoch);
+  if (epoch >= V4_FROM_EPOCH) return renderKnot(epoch);
   const k = renderKnotV2(epoch);
   // v1 and v2 draw the same image; v2 only reworded the description. Day 1 carries v1.
-  return { ...k, version: 1, traits: { palette: k.palette.name, grid: 8, weave: "passes", symmetry: "none", weight: "regular", caps: "round", accent: "none" } };
+  return { ...k, version: 1, traits: { palette: k.palette.name, grid: 8, weave: "passes", symmetry: "none", weight: "regular", caps: "round", accent: "none", style: "cord", ground: "flat", inverted: false } };
 }
 
 /** The form in which the image leaves the contract. */
