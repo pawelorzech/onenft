@@ -145,3 +145,42 @@ test("OpenSea collection link appears with a contract, never without", () => {
   expect(homePage(t, t.startsAt)).not.toContain("OpenSea");
   expect(homePage(t, t.startsAt, { ...fakeChain(5, {}), chainId: 8453 })).toContain("opensea.io/collection/onenft-click");
 });
+
+import { contrast, mutedFor, MUTED_MIN_CONTRAST, chainDown } from "./site.ts";
+import { PALETTES } from "./knot.ts";
+import { holderPage } from "./pages.ts";
+
+test("muted text reads at 4.5:1 or better on every palette", () => {
+  for (const p of PALETTES) {
+    const m = mutedFor(p.cord, p.bg);
+    expect(contrast(m, p.bg)).toBeGreaterThanOrEqual(MUTED_MIN_CONTRAST);
+    expect(contrast(m, p.bg)).toBeLessThan(contrast(p.cord, p.bg));
+  }
+  const t = dayByNumber(3)!;
+  expect(homePage(t, t.startsAt)).toMatch(/--muted:#[0-9a-f]{6}/);
+});
+
+test("the countdown comes from the clock, never from a cached chain read", () => {
+  const t = dayByNumber(5)!;
+  const stale = fakeChain(5, {}, { secondsLeft: 7 });
+  const h = homePage(t, t.startsAt + 3600n, stale);
+  expect(h).toContain('data-left="82800"');
+  expect(h).not.toContain('data-left="7"');
+});
+
+test("a configured chain that did not answer says so instead of 'opens today'", () => {
+  const t = dayByNumber(5)!;
+  expect(homePage(t, t.startsAt, null, undefined, true)).toContain("The chain did not answer");
+  expect(homePage(t, t.startsAt, null, undefined, true)).not.toContain("opens today");
+  expect(homePage(t, t.startsAt, null)).toContain("opens today");
+  expect(chainDown(t)).toContain("The chain did not answer");
+});
+
+test("a hostile name in the names map cannot break out of the title or the heading", () => {
+  const t = dayByNumber(5)!;
+  const who = "0x2222222222222222222222222222222222222222" as const;
+  const names = new Map([[who, '</title><script>alert(1)</script>"']]);
+  const h = holderPage(who, who, t, fakeChain(5, { 1: who }), names);
+  expect(h).not.toContain("<script>alert(1)</script>");
+  expect(h).toContain("&lt;/title&gt;&lt;script&gt;");
+});
