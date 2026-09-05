@@ -1,6 +1,6 @@
 # Architecture
 
-Last verified: 2026-09-05 (renderer v4)
+Last verified: 2026-09-05 (renderer v4, Yours page)
 
 ## One number in, one knot out
 1. **Clock.** `day = block.timestamp / 86400` (UTC calendar day). The site computes the same number from `Date.now()`; when a contract is configured it trusts `currentDay()` from the chain instead.
@@ -20,8 +20,8 @@ Last verified: 2026-09-05 (renderer v4)
 - `IKnotRenderer.sol` — the interface the token calls.
 
 ## Site (`src`)
-- `server.ts` — Bun.serve, routes, 301s for the old Polish paths, starts autoclaim when `DEPLOYER_KEY` is set.
-- `site.ts` — all HTML/CSS/copy. `homePage` (the fabric), `dayPage`, `howPage`, `beforeStart`, `notFound`, `feedXml`. Colors are CSS variables derived from today's palette by `mix()`. The mint button is plain EIP-1193: `eth_requestAccounts`, `wallet_switchEthereumChain` (adds Base if missing), `eth_sendTransaction` with data `0x4e71d92d` (`claim()`), then polls the receipt. No wallet library in the browser.
+- `server.ts` — Bun.serve, routes, 301s for the old Polish paths, `/yours` (the way in) and `/go?who=` (302 to `/<address or name.eth>`, or back to `/yours`), starts autoclaim when `DEPLOYER_KEY` is set.
+- `site.ts` — all HTML/CSS/copy. `homePage` (the fabric), `dayPage`, `howPage`, `beforeStart`, `notFound`, `feedXml`. `topBar` is the breadcrumb (`onenft.click / knot.onenft.click`) plus the nav. `connectScript` (Connect wallet: `eth_requestAccounts`, then `location.href = /<address>`) and `downloadScript` (fetch `/day/N.svg`, draw on a canvas at the picked size, save PNG or JPEG; SVG downloads as is) are plain inline scripts. Colors are CSS variables derived from today's palette by `mix()`. The mint button is plain EIP-1193: `eth_requestAccounts`, `wallet_switchEthereumChain` (adds Base if missing), `eth_sendTransaction` with data `0x4e71d92d` (`claim()`), then polls the receipt. No wallet library in the browser.
 - `contract.ts` — viem public client; one multicall for day/startEpoch/author/lock/secondsLeft, one multicall of `ownerOf` for days 1..today (`allowFailure: true`, a failure means a gap). 12 s cache.
 - `chain.ts` — day math from unix seconds; `START_EPOCH` default 20701, overridden by the contract at boot.
 - `autoclaim.ts` — every 5 min: if today is an author day and unclaimed, send `claim()` from the deployer.
