@@ -42,7 +42,7 @@ test("palettes are evenly spread, no runs", () => {
 });
 
 test("every trait value shows up within a year", () => {
-  const seen: Record<string, Set<string | number>> = {};
+  const seen: Record<string, Set<string | number | boolean>> = {};
   for (let e = 20702n; e < 20702n + 365n; e++) {
     for (const [k, v] of Object.entries(renderKnot(e).traits)) (seen[k] ??= new Set()).add(v);
   }
