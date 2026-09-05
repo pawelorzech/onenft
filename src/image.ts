@@ -23,7 +23,7 @@ export function cardSvg(day: Day): string {
 <rect width="1200" height="630" fill="${bg}"/>
 <svg x="30" y="30" width="570" height="570" viewBox="0 0 512 512">${inner}</svg>
 <rect x="30" y="30" width="570" height="570" fill="none" stroke="${muted}" stroke-width="2"/>
-<text x="660" y="250" font-family="Syne" font-weight="800" font-size="150" fill="${fg}">Day ${day.n}</text>
+<text x="656" y="235" font-family="Syne" font-weight="800" font-size="104" fill="${fg}">Day ${day.n}</text>
 <text x="662" y="330" font-family="Newsreader" font-size="38" fill="${fg}">${esc(dateOf(day.epoch))}, UTC</text>
 <text x="662" y="385" font-family="Newsreader" font-size="34" fill="${muted}">palette ${k.palette.name}</text>
 <text x="662" y="560" font-family="Syne" font-weight="800" font-size="44" fill="${fg}">onenft.click</text>
