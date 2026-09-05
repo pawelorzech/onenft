@@ -50,7 +50,7 @@ contract OneNFT is ERC721, Ownable {
         // would otherwise skip days silently, and startEpoch is immutable.
         uint256 now_ = block.timestamp / EPOCH_SECONDS;
         if (startEpoch_ < now_ || startEpoch_ > now_ + 7) revert BadStartEpoch(startEpoch_, now_);
-        _checkRenderer(renderer_);
+        _checkRenderer(renderer_, startEpoch_);
         startEpoch = startEpoch_;
         author = author_;
         renderer = renderer_;
@@ -58,11 +58,12 @@ contract OneNFT is ERC721, Ownable {
     }
 
     /// @dev A renderer address is pinned per token forever, so it must be a live
-    /// contract that answers svg() before we let anyone claim against it.
-    function _checkRenderer(address renderer_) internal view {
+    /// contract that answers tokenURI() before we let anyone claim against it.
+    /// 96 bytes is the ABI floor for a non-empty string return.
+    function _checkRenderer(address renderer_, uint256 epoch) internal view {
         if (renderer_.code.length == 0) revert BadRenderer(renderer_);
-        (bool ok, bytes memory out) = renderer_.staticcall(abi.encodeCall(IKnotRenderer.svg, (0)));
-        if (!ok || out.length < 64) revert BadRenderer(renderer_);
+        (bool ok, bytes memory out) = renderer_.staticcall(abi.encodeCall(IKnotRenderer.tokenURI, (1, epoch)));
+        if (!ok || out.length < 96) revert BadRenderer(renderer_);
     }
 
     // ---- zegar ----
@@ -117,7 +118,7 @@ contract OneNFT is ERC721, Ownable {
 
     function setRenderer(address renderer_) external onlyOwner {
         if (rendererLocked) revert RendererIsLocked();
-        _checkRenderer(renderer_);
+        _checkRenderer(renderer_, currentEpoch());
         renderer = renderer_;
         emit RendererSet(renderer_);
     }

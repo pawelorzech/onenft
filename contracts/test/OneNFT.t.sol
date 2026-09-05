@@ -7,9 +7,15 @@ import {KnotRenderer} from "../src/KnotRenderer.sol";
 import {IKnotRenderer} from "../src/IKnotRenderer.sol";
 
 contract StubRenderer is IKnotRenderer {
-    function svg(uint256) external pure returns (string memory) { return "stub-svg-long-enough-to-pass-the-sanity-check-in-the-token-contract-0123456789"; }
+    function svg(uint256) external pure returns (string memory) { return "stub"; }
     function paletteName(uint256) external pure returns (string memory) { return "stub"; }
     function tokenURI(uint256, uint256) external pure returns (string memory) { return "stub-uri"; }
+}
+
+contract BrokenRenderer is IKnotRenderer {
+    function svg(uint256) external pure returns (string memory) { return "looks fine"; }
+    function paletteName(uint256) external pure returns (string memory) { return "x"; }
+    function tokenURI(uint256, uint256) external pure returns (string memory) { revert("nope"); }
 }
 
 contract OneNFTTest is Test {
@@ -40,6 +46,10 @@ contract OneNFTTest is Test {
         vm.prank(author);
         vm.expectRevert(abi.encodeWithSelector(OneNFT.BadRenderer.selector, address(0xdead)));
         nft.setRenderer(address(0xdead));
+        address broken = address(new BrokenRenderer());
+        vm.prank(author);
+        vm.expectRevert(abi.encodeWithSelector(OneNFT.BadRenderer.selector, broken));
+        nft.setRenderer(broken);
         vm.expectRevert(abi.encodeWithSelector(OneNFT.BadRenderer.selector, address(0)));
         new OneNFT("x", "X", START, author, address(0));
     }
