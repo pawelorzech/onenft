@@ -7,7 +7,7 @@ One Truchet knot a day, computed on-chain from the clock of the Base chain. Live
 - Every UTC day the contract can mint exactly one ERC-721 token, `tokenId = day number` (day 1 = 2026-09-05). A day nobody claims stays empty forever; the gaps are part of the work.
 - The image is generated fully on-chain by a separate renderer contract from the day number alone. The TypeScript in `src/knot.ts` and the Solidity in `contracts/src/KnotRendererV3.sol` produce the same SVG byte for byte; a Foundry test enforces that against fixtures generated from TS. **TypeScript is the source of truth.** Renderer v2 (`src/knot_v2.ts`, `KnotRenderer.sol`) is frozen and renders day 1 only; `knotFor(epoch)` picks the version, and every page and image must go through it, never `renderKnot` directly (except previews of future days).
 - Seven traits per day (palette, grid, weave, symmetry, weight, caps, accent), all in the token metadata and on `/traits`. Everything is CC0, stated on `/assets`.
-- The website has no palette of its own. It takes colors from today's palette, so it looks different in each of the eight epochs. There is no light/dark toggle and there must not be one.
+- The website has no palette of its own. It takes colors from today's palette, so it looks different in each of the sixteen epochs. There is no light/dark toggle and there must not be one.
 - Every tenth day up to 1000 goes to the author. The site's autoclaim loop claims those from the deployer wallet.
 - Not an investment, no price, no royalties (decided; a new contract with ERC-2981 was offered and declined). Owner's cut is the author days.
 
