@@ -70,7 +70,7 @@ test("z kontraktem: wolna doba ma przycisk mintu i skrypt", () => {
   expect(h).toContain("0x4e71d92d");
   expect(h).toContain("wallet_switchEthereumChain");
   expect(h).toContain("still nobody's");
-  expect(h).not.toContain("can't claim on-chain yet");
+  expect(h).not.toContain("Claiming on-chain opens today");
 });
 
 test("z kontraktem: dziury i właściciele w paskach", () => {

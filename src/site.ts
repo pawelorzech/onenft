@@ -201,7 +201,7 @@ export function homePage(today: Day, now: bigint, chain: ChainState | null = nul
   let todayState = "today";
   let cta = `<a class="cta syne" href="/day/${today.n}.svg" download="onenft-day-${today.n}.svg">Download today's knot</a>
 <a class="cta ghost syne" href="/how">How it works</a>
-<p class="small">You can't claim on-chain yet. That opens after day 90, so there is something worth claiming.</p>`;
+<p class="small">Claiming on-chain opens today.</p>`;
   if (chain) {
     const badge = chain.chainId === 8453 ? "" : ` <span class="testnet">${chainName(chain.chainId)} testnet</span>`;
     if (todayOwner) {
