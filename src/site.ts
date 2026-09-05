@@ -22,6 +22,9 @@ export function shortAddr(a: string): string {
 function label(a: string, names: Names): string {
   return names.get(a.toLowerCase()) ?? shortAddr(a);
 }
+function openseaCollection(chain: ChainState): string {
+  return chain.chainId === 8453 ? "https://opensea.io/collection/onenft-click" : `https://testnets.opensea.io/assets/base_sepolia/${chain.address}`;
+}
 function opensea(chain: ChainState, id: number): string {
   return chain.chainId === 8453 ? `https://opensea.io/assets/base/${chain.address}/${id}` : `https://testnets.opensea.io/assets/base_sepolia/${chain.address}/${id}`;
 }
@@ -86,6 +89,7 @@ button.cta[disabled]{opacity:.55;cursor:default}
 .tiles{display:flex;gap:8px;flex-shrink:0}
 .tiles svg{width:56px;height:56px;background:var(--bg);box-shadow:0 0 0 1px var(--line)}
 footer{padding:26px 34px;display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;color:var(--muted);font-size:16px}
+footer nav{display:flex;gap:20px;flex-wrap:wrap}
 .prose{max-width:640px;padding:38px 34px;display:flex;flex-direction:column;gap:22px}
 .prose h2{font-weight:800;font-size:34px;line-height:1;letter-spacing:-.03em;margin:22px 0 0}
 .prose p{margin:0}
@@ -231,6 +235,7 @@ export function homePage(today: Day, now: bigint, chain: ChainState | null = nul
       todayState = isAuthor(chain, todayOwner) ? "today, the author's" : `today, taken by ${label(todayOwner, names)}`;
       cta = `<button class="cta syne" disabled>Day ${today.n} is taken</button>
 <a class="cta ghost syne" href="/how">How it works</a>
+<a class="small" href="${openseaCollection(chain)}">Collection on OpenSea</a>
 <p class="small">The next one ties tomorrow. ${fmtLeft(left)} left.${badge}</p>`;
     } else if (authorDay) {
       todayState = "today, the author's day";
@@ -242,6 +247,7 @@ export function homePage(today: Day, now: bigint, chain: ChainState | null = nul
       cta = `<button class="cta syne" id="mint">Claim today's knot</button>
 <p class="msg" id="msg" aria-live="polite"></p>
 <a class="cta ghost syne" href="/how">How it works</a>
+<a class="small" href="${openseaCollection(chain)}">Collection on OpenSea</a>
 <p class="small">Free. You pay gas, nothing else. ${fmtLeft(left)} left.${badge}</p>`;
     }
   }
@@ -272,7 +278,7 @@ ${today.n === 1 ? `<p class="small">This is day one. Tomorrow a second row appea
 <section class="format">${TILES}<p style="max-width:520px;margin:0">The whole knot is these four shapes, two bits per cell. The format is public. You can build it yourself. <a href="/how">See how the machine works</a></p></section>
 ${rows.join("\n")}
 ${older}
-<footer><span>This is not an investment and never will be.</span></footer>
+<footer><span>This is not an investment and never will be.</span><nav>${chain ? `<a href="${openseaCollection(chain)}">OpenSea</a><a href="${explorer(chain.chainId)}/address/${chain.address}">Basescan</a>` : ""}<a href="/feed.xml">RSS</a><a href="${REPO}">Code</a></nav></footer>
 </main>
 </div>
 ${chain && !todayOwner && !authorDay ? mintScript(chain) : ""}

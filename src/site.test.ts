@@ -136,3 +136,10 @@ test("every page carries og:image and the feed link", () => {
   expect(homePage(t, t.startsAt)).toContain('og:image" content="https://onenft.click/day/2.png"');
   expect(howPage(t)).toContain('type="application/rss+xml"');
 });
+
+test("OpenSea collection link appears with a contract, never without", () => {
+  const t = dayByNumber(5)!;
+  expect(homePage(t, t.startsAt, fakeChain(5, {}))).toContain("Collection on OpenSea");
+  expect(homePage(t, t.startsAt)).not.toContain("OpenSea");
+  expect(homePage(t, t.startsAt, { ...fakeChain(5, {}), chainId: 8453 })).toContain("opensea.io/collection/onenft-click");
+});
