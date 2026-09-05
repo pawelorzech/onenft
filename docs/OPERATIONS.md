@@ -15,10 +15,10 @@ The contract mints on demand. The site reads the chain every 12 s. The autoclaim
 `contracts/deploy.sh sepolia|mainnet` reads the deployer secret from Keychain and the author address from `~/.config/onenft/author.json`, deploys renderer and token with `START_EPOCH` = today unless overridden, verifies on Sourcify, and writes `~/.config/onenft/deploy-<net>.json`. Then `contracts/wire.sh <net>` pushes the addresses into the hosting env and redeploys the site. The constructor rejects a `startEpoch` in the past or more than 7 days ahead.
 
 ## Swap the renderer (affects future days only)
-1. Change `src/knot.ts` and `contracts/src/KnotRenderer.sol` together. Run `bun run contracts/fixtures.ts`, then `forge test`; the byte-equality test must pass.
-2. Deploy the renderer alone with `forge create src/KnotRenderer.sol:KnotRenderer --broadcast` against the target RPC using the deployer secret, and read the address from the "Deployed to:" line. Verify with `forge verify-contract <addr> src/KnotRenderer.sol:KnotRenderer --chain base --verifier sourcify`.
-3. From the author wallet (secret in 1Password; it needs a little ETH): `cast send <OneNFT> "setRenderer(address)" <addr>`. The contract probes `tokenURI(1, currentEpoch)` and rejects a renderer that does not answer.
-4. Record the new address as `KnotRenderer_vN` in `~/.config/onenft/deploy-<net>.json` and in `docs/DEPLOYMENTS.md`.
+1. Freeze the old generator as `src/knot_vN.ts` (the site keeps rendering old days with it through `knotFor`), then change `src/knot.ts` and the new `contracts/src/KnotRendererVN.sol` together. Run `bun run contracts/fixtures.ts`, then `forge test`; the byte-equality test must pass.
+2. `contracts/deploy-renderer.sh sepolia|mainnet` deploys the renderer alone from the deployer wallet, verifies on Sourcify and writes `KnotRenderer_v3` into `~/.config/onenft/deploy-<net>.json`. (Edit the script for the next version.)
+3. `contracts/set-renderer.sh sepolia|mainnet` reads the author secret from 1Password for one transaction and calls `setRenderer`. The contract probes `tokenURI(1, currentEpoch)` and rejects a renderer that does not answer. The author wallet needs a little ETH.
+4. Set `V3_FROM_EPOCH` in the site env if the switch did not land on the planned day, and record the address in `docs/DEPLOYMENTS.md`.
 
 ## Freeze the renderer for good
 `cast send <OneNFT> "lockRenderer()"` from the author wallet. One-way. Do it once the format is final.

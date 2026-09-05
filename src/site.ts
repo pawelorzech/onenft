@@ -1,41 +1,41 @@
 /**
  * Page HTML. One rule governs color: the page has no palette of its own.
  * It takes today's palette from the renderer, so it looks different in each
- * of the eight epochs. There is no light or dark mode.
+ * of the sixteen epochs. There is no light or dark mode.
  *
  * Copy rules: plain words, active voice, no adverbs, no em dashes, nothing
  * a reader could misunderstand. Facts (numbers, addresses, paths) stay exact.
  */
-import { renderKnot, type Palette, PALETTES } from "./knot.ts";
+import { knotFor, type Palette, type Knot, type Traits, PALETTES } from "./knot.ts";
 import { dayByNumber, secondsLeft, dateOf, type Day } from "./chain.ts";
 import type { ChainState } from "./contract.ts";
 
 export type Names = Map<string, string>;
-const NO_NAMES: Names = new Map();
+export const NO_NAMES: Names = new Map();
 
 export const SITE = "onenft.click";
-const REPO = "https://github.com/pawelorzech/onenft";
+export const REPO = "https://github.com/pawelorzech/onenft";
 
 export function shortAddr(a: string): string {
   return `${a.slice(0, 6)}…${a.slice(-4)}`;
 }
-function label(a: string, names: Names): string {
+export function label(a: string, names: Names): string {
   return names.get(a.toLowerCase()) ?? shortAddr(a);
 }
-function openseaCollection(chain: ChainState): string {
+export function openseaCollection(chain: ChainState): string {
   return chain.chainId === 8453 ? "https://opensea.io/collection/onenft-click" : `https://testnets.opensea.io/assets/base_sepolia/${chain.address}`;
 }
-function opensea(chain: ChainState, id: number): string {
+export function opensea(chain: ChainState, id: number): string {
   return chain.chainId === 8453 ? `https://opensea.io/assets/base/${chain.address}/${id}` : `https://testnets.opensea.io/assets/base_sepolia/${chain.address}/${id}`;
 }
-function explorer(chainId: number): string {
+export function explorer(chainId: number): string {
   return chainId === 8453 ? "https://basescan.org" : "https://sepolia.basescan.org";
 }
-function chainName(chainId: number): string {
+export function chainName(chainId: number): string {
   return chainId === 8453 ? "Base" : "Base Sepolia";
 }
-const num = (n: number | bigint) => n.toLocaleString("en-US");
-const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
+export const num = (n: number | bigint) => n.toLocaleString("en-US");
+export const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
 
 function hex(c: string): [number, number, number] {
   return [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
@@ -88,7 +88,8 @@ button.cta[disabled]{opacity:.55;cursor:default}
 .row .n{font-weight:700;font-size:23px}
 .format{padding:30px 34px;border-bottom:1px solid var(--line);background:var(--soft);display:flex;gap:26px;align-items:center}
 .tiles{display:flex;gap:8px;flex-shrink:0}
-.tiles svg{width:56px;height:56px;background:var(--bg);box-shadow:0 0 0 1px var(--line)}
+.tiles{flex-wrap:wrap}
+.tiles svg{width:48px;height:48px;background:var(--bg);box-shadow:0 0 0 1px var(--line)}
 footer{padding:26px 34px;display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;color:var(--muted);font-size:16px}
 footer nav{display:flex;gap:20px;flex-wrap:wrap}
 .prose{max-width:640px;padding:38px 34px;display:flex;flex-direction:column;gap:22px}
@@ -100,6 +101,34 @@ footer nav{display:flex;gap:20px;flex-wrap:wrap}
 .single .knot{width:100%;max-width:640px;aspect-ratio:1;box-shadow:0 0 0 1px var(--line)}
 .single .knot svg{display:block;width:100%;height:100%}
 .nav{display:flex;gap:22px;flex-wrap:wrap}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:20px;flex-wrap:wrap}
+.top nav{display:flex;gap:18px;flex-wrap:wrap;font-size:16px;color:var(--muted)}
+.wide{padding:38px 34px;display:flex;flex-direction:column;gap:28px;max-width:1180px}
+.wide h2{font-weight:800;font-size:34px;line-height:1;letter-spacing:-.03em;margin:0}
+.wide h3{font-weight:700;font-size:20px;margin:0}
+.wide p{margin:0}
+.cal{max-width:900px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.cal .dow{background:var(--bg);padding:6px 8px;font-size:13px;color:var(--muted)}
+.cal a,.cal .blank,.cal .later{background:var(--bg);display:block;aspect-ratio:1;position:relative;text-decoration:none;overflow:hidden}
+.cal a img{width:100%;height:100%;display:block}
+.cal a span,.cal .later span{position:absolute;left:6px;top:4px;font-size:13px;font-weight:700;padding:0 4px;background:var(--bg)}
+.cal a.hole{background:repeating-linear-gradient(135deg,var(--bg) 0 8px,var(--soft) 8px 16px)}
+.cal a.hole span{background:transparent;color:var(--muted)}
+.cal .later{color:var(--muted)}
+.cal a:hover{outline:2px solid var(--fg);outline-offset:-2px;z-index:1}
+.strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px}
+.strip a{text-decoration:none}
+.strip img,.strip svg{width:100%;aspect-ratio:1;display:block;box-shadow:0 0 0 1px var(--line)}
+.strip .cap{font-size:14px;color:var(--muted);margin-top:6px}
+table.tr{border-collapse:collapse;width:100%;max-width:640px;font-size:16px}
+table.tr th,table.tr td{text-align:left;padding:8px 10px 8px 0;border-bottom:1px solid var(--line);vertical-align:top}
+table.tr th{font-weight:400;color:var(--muted);font-size:14px}
+table.tr td.n{text-align:right;font-family:"Syne",system-ui,sans-serif;font-weight:700;white-space:nowrap}
+.traits{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;font-size:16px;max-width:420px}
+.traits dt{color:var(--muted);margin:0}
+.traits dd{margin:0}
+.share{display:flex;gap:16px;flex-wrap:wrap;font-size:15px}
+pre.snip{margin:0;padding:14px;background:var(--soft);overflow-x:auto;font-size:13px;line-height:1.5;font-family:ui-monospace,Menlo,monospace}
 @media (max-width:1180px){
  .today{grid-template-columns:1fr}
  .today .knot{max-width:460px}
@@ -116,7 +145,8 @@ footer nav{display:flex;gap:20px;flex-wrap:wrap}
  .row{height:auto;min-height:64px;padding:14px 20px;gap:16px}
  .row img,.row .ph{width:56px;height:56px}
  .format{flex-direction:column;align-items:flex-start;padding:20px}
- footer,.prose,.single{padding:20px}
+ footer,.prose,.single,.wide{padding:20px}
+ .cal a span{font-size:11px}
 }
 @media (prefers-reduced-motion:no-preference){.row{transition:background .15s}}
 `;
@@ -124,7 +154,7 @@ footer nav{display:flex;gap:20px;flex-wrap:wrap}
 
 const FONTS = `<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Newsreader:opsz,wght@6..72,400&display=swap">`;
 
-function layout(title: string, p: Palette, body: string, image = "/today.png", path = "/"): string {
+export function layout(title: string, p: Palette, body: string, image = "/today.png", path = "/"): string {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -154,13 +184,15 @@ const TILES = `<div class="tiles" aria-hidden="true">
 <svg viewBox="0 0 64 64"><path d="M32 0A32 32 0 0 1 64 32M0 32A32 32 0 0 0 32 64" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"/></svg>
 <svg viewBox="0 0 64 64"><path d="M32 0L32 64" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"/></svg>
 <svg viewBox="0 0 64 64"><path d="M0 32L64 32" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"/></svg>
+<svg viewBox="0 0 64 64"></svg>
+<svg viewBox="0 0 64 64"><path d="M32 0L32 64M0 32L64 32" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"/></svg>
 </div>`;
 
-function fmtLeft(s: number): string {
+export function fmtLeft(s: number): string {
   const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
   return h === 0 ? `${m} min` : `${h} h ${m} min`;
 }
-function stripSize(svg: string): string {
+export function stripSize(svg: string): string {
   return svg.replace(/ width="\d+" height="\d+"/, "");
 }
 const COUNTDOWN = `<script>
@@ -172,7 +204,36 @@ const YOURS = `<script>
 (function(){var eth=window.ethereum;if(!eth||!eth.request)return;eth.request({method:'eth_accounts'}).then(function(accs){if(!accs||!accs.length)return;var mine={};accs.forEach(function(a){mine[a.toLowerCase()]=1});var n=0;document.querySelectorAll('[data-owner]').forEach(function(el){if(mine[el.getAttribute('data-owner')]){el.classList.add('yours');n++}});var box=document.getElementById('yours');if(box&&n){box.hidden=false;box.querySelector('.syne').textContent=n}}).catch(function(){})})();
 </script>`;
 
-function isAuthor(chain: ChainState, a?: string): boolean {
+/** The seven traits as a definition list. Day 1 was rendered with v2 and reads as plain 8 by 8. */
+export function traitList(k: Knot): string {
+  const t = k.traits;
+  const rows: [string, string][] = [
+    ["palette", `<a href="/traits#palette">${t.palette}</a>`],
+    ["grid", `<a href="/traits#grid">${t.grid} by ${t.grid}</a>`],
+    ["weave", `<a href="/traits#weave">${t.weave}</a>`],
+    ["symmetry", `<a href="/traits#symmetry">${t.symmetry}</a>`],
+    ["weight", `<a href="/traits#weight">${t.weight}</a>`],
+    ["caps", `<a href="/traits#caps">${t.caps}</a>`],
+    ["accent", `<a href="/traits#accent">${t.accent}</a>`],
+    ["renderer", `v${k.version}`],
+  ];
+  return `<dl class="traits">${rows.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join("")}</dl>`;
+}
+
+/** Top bar for the inner pages: the mark and the site nav. */
+export function topBar(): string {
+  return `<div class="top"><a class="mark syne" href="/">${SITE}</a><nav><a href="/explore">Explore</a><a href="/traits">Traits</a><a href="/assets">Assets</a><a href="/how">How it works</a></nav></div>`;
+}
+
+/** "4 min after midnight UTC" for a claim block time. */
+export function afterMidnight(at: number, dayStart: bigint): string {
+  const s = at - Number(dayStart);
+  if (s < 60) return `${s} s after midnight UTC`;
+  if (s < 3600) return `${Math.floor(s / 60)} min after midnight UTC`;
+  return `${Math.floor(s / 3600)} h ${Math.floor((s % 3600) / 60)} min after midnight UTC`;
+}
+
+export function isAuthor(chain: ChainState, a?: string): boolean {
   return Boolean(a) && a!.toLowerCase() === chain.author.toLowerCase();
 }
 
@@ -210,7 +271,7 @@ btn.addEventListener('click',async function(){
 }
 
 export function homePage(today: Day, now: bigint, chain: ChainState | null = null, names: Names = NO_NAMES): string {
-  const k = renderKnot(today.epoch);
+  const k = knotFor(today.epoch);
   const left = chain ? chain.secondsLeft : secondsLeft(now);
 
   const rows: string[] = [];
@@ -221,7 +282,7 @@ export function homePage(today: Day, now: bigint, chain: ChainState | null = nul
       continue;
     }
     const owner = chain?.owners.get(n);
-    const who = owner ? (isAuthor(chain!, owner) ? "the author's" : `taken by ${label(owner, names)}`) : `palette ${renderKnot(d.epoch).palette.name}`;
+    const who = owner ? (isAuthor(chain!, owner) ? "the author's" : `taken by ${label(owner, names)}`) : `palette ${knotFor(d.epoch).palette.name}`;
     rows.push(`<a class="row" href="/day/${n}"${owner ? ` data-owner="${owner.toLowerCase()}"` : ""}><img src="/day/${n}.svg" alt="" loading="lazy" width="92" height="92"><span><span class="n syne">${n}</span><br><span class="small">${who}</span></span></a>`);
   }
   const older = today.n - 61 > 0 ? `<a class="row" href="/day/${today.n - 61}"><span class="small">earlier days</span></a>` : "";
@@ -269,6 +330,7 @@ ${chain ? `<div style="display:flex;gap:34px"><div><div class="syne" style="font
 <div style="display:flex;flex-direction:column;gap:12px">
 ${cta}
 </div>
+<nav class="nav small"><a href="/explore">Explore</a><a href="/traits">Traits</a><a href="/assets">Assets</a><a href="/feed.xml">RSS</a></nav>
 </div></aside>
 <main>
 <section class="today">
@@ -277,14 +339,15 @@ ${cta}
 <div${todayOwner ? ` data-owner="${todayOwner.toLowerCase()}"` : ""}><div class="num syne">${today.n}</div><div class="lead" style="margin-top:8px;font-size:19px">${todayState}</div></div>
 <p class="lead" style="max-width:330px">The contract tied this knot at midnight UTC, ${dateOf(today.epoch)}. It ties the next one in <span data-left="${left}">${fmtLeft(left)}</span>.</p>
 <hr>
-<p class="small" style="line-height:1.7">palette ${k.palette.name}, ${paletteIndex(k.palette)} of ${PALETTES.length}<br>${num(k.svg.length)} bytes of SVG<br>day number ${today.epoch} since 1970${chain ? `<br>contract <a href="${explorer(chain.chainId)}/address/${chain.address}">${shortAddr(chain.address)}</a>, renderer ${chain.rendererLocked ? "frozen for good" : "can still change for future days"}` : ""}</p>
+${traitList(k)}
+<p class="small" style="line-height:1.7">${num(k.svg.length)} bytes of SVG<br>day number ${today.epoch} since 1970${chain ? `<br>contract <a href="${explorer(chain.chainId)}/address/${chain.address}">${shortAddr(chain.address)}</a>, renderer ${chain.rendererLocked ? "frozen for good" : "can still change for future days"}` : ""}</p>
 ${today.n === 1 ? `<p class="small">This is day one. Tomorrow a second row appears under it, and so on, with no end.</p>` : ""}
 </div>
 </section>
-<section class="format">${TILES}<p style="max-width:520px;margin:0">The whole knot is these four shapes, two bits per cell. The format is public. You can build it yourself. <a href="/how">See how the machine works</a></p></section>
+<section class="format">${TILES}<p style="max-width:520px;margin:0">The whole knot is these shapes on a grid, plus seven traits drawn from the day number. The format is public and CC0. You can build it yourself. <a href="/how">See how the machine works</a></p></section>
 ${rows.join("\n")}
 ${older}
-<footer><span>This is not an investment and never will be.</span><nav>${chain ? `<a href="${openseaCollection(chain)}">OpenSea</a><a href="${explorer(chain.chainId)}/address/${chain.address}">Basescan</a>` : ""}<a href="/feed.xml">RSS</a><a href="${REPO}">Code</a></nav></footer>
+<footer><span>This is not an investment and never will be. Images and code are CC0.</span><nav><a href="/explore">Explore</a><a href="/traits">Traits</a><a href="/assets">Assets</a>${chain ? `<a href="${openseaCollection(chain)}">OpenSea</a><a href="${explorer(chain.chainId)}/address/${chain.address}">Basescan</a>` : ""}<a href="/feed.xml">RSS</a><a href="/calendar.ics">Calendar</a><a href="${REPO}">Code</a></nav></footer>
 </main>
 </div>
 ${chain && !todayOwner && !authorDay ? mintScript(chain) : ""}
@@ -294,40 +357,57 @@ ${COUNTDOWN}`;
 }
 
 export function dayPage(d: Day, today: Day, chain: ChainState | null = null, names: Names = NO_NAMES): string {
-  const k = renderKnot(d.epoch);
+  const k = knotFor(d.epoch);
   const prev = d.n > 1 ? `<a href="/day/${d.n - 1}">previous</a>` : "";
   const next = d.n < today.n ? `<a href="/day/${d.n + 1}">next</a>` : "";
   let state = d.n === today.n ? "today" : `day ${d.n} of ${today.n}`;
+  let came = "";
   if (chain) {
     const o = chain.owners.get(d.n);
-    if (o) state += isAuthor(chain, o) ? ", the author's" : `, taken by <a href="${explorer(chain.chainId)}/address/${o}">${label(o, names)}</a>`;
+    if (o) state += isAuthor(chain, o) ? ", the author's" : `, taken by <a href="/${label(o, names)}">${label(o, names)}</a>`;
     else state += d.n < today.n ? ", nobody came" : ", still nobody's";
+    const c = chain.claims.get(d.n);
+    if (c) came = `<p class="small">Claimed ${afterMidnight(c.at, d.startsAt)}, <a href="${explorer(chain.chainId)}/tx/${c.tx}">transaction</a>.</p>`;
   }
+  const url = `https://${SITE}/day/${d.n}`;
+  const text = encodeURIComponent(`Day ${d.n} of ${SITE}`);
+  const share = `<nav class="share"><a href="https://warpcast.com/~/compose?text=${text}&embeds[]=${encodeURIComponent(url)}">Share on Farcaster</a><a href="https://x.com/intent/post?text=${text}&url=${encodeURIComponent(url)}">Share on X</a><a href="/api/day/${d.n}">JSON</a></nav>`;
+  const snippet = esc(`<a href="${url}"><img src="https://${SITE}/day/${d.n}.svg" width="256" height="256" alt="Day ${d.n} of onenft.click"></a>`);
   const body = `<main class="single">
-<a class="mark syne" href="/">${SITE}</a>
+${topBar()}
 <div class="knot">${stripSize(k.svg)}</div>
 <div><div class="num syne">${d.n}</div><p class="lead">${state}</p></div>
-<p class="small" style="line-height:1.7">palette ${k.palette.name}, ${paletteIndex(k.palette)} of ${PALETTES.length}<br>${dateOf(d.epoch)}, UTC<br>day number ${d.epoch} since 1970<br>${num(k.svg.length)} bytes of SVG</p>
-<nav class="nav">${prev}${next}<a href="/">whole fabric</a></nav>
+${came}
+${traitList(k)}
+<p class="small" style="line-height:1.7">${dateOf(d.epoch)}, UTC<br>day number ${d.epoch} since 1970<br>${num(k.svg.length)} bytes of SVG${chain ? `<br>token ${d.n} of <a href="${explorer(chain.chainId)}/address/${chain.address}">${shortAddr(chain.address)}</a> on ${chainName(chain.chainId)}` : ""}</p>
+<nav class="nav">${prev}${next}<a href="/">whole fabric</a><a href="/explore">calendar</a></nav>
 <nav class="nav small">${chain && chain.owners.has(d.n) ? `<a href="${opensea(chain, d.n)}">OpenSea</a><a href="${explorer(chain.chainId)}/nft/${chain.address}/${d.n}">Basescan</a>` : ""}<a href="/day/${d.n}.svg" download="onenft-day-${d.n}.svg">SVG</a><a href="/day/${d.n}.png">PNG</a></nav>
+${share}
+<details><summary class="small">Put this knot on your page</summary><pre class="snip">${snippet}</pre><p class="small">CC0. No credit needed.</p></details>
 </main>`;
   return layout(`Day ${d.n} | ${SITE}`, k.palette, body, `/day/${d.n}.png`, `/day/${d.n}`);
 }
 
+export function esc(t: string): string {
+  return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 export function howPage(today: Day): string {
-  const k = renderKnot(today.epoch);
+  const k = knotFor(today.epoch);
   const body = `<main class="prose">
-<a class="mark syne" href="/">${SITE}</a>
+${topBar()}
 <h2 class="syne">From one number to one knot</h2>
 <p>The only input is the clock of the Base chain: the timestamp of the current block. Nobody sets it and nobody can roll it back.</p>
 <p><strong>A day</strong> is that timestamp divided by 86,400, rounded down. That gives one calendar day in UTC, with the boundary at midnight UTC. The number itself counts days since 1 January 1970; day one of this project is day number 20701.</p>
-<p><strong>The seed</strong> is that day number run through splitmix64. From it you pull a stream of bits: eight bits pick the palette, then two bits for each of the 64 cells in an 8 by 8 grid.</p>
+<p><strong>The seed</strong> is that day number run through splitmix64. From it you pull a stream of bits. The first draws set seven traits; the rest fill the grid, one cell at a time.</p>
+<p><strong>The traits:</strong> a palette out of sixteen; a grid of 6, 8, 10 or 12 cells a side; a weave, which is the set of shapes a cell can take; a symmetry, which is none, a mirror, a fourfold medallion or a quarter turn; a weight for the cord; round or cut ends; and, one day in sixteen, an accent color on a few cells.</p>
 ${TILES}
-<p><strong>Four cell states:</strong> two quarter-arcs in one of two orientations, a vertical pass, a horizontal pass. Classic Truchet has arcs and nothing else. The passes break it into longer runs.</p>
-<p><strong>The drawing</strong> is one SVG path drawn twice: a thicker shadow and a thinner cord. The whole file is about five kilobytes. The contract returns it as a <code>data:</code> URI, with no server in between.</p>
-<p><strong>The palette</strong> is one of eight: ink, copper, moss, ash, ultramarine, rust, salt, tar. This page takes its colors from today's palette, so it looks different in each of the eight epochs. Today: ${k.palette.name}.</p>
+<p><strong>Six cell states:</strong> two quarter-arcs in one of two orientations, a vertical pass, a horizontal pass, an empty cell (weave "loose") and a crossing (weave "cross"). Classic Truchet has arcs and nothing else. The passes break it into longer runs.</p>
+<p><strong>The drawing</strong> is one SVG path drawn twice: a thicker shadow and a thinner cord, plus a third path in the accent color when the day has one. The whole file is a few kilobytes. The contract returns it as a <code>data:</code> URI, with no server in between.</p>
+<p><strong>The palette</strong> is one of sixteen. This page takes its colors from today's palette, so it looks different in each epoch. Today: ${k.palette.name}. <a href="/traits">See all traits and how often they come up.</a></p>
+<p><strong>Day 1</strong> was tied by renderer v2: eight palettes, always 8 by 8, arcs and passes, no symmetry. The renderer address is stored on each token when it is claimed, so day 1 never changes. Every day from day 2 uses v3, described here.</p>
 <h2 class="syne">Build it yourself</h2>
-<p>The same day number gives the same knot every time, ten years from now and with this page switched off. The generator is in <a href="${REPO}">the repository</a>. The full random stream is below, so you can port it to any language.</p>
+<p>The same day number gives the same knot every time, ten years from now and with this page switched off. The generator is in <a href="${REPO}">the repository</a>, in TypeScript and in Solidity, with a test that keeps the two byte for byte equal. The random stream is below; the trait tables are in <a href="/spec.json">spec.json</a>.</p>
 <pre><code>u64 next(u64 x):
   x += 0x9e3779b97f4a7c15
   x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9
@@ -335,16 +415,25 @@ ${TILES}
   return x ^ (x >> 31)
 
 counter = next(day_number)
-palette = top8(next(++counter)) mod 8
-cell[i] = top2(next(++counter))   for i in 0..63</code></pre>
-<p>If you build it, write to me. That is the one thing I am waiting for here.</p>
+palette  = top8(next(++counter)) mod 16
+grid     = GRIDS[top4(next(++counter))]
+weave    = WEAVES[top3(next(++counter))]
+symmetry = SYMMETRIES[top3(next(++counter))]
+weight   = WEIGHTS[top2(next(++counter))]
+caps     = top2(next(++counter)) == 0 ? butt : round
+accent   = top4(next(++counter)) == 0 ? ACCENTS[top2(next(++counter))] : none
+for each free cell in row order:
+  state = stateOf(weave, top3(next(++counter)))
+  if accent and state is not empty: mark = top4(next(++counter)) == 0
+mirrored cells copy their source, arcs flip under a mirror or a quarter turn</code></pre>
+<p>Everything here is CC0. If you build it, write to me. That is the one thing I am waiting for here.</p>
 <p class="small"><a href="/">Back to the fabric</a></p>
 </main>`;
   return layout(`How it works | ${SITE}`, k.palette, body, "/today.png", "/how");
 }
 
 export function beforeStart(seconds: number, dayOne: Day): string {
-  const k = renderKnot(dayOne.epoch);
+  const k = knotFor(dayOne.epoch);
   const body = `<main class="single">
 <a class="mark syne" href="/">${SITE}</a>
 <h2 class="syne" style="font-size:52px;line-height:.9;letter-spacing:-.035em;margin:0">The first day<br>ties in <span data-left="${seconds}">${fmtLeft(seconds)}</span></h2>
@@ -356,15 +445,15 @@ ${COUNTDOWN}`;
 }
 
 export function notFound(today: Day): string {
-  const k = renderKnot(today.epoch);
-  return layout(`No such day | ${SITE}`, k.palette, `<main class="single"><a class="mark syne" href="/">${SITE}</a><h2 class="syne" style="font-size:34px;margin:0">No such day</h2><p class="lead">Today is day ${today.n}. Earlier days run from 1 to ${today.n}. Later ones do not exist yet.</p><a href="/">Back to the fabric</a></main>`);
+  const k = knotFor(today.epoch);
+  return layout(`No such day | ${SITE}`, k.palette, `<main class="single">${topBar()}<h2 class="syne" style="font-size:34px;margin:0">No such day</h2><p class="lead">Today is day ${today.n}. Earlier days run from 1 to ${today.n}. Later ones do not exist yet.</p><a href="/">Back to the fabric</a></main>`);
 }
 
 export function feedXml(today: Day, chain: ChainState | null): string {
   const items: string[] = [];
   for (let n = today.n; n >= Math.max(1, today.n - 30); n--) {
     const d = dayByNumber(n)!;
-    const k = renderKnot(d.epoch);
+    const k = knotFor(d.epoch);
     const owner = chain?.owners.get(n);
     const state = !chain ? "" : owner ? (isAuthor(chain, owner) ? " The author's." : ` Taken by ${shortAddr(owner)}.`) : (n < today.n ? " Nobody came; the gap stays." : " Still nobody's.");
     const date = new Date(Number(d.startsAt) * 1000).toUTCString();

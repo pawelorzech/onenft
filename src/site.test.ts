@@ -35,9 +35,9 @@ test("day page navigates both ways only when neighbours exist", () => {
   expect(d7).not.toContain('href="/day/8"');
 });
 
-test("how page names all eight palettes", () => {
+test("how page explains the traits and points at the spec", () => {
   const f = howPage(today);
-  for (const p of ["ink", "copper", "moss", "ash", "ultramarine", "rust", "salt", "tar"]) expect(f).toContain(p);
+  for (const w of ["palette", "grid", "weave", "symmetry", "weight", "caps", "accent", "/spec.json", "CC0"]) expect(f).toContain(w);
 });
 
 test("day one gets a sentence instead of an empty list", () => {
@@ -56,8 +56,10 @@ function fakeChain(day: number, owners: Record<number, string>, extra: Partial<C
     day,
     startEpoch: 20701n,
     author: "0xAAAA000000000000000000000000000000000001",
+    renderer: "0x2222222222222222222222222222222222222222",
     rendererLocked: false,
     secondsLeft: 2000,
+    claims: new Map(),
     owners: new Map(Object.entries(owners).map(([k, v]) => [Number(k), v as `0x${string}`])),
     ...extra,
   };

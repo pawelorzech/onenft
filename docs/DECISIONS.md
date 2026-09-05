@@ -31,3 +31,12 @@ No ERC-2981. A new contract with royalties was offered and declined ("leave it a
 
 ## 2026-09-05 — Author line removed from the site
 Footer and `/how` no longer name the author. Kept: "This is not an investment and never will be."
+
+## 2026-09-05 — Renderer v3: seven traits, day 2 onward
+The v2 generator had 8 × 4^64 combinations and eight looks: the same grid, the same cord, the same four shapes every day. Nouns and Gnars keep people coming back with nameable traits, so v3 draws seven from the day number: palette (16), grid (6, 8, 10, 12), weave (arcs, passes, loose, cross), symmetry (none, mirror, quad, turn), weight, caps, and a rare accent color. All of them go into the token metadata. The switch happens on day 1, so only day 1 keeps v2 (its renderer is stored on the token). Rejected: keeping 8 by 8 only, and palettes plus symmetry only. The site renders past days with the renderer they were claimed with (`knotFor`).
+
+## 2026-09-05 — CC0, stated
+Every knot, the generator, the contracts and the site are CC0. Stated on `/assets`, in the footer and in the token description. Nouns and Gnars showed that a public domain brand travels further than a licensed one; there is nothing here to protect.
+
+## 2026-09-05 — Site pages after Nouns and Gnars
+Added: day pages with the claim transaction and time after midnight, share links and an embed snippet; `/explore` (a calendar of every day, gaps hatched, the next seven days previewed); `/traits` (odds and counts); holder pages at `/0x…` and `/name.eth`; `/assets`; JSON at `/api/*` and `/spec.json`; `/embed`; `/calendar.ics`. Deferred: a Farcaster or Base mini-app (needs a developer account and a signed manifest). Not added: the live vote feed and treasury of a DAO; there is no treasury.

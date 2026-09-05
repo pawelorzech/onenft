@@ -1,20 +1,22 @@
 # Architecture
 
-Last verified: 2026-09-05
+Last verified: 2026-09-05 (renderer v3)
 
 ## One number in, one knot out
 1. **Clock.** `day = block.timestamp / 86400` (UTC calendar day). The site computes the same number from `Date.now()`; when a contract is configured it trusts `currentDay()` from the chain instead.
 2. **Seed.** The day number goes through splitmix64 (`mix` in both languages). A counter starts at `mix(day)`; each draw increments the counter, mixes it, and takes the top bits.
-3. **Palette.** First draw, 8 bits, `mod 8` picks one of: ink, copper, moss, ash, ultramarine, rust, salt, tar (`PALETTES` in `src/knot.ts`, `palettes()` in `KnotRenderer.sol`).
-4. **Cells.** 64 draws of 2 bits. State 0 and 1: two quarter-arcs in one of two orientations. State 2: vertical pass. State 3: horizontal pass.
-5. **SVG.** One path string built cell by cell (cell 64 units, half 32), drawn twice: shadow (`stroke-width="21"`, palette `shade`) under cord (`stroke-width="9"`, palette `cord`), on a `rect` in palette `bg`. Integer stroke widths on purpose: Solidity cannot print `64/3`.
-6. **Token URI.** `KnotRenderer.tokenURI(day, epoch)` returns `data:application/json;base64,…` with `name`, `description`, `image` (`data:image/svg+xml;base64,…`) and attributes Day, Epoch, Palette. About 8.5 kB, about 1.27M gas in `eth_call`.
+3. **Traits (renderer v3, day 2 onward).** Seven draws set the traits, in this order: palette (8 bits mod 16), grid (4 bits into `GRIDS`: 6, 8, 10 or 12), weave (3 bits into `WEAVES`: arcs, passes, loose, cross), symmetry (3 bits into `SYMMETRIES`: none, mirror, quad, turn), weight (2 bits: thin, regular, heavy), caps (2 bits: 0 is butt, else round), accent (4 bits; 0 means an accent, then 2 bits pick flame, gold, sky or rose). Tables in `src/knot.ts` and `/spec.json`.
+4. **Cells.** 3 bits per free cell in row order, mapped by weave to a state. States 0 and 1: quarter-arcs in two orientations. 2: vertical pass. 3: horizontal pass. 4: empty (loose). 5: crossing (cross). On accent days each non-empty free cell draws 4 more bits; 0 marks it. Under a symmetry the free cells are the left half (mirror) or the top left quarter (quad, turn); the rest copy their source, arcs flip under a mirror or a quarter turn, passes flip under a quarter turn.
+5. **SVG.** One path string built cell by cell (cell 64 units, half 32), drawn twice: shadow (palette `shade`) under cord (palette `cord`), widths 13/5, 21/9 or 30/15 by weight, plus a third path in the accent color for marked cells. `viewBox` is `grid * 64` square, `width` and `height` are 512. Integer stroke widths on purpose: Solidity cannot print `64/3`.
+6. **Token URI.** `KnotRendererV3.tokenURI(day, epoch)` returns `data:application/json;base64,…` with `name`, `description`, `image` (`data:image/svg+xml;base64,…`) and attributes Day, Epoch, Palette, Grid, Weave, Symmetry, Weight, Caps, Accent. A 12 by 12 day runs to about 5M gas in `eth_call`.
+7. **Renderer v2 (day 1).** `src/knot_v2.ts` and `contracts/src/KnotRenderer.sol`, frozen: eight palettes, 8 by 8, arcs and passes (2 bits per cell), one shadow and one cord width. Day 1 was claimed with this renderer, so it keeps it forever. `knotFor(epoch)` in `src/knot.ts` picks v2 below `V3_FROM_EPOCH` (20702) and v3 from there; every page and image goes through it.
 
-`contracts/fixtures.ts` renders a set of epochs from TypeScript into `contracts/test/fixtures/knots.json`; `KnotRenderer.t.sol` asserts `keccak256(svg)` equality for each. Any drift between the two implementations fails the build.
+`contracts/fixtures.ts` renders a set of epochs from TypeScript into `contracts/test/fixtures/knots.json` (v2) and `knots_v3.json` (v3, 60 epochs with traits); `KnotRenderer.t.sol` and `KnotRendererV3.t.sol` assert `keccak256(svg)` equality and trait names for each. Any drift between the two implementations fails the build. `via_ir` is on in `foundry.toml`; v3 does not compile without it.
 
 ## Contracts (`contracts/src`)
 - `OneNFT.sol` — ERC-721 (OpenZeppelin 5.x) + Ownable. `claim()` mints `tokenId = currentDay()` to `msg.sender`, or to `author` on author days (day % 10 == 0, day ≤ 1000). No price. `rendererOf[tokenId]` is set at claim. `tokenURI` delegates to that renderer. `setRenderer` (owner, probes the new renderer), `lockRenderer` (owner, one-way), `renounceOwnership` reverts. Constructor rejects `startEpoch` outside `[today, today+7]`. Uses `_mint` (EIP-7702 accounts break `_safeMint`).
-- `KnotRenderer.sol` — pure; `svg(epoch)`, `paletteName(epoch)`, `tokenURI(day, epoch)`, `cells(epoch)`.
+- `KnotRenderer.sol` — v2, pure, frozen; `svg(epoch)`, `paletteName(epoch)`, `tokenURI(day, epoch)`, `cells(epoch)`.
+- `KnotRendererV3.sol` — v3, pure; the same interface plus `cells(epoch)` returning traits, states and accent marks, and the trait name helpers.
 - `IKnotRenderer.sol` — the interface the token calls.
 
 ## Site (`src`)
