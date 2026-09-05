@@ -11,6 +11,29 @@ const client = createPublicClient({ chain: mainnet, transport: http(process.env.
 const cache = new Map<string, { at: number; name: string | null }>();
 const forward = new Map<string, { at: number; address: Address | null }>();
 const TTL_MS = 6 * 3600 * 1000;
+/** Both caches are keyed by whatever the network or a visitor hands in, so they are capped. */
+const MAX_ENTRIES = 5000;
+
+/**
+ * A reverse record is a string the wallet's owner chose, and the universal
+ * resolver checks only that it resolves back; it does not check the characters.
+ * Names go into HTML and into paths, so only a name that is already in its
+ * ENSIP-15 normal form and made of plain label characters gets through.
+ * Anything else falls back to the address.
+ */
+export function safeName(name: string | null | undefined): string | null {
+  if (!name || name.length > 255) return null;
+  if (!/^[a-z0-9-]+(?:\.[a-z0-9-]+)*\.eth$/.test(name)) return null;
+  try {
+    return normalize(name) === name ? name : null;
+  } catch {
+    return null;
+  }
+}
+
+function trim<V>(m: Map<string, V>): void {
+  if (m.size > MAX_ENTRIES) m.clear();
+}
 
 export async function ensNames(addresses: Address[]): Promise<Map<string, string>> {
   const out = new Map<string, string>();
@@ -27,8 +50,9 @@ export async function ensNames(addresses: Address[]): Promise<Map<string, string
     todo.map(async (a) => {
       let name: string | null = null;
       try {
-        name = await client.getEnsName({ address: a as Address });
+        name = safeName(await client.getEnsName({ address: a as Address }));
       } catch {}
+      trim(cache);
       cache.set(a, { at: now, name });
       if (name) out.set(a, name);
     }),
@@ -47,6 +71,7 @@ export async function resolveHolder(input: string): Promise<Address | null> {
   try {
     address = await client.getEnsAddress({ name: normalize(key) });
   } catch {}
+  trim(forward);
   forward.set(key, { at: Date.now(), address });
   return address;
 }

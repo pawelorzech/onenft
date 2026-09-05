@@ -3,7 +3,7 @@
 set -euo pipefail
 NET="${1:-mainnet}"
 case "$NET" in
-  mainnet) RPC=https://mainnet.base.org; SITE=https://onenft.click;;
+  mainnet) RPC=https://mainnet.base.org; SITE=https://knot.onenft.click;;
   sepolia) RPC=https://sepolia.base.org; SITE=https://test.onenft.click;;
   *) echo "mainnet|sepolia"; exit 1;;
 esac

@@ -4,7 +4,7 @@ import type { ChainState } from "./contract.ts";
 
 const st = (day: number, owners: number[] = []): ChainState => ({
   address: "0x1111111111111111111111111111111111111111", chainId: 8453, day, startEpoch: 20701n,
-  author: "0xAAAA000000000000000000000000000000000001", rendererLocked: false, secondsLeft: 100,
+  author: "0xAAAA000000000000000000000000000000000001", renderer: "0x3333333333333333333333333333333333333333", rendererLocked: false, secondsLeft: 100, claims: new Map(),
   owners: new Map(owners.map((n) => [n, "0x2222222222222222222222222222222222222222" as const])),
 });
 

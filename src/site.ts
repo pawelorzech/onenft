@@ -51,10 +51,36 @@ export function paletteIndex(p: Palette): number {
   return PALETTES.findIndex((q) => q.name === p.name) + 1;
 }
 
+/** WCAG relative luminance of a #rrggbb color. */
+function luminance(c: string): number {
+  const ch = (v: number) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+  const [r, g, b] = hex(c).map((x) => ch(x / 255));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+/** WCAG contrast ratio, 1 to 21. */
+export function contrast(a: string, b: string): number {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
+/** WCAG AA for small text. */
+export const MUTED_MIN_CONTRAST = 4.5;
+/**
+ * The muted text color: fg pulled toward bg, as far as the palette allows.
+ * Small text needs 4.5:1 against the background, and the palettes differ a lot in
+ * how much room they leave, so the pull is chosen per palette, not fixed.
+ */
+export function mutedFor(fg: string, bg: string): string {
+  for (let t = 0.38; t > 0; t -= 0.01) {
+    const c = mix(fg, bg, t);
+    if (contrast(c, bg) >= MUTED_MIN_CONTRAST) return c;
+  }
+  return fg;
+}
+
 function css(p: Palette): string {
   const fg = p.cord, bg = p.bg;
   return `
-:root{--bg:${bg};--fg:${fg};--muted:${mix(fg, bg, 0.38)};--line:${mix(fg, bg, 0.82)};--soft:${mix(fg, bg, 0.955)}}
+:root{--bg:${bg};--fg:${fg};--muted:${mutedFor(fg, bg)};--line:${mix(fg, bg, 0.82)};--soft:${mix(fg, bg, 0.955)}}
 *{box-sizing:border-box}
 html{background:var(--bg);color:var(--fg);font-family:"Newsreader",Georgia,serif;font-size:17px;line-height:1.5}
 body{margin:0;min-height:100vh}
@@ -195,13 +221,13 @@ export function layout(title: string, p: Palette, body: string, image = "/today.
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${title}</title>
+<title>${esc(title)}</title>
 <meta name="description" content="One Truchet knot a day, computed from the clock of the Base chain. The drawing exists before anyone sees it.">
 <meta name="theme-color" content="${p.bg}">
 <link rel="icon" href="/today.svg" type="image/svg+xml">
 <link rel="alternate" type="application/rss+xml" title="knot.onenft.click, one knot a day" href="/feed.xml">
 <link rel="canonical" href="https://${SITE}${path}">
-<meta property="og:title" content="${title}">
+<meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="One Truchet knot a day, computed from the clock of the Base chain.">
 <meta property="og:image" content="https://${SITE}${image}">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
@@ -403,9 +429,14 @@ btn.addEventListener('click',async function(){
 </script>`;
 }
 
-export function homePage(today: Day, now: bigint, chain: ChainState | null = null, names: Names = NO_NAMES): string {
+/**
+ * `offline` means a contract is configured but the chain did not answer this
+ * request. The page then says so instead of pretending claiming has not opened.
+ */
+export function homePage(today: Day, now: bigint, chain: ChainState | null = null, names: Names = NO_NAMES, offline = false): string {
   const k = knotFor(today.epoch);
-  const left = chain ? chain.secondsLeft : secondsLeft(now);
+  // The clock, never a cached chain read: a stale read would count down to a midnight that has passed and reload the page in a loop.
+  const left = secondsLeft(now);
 
   const rows: string[] = [];
   for (let n = today.n - 1; n >= Math.max(1, today.n - 60); n--) {
@@ -428,7 +459,7 @@ export function homePage(today: Day, now: bigint, chain: ChainState | null = nul
   let todayState = "today";
   let cta = `<a class="cta syne" href="/day/${today.n}.svg" download="onenft-day-${today.n}.svg">Download today's knot</a>
 <a class="cta ghost syne" href="/how">How it works</a>
-<p class="small">Claiming on-chain opens today.</p>`;
+<p class="small">${offline ? "The chain did not answer. Try again in a minute." : "Claiming on-chain opens today."}</p>`;
   if (chain) {
     const badge = chain.chainId === 8453 ? "" : ` <span class="testnet">${chainName(chain.chainId)} testnet</span>`;
     if (todayOwner) {
@@ -583,6 +614,12 @@ ${COUNTDOWN}`;
 export function notFound(today: Day): string {
   const k = knotFor(today.epoch);
   return layout(`No such day | ${SITE}`, k.palette, `<main class="single">${topBar()}<h2 class="syne" style="font-size:34px;margin:0">No such day</h2><p class="lead">Today is day ${today.n}. Earlier days run from 1 to ${today.n}. Later ones do not exist yet.</p><a href="/">Back to the fabric</a></main>`);
+}
+
+/** Pages that need the chain (holder pages) when the chain did not answer. */
+export function chainDown(today: Day): string {
+  const k = knotFor(today.epoch);
+  return layout(`The chain did not answer | ${SITE}`, k.palette, `<main class="single">${topBar()}<h2 class="syne" style="font-size:34px;margin:0">The chain did not answer</h2><p class="lead">This page lists a wallet's days, and that needs the chain. Try again in a minute.</p><a href="/">Back to the fabric</a></main>`);
 }
 
 export function feedXml(today: Day, chain: ChainState | null): string {

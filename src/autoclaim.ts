@@ -5,7 +5,7 @@
  */
 import { createWalletClient, http, type Address, type Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { ABI, CONTRACT, chain, chainState, type ChainState } from "./contract.ts";
+import { ABI, CONTRACT, chain, chainState, client, type ChainState } from "./contract.ts";
 
 export function isAuthorDay(day: number): boolean {
   return day > 0 && day % 10 === 0 && day <= 1000;
@@ -29,6 +29,8 @@ export function startAutoclaim(key: Hex, everyMs = 5 * 60_000): void {
       if (shouldClaim(st)) {
         const hash = await wallet.writeContract({ address: CONTRACT as Address, abi: ABI, functionName: "claim" });
         console.log(`autoclaim: day ${st!.day} for the author, tx ${hash}`);
+        // Stay busy until the claim lands, so a slow network never gets a second claim for the same day.
+        if (client) await client.waitForTransactionReceipt({ hash, timeout: 120_000 });
       }
     } catch (e) {
       console.error("autoclaim:", (e as Error).message);

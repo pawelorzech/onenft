@@ -50,7 +50,7 @@ export type ChainState = {
 let cache: { at: number; state: ChainState } | null = null;
 const TTL_MS = 12_000;
 
-const client = CONTRACT
+export const client = CONTRACT
   ? createPublicClient({ chain, transport: http(process.env.BASE_RPC_URL) })
   : null;
 
@@ -107,7 +107,8 @@ export async function chainState(): Promise<ChainState | null> {
 }
 
 async function readChainState(): Promise<ChainState> {
-  const c = { address: CONTRACT as Address, abi: ABI } as const;
+  if (!client || !CONTRACT) throw new Error("no contract configured");
+  const c = { address: CONTRACT, abi: ABI } as const;
   const [dayBn, startEpoch, author, renderer, rendererLocked, secondsLeftBn] = await client.multicall({
     contracts: [
       { ...c, functionName: "currentDay" },
