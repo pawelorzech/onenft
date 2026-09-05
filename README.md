@@ -2,6 +2,11 @@
 
 One Truchet knot a day, computed on-chain from the clock of the Base chain. Nobody draws it and nobody can delay it. A day nobody claims stays empty forever.
 
+<p align="center"><img src="assets/readme/day-1.png" width="512" alt="Day 1: a Truchet knot in the ultramarine palette"></p>
+<p align="center"><a href="https://onenft.click/day/1">Day 1</a>, 5 September 2026, palette ultramarine. Claimed by <code>pawelorzech.eth</code>.</p>
+
+<img src="assets/readme/days-1-8.png" width="100%" alt="The first eight days side by side, each in its own palette">
+
 Live: **https://onenft.click** · Contract: [`0xb3b8…E783` on Base](https://basescan.org/address/0xb3b83788b9E6ccCb2379c3445dEF0627cf45E783) · [OpenSea](https://opensea.io/collection/onenft-click) · [RSS](https://onenft.click/feed.xml)
 
 ## How it works
