@@ -13,7 +13,8 @@ import type { ChainState } from "./contract.ts";
 export type Names = Map<string, string>;
 export const NO_NAMES: Names = new Map();
 
-export const SITE = "onenft.click";
+export const SITE = "knot.onenft.click";
+export const PARENT = "onenft.click";
 export const REPO = "https://github.com/pawelorzech/onenft";
 
 export function shortAddr(a: string): string {
@@ -170,7 +171,7 @@ export function layout(title: string, p: Palette, body: string, image = "/today.
 <meta name="description" content="One Truchet knot a day, computed from the clock of the Base chain. The drawing exists before anyone sees it.">
 <meta name="theme-color" content="${p.bg}">
 <link rel="icon" href="/today.svg" type="image/svg+xml">
-<link rel="alternate" type="application/rss+xml" title="onenft.click, one knot a day" href="/feed.xml">
+<link rel="alternate" type="application/rss+xml" title="knot.onenft.click, one knot a day" href="/feed.xml">
 <link rel="canonical" href="https://${SITE}${path}">
 <meta property="og:title" content="${title}">
 <meta property="og:description" content="One Truchet knot a day, computed from the clock of the Base chain.">
@@ -356,7 +357,7 @@ ${today.n === 1 ? `<p class="small">This is day one. Tomorrow a second row appea
 <section class="format">${TILES}<p style="max-width:520px;margin:0">Every knot is these shapes on a grid, plus ten traits, all drawn from the day number. The format is public and CC0. <a href="/how">See how the machine works</a></p></section>
 ${rows.join("\n")}
 ${older}
-<footer><span>This is not an investment and never will be. Images and code are CC0.</span><nav><a href="/explore">Explore</a><a href="/traits">Traits</a><a href="/assets">Assets</a>${chain ? `<a href="${openseaCollection(chain)}">OpenSea</a><a href="${explorer(chain.chainId)}/address/${chain.address}">Basescan</a>` : ""}<a href="/feed.xml">RSS</a><a href="/calendar.ics">Calendar</a><a href="${REPO}">Code</a></nav></footer>
+<footer><span>This is not an investment and never will be. Images and code are CC0. One of the daily collections at <a href="https://${PARENT}">${PARENT}</a>.</span><nav><a href="/explore">Explore</a><a href="/traits">Traits</a><a href="/assets">Assets</a>${chain ? `<a href="${openseaCollection(chain)}">OpenSea</a><a href="${explorer(chain.chainId)}/address/${chain.address}">Basescan</a>` : ""}<a href="/feed.xml">RSS</a><a href="/calendar.ics">Calendar</a><a href="${REPO}">Code</a></nav></footer>
 </main>
 </div>
 ${chain && !todayOwner && !authorDay ? mintScript(chain) : ""}
@@ -381,7 +382,7 @@ export function dayPage(d: Day, today: Day, chain: ChainState | null = null, nam
   const url = `https://${SITE}/day/${d.n}`;
   const text = encodeURIComponent(`Day ${d.n} of ${SITE}`);
   const share = `<nav class="share"><a href="https://warpcast.com/~/compose?text=${text}&embeds[]=${encodeURIComponent(url)}">Share on Farcaster</a><a href="https://x.com/intent/post?text=${text}&url=${encodeURIComponent(url)}">Share on X</a><a href="/api/day/${d.n}">JSON</a></nav>`;
-  const snippet = esc(`<a href="${url}"><img src="https://${SITE}/day/${d.n}.svg" width="256" height="256" alt="Day ${d.n} of onenft.click"></a>`);
+  const snippet = esc(`<a href="${url}"><img src="https://${SITE}/day/${d.n}.svg" width="256" height="256" alt="Day ${d.n} of ${SITE}"></a>`);
   const body = `<main class="single">
 ${topBar()}
 <div class="knot">${stripSize(k.svg)}</div>
@@ -472,7 +473,7 @@ export function feedXml(today: Day, chain: ChainState | null): string {
     items.push(`<item><title>Day ${n}</title><link>https://${SITE}/day/${n}</link><guid isPermaLink="true">https://${SITE}/day/${n}</guid><pubDate>${date}</pubDate><description>&lt;img src="https://${SITE}/day/${n}.png" alt=""&gt;&lt;p&gt;Day ${n}, ${dateOf(d.epoch)} UTC, palette ${k.palette.name}.${state}&lt;/p&gt;</description><enclosure url="https://${SITE}/day/${n}.png" type="image/png" length="0"/></item>`);
   }
   return `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0"><channel><title>onenft.click</title><link>https://${SITE}/</link><description>One Truchet knot a day, computed from the clock of the Base chain.</description><language>en</language>
+<rss version="2.0"><channel><title>${SITE}</title><link>https://${SITE}/</link><description>One Truchet knot a day, computed from the clock of the Base chain.</description><language>en</language>
 ${items.join("\n")}
 </channel></rss>`;
 }

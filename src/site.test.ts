@@ -15,7 +15,7 @@ test("home lists every earlier day, today not among the rows", () => {
   const h = homePage(today, today.startsAt + 100n);
   for (let n = 1; n < 7; n++) expect(h).toContain(`href="/day/${n}"`);
   expect(h).not.toContain(`class="row" href="/day/7"`);
-  expect(h).toContain("<title>Day 7 | onenft.click</title>");
+  expect(h).toContain("<title>Day 7 | knot.onenft.click</title>");
 });
 
 test("page palette is today's palette", () => {
@@ -129,13 +129,13 @@ test("feed lists days newest first with a PNG enclosure", () => {
   const t = dayByNumber(3)!;
   const x = feedXml(t, fakeChain(3, { 1: "0x2222222222222222222222222222222222222222" }));
   expect(x.indexOf("<title>Day 3</title>")).toBeLessThan(x.indexOf("<title>Day 1</title>"));
-  expect(x).toContain('enclosure url="https://onenft.click/day/2.png"');
+  expect(x).toContain('enclosure url="https://knot.onenft.click/day/2.png"');
   expect(x).toContain("Nobody came");
 });
 
 test("every page carries og:image and the feed link", () => {
   const t = dayByNumber(2)!;
-  expect(homePage(t, t.startsAt)).toContain('og:image" content="https://onenft.click/day/2.png"');
+  expect(homePage(t, t.startsAt)).toContain('og:image" content="https://knot.onenft.click/day/2.png"');
   expect(howPage(t)).toContain('type="application/rss+xml"');
 });
 

@@ -30,7 +30,7 @@ export function cardSvg(day: Day): string {
 <text x="654" y="290" font-family="Syne" font-weight="800" font-size="150" fill="${fg}">${day.n}</text>
 <text x="662" y="360" font-family="Newsreader" font-size="38" fill="${fg}">${esc(dateOf(day.epoch))}, UTC</text>
 <text x="662" y="412" font-family="Newsreader" font-size="30" fill="${muted}">${esc(line)}</text>
-<text x="662" y="560" font-family="Syne" font-weight="800" font-size="44" fill="${fg}">onenft.click</text>
+<text x="662" y="560" font-family="Syne" font-weight="800" font-size="44" fill="${fg}">knot.onenft.click</text>
 </svg>`;
 }
 

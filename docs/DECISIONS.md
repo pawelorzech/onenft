@@ -43,3 +43,6 @@ Added: day pages with the claim transaction and time after midnight, share links
 
 ## 2026-09-05 — Renderer v4 replaces v3 the same day
 v3 (seven traits) went on chain at 12:00 UTC and was judged not varied enough within the hour. v4 adds three traits: style (cord, double, dashed, solid Truchet triangles), ground (flat, dots, lattice) and an inverted palette one day in four. Masks (circle, diamond, frame) were prototyped and declined. v3 never minted a token, so it was replaced in place rather than frozen; its addresses stay in DEPLOYMENTS.md as superseded.
+
+## 2026-09-05 — The knot moves to knot.onenft.click; the root becomes the hub
+Three daily collections exist now (knot, blit, chainrun), and more are planned. The root `onenft.click` becomes a landing that lists every collection and redirects every old knot path (`/day/N`, `/explore`, `/api/*`, `/feed.xml`, holder pages) to `knot.onenft.click` with a 301. The on-chain renderer never embedded the host, so nothing on chain changes. The landing lives in its own repo (`onenft-hub`) and reads each collection's `/api/today` and `/api/days`; adding a collection is one entry in its table. The wordmark of the knot is now `knot.onenft.click`.

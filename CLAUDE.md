@@ -1,6 +1,6 @@
-# onenft.click
+# knot.onenft.click
 
-One Truchet knot a day, computed on-chain from the clock of the Base chain. Live at https://onenft.click, contract on Base mainnet. This file is what a fresh session needs to continue the work. Operational identifiers that should not be public live in `CLAUDE.local.md` (gitignored).
+One Truchet knot a day, computed on-chain from the clock of the Base chain. Live at https://knot.onenft.click (moved from the root of onenft.click on 2026-09-05; the root is now the landing for every daily collection, repo `~/Programowanie/onenft-hub`), contract on Base mainnet. This file is what a fresh session needs to continue the work. Operational identifiers that should not be public live in `CLAUDE.local.md` (gitignored).
 
 ## What this is
 

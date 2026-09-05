@@ -86,7 +86,7 @@ export function calendarIcs(dayOne: Day): string {
     `DTSTART:${stamp}`,
     "DURATION:PT15M",
     "RRULE:FREQ=DAILY",
-    "SUMMARY:A new knot at onenft.click",
+    "SUMMARY:A new knot at knot.onenft.click",
     `DESCRIPTION:The contract tied today's knot at midnight UTC. Claim it, free, gas only: https://${SITE}/`,
     `URL:https://${SITE}/`,
     "END:VEVENT",

@@ -59,7 +59,7 @@ test("holder page lists that wallet's days only", () => {
 test("assets page states CC0 and the embed snippet", () => {
   const h = assetsPage(dayByNumber(3)!);
   expect(h).toContain("CC0");
-  expect(h).toContain("&lt;iframe src=&quot;https://onenft.click/embed&quot;");
+  expect(h).toContain("&lt;iframe src=&quot;https://knot.onenft.click/embed&quot;");
   expect(h).toContain("/spec.json");
   expect(h).toContain("/calendar.ics");
 });

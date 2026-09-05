@@ -130,4 +130,4 @@ Bun.serve({
   },
 });
 
-console.log(`onenft.click on :${PORT}`);
+console.log(`knot.onenft.click on :${PORT}`);

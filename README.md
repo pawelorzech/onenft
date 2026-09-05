@@ -1,13 +1,13 @@
-# onenft.click
+# knot.onenft.click
 
 One Truchet knot a day, computed on-chain from the clock of the Base chain. Nobody draws it and nobody can delay it. A day nobody claims stays empty forever.
 
 <p align="center"><img src="assets/readme/day-1.png" width="512" alt="Day 1: a Truchet knot in the ultramarine palette"></p>
-<p align="center"><a href="https://onenft.click/day/1">Day 1</a>, 5 September 2026, palette ultramarine. Claimed by <code>pawelorzech.eth</code>.</p>
+<p align="center"><a href="https://knot.onenft.click/day/1">Day 1</a>, 5 September 2026, palette ultramarine. Claimed by <code>pawelorzech.eth</code>.</p>
 
 <img src="assets/readme/days-1-8.png" width="100%" alt="The first eight days side by side, each in its own palette">
 
-Live: **https://onenft.click** · Contract: [`0xb3b8…E783` on Base](https://basescan.org/address/0xb3b83788b9E6ccCb2379c3445dEF0627cf45E783) · [OpenSea](https://opensea.io/collection/onenft-click) · [RSS](https://onenft.click/feed.xml)
+Live: **https://knot.onenft.click** · One of the daily collections at [onenft.click](https://onenft.click) · Contract: [`0xb3b8…E783` on Base](https://basescan.org/address/0xb3b83788b9E6ccCb2379c3445dEF0627cf45E783) · [OpenSea](https://opensea.io/collection/onenft-click) · [RSS](https://knot.onenft.click/feed.xml)
 
 ## How it works
 
@@ -17,9 +17,9 @@ Live: **https://onenft.click** · Contract: [`0xb3b8…E783` on Base](https://ba
 - **The image** is one SVG path drawn twice (shadow and cord), plus an accent path on accent days, a few kB, returned by the contract as a `data:` URI. No server in the loop.
 - **The site has no palette of its own.** It takes colors from today's palette, so it looks different in each of the sixteen epochs.
 - **Day 1** came from the first renderer (eight palettes, 8 by 8, no traits). Each token stores the renderer that drew it, so a claimed day never changes. Every day from day 2 uses the current renderer, `KnotRendererV4.sol`.
-- **Everything is CC0**: images, generator, contracts, site. See [`/assets`](https://onenft.click/assets), [`/explore`](https://onenft.click/explore), [`/traits`](https://onenft.click/traits) and the JSON at [`/api/today`](https://onenft.click/api/today).
+- **Everything is CC0**: images, generator, contracts, site. See [`/assets`](https://knot.onenft.click/assets), [`/explore`](https://knot.onenft.click/explore), [`/traits`](https://knot.onenft.click/traits) and the JSON at [`/api/today`](https://knot.onenft.click/api/today).
 
-The full random stream is written out on [`/how`](https://onenft.click/how) so you can port it to any language. The TypeScript generator and the Solidity renderer produce the same bytes; a test enforces it.
+The full random stream is written out on [`/how`](https://knot.onenft.click/how) so you can port it to any language. The TypeScript generator and the Solidity renderer produce the same bytes; a test enforces it.
 
 ## Repository
 

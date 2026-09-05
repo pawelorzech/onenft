@@ -30,7 +30,7 @@ An earlier Sepolia pair (`0xb3b8…E783` / `0x37a6…9528`, the same addresses a
 
 ## Site
 
-- https://onenft.click reads the mainnet contract. https://test.onenft.click reads the Sepolia contract.
+- https://knot.onenft.click reads the mainnet contract (until 2026-09-05 the site sat at the root, https://onenft.click; the root now redirects old paths there). https://test.onenft.click reads the Sepolia contract.
 - Docker image from `Dockerfile` (oven/bun:1-slim; copies `src/` and `assets/`, runs `bun install`). Health at `/health`.
 - Routes: `/`, `/day/N`, `/day/N.svg`, `/day/N.png`, `/preview/N.svg` (next 7 days), `/today.svg`, `/today.png`, `/how`, `/explore`, `/traits`, `/assets`, `/embed`, `/wordmark.svg`, `/0x…` and `/name.eth`, `/api/today`, `/api/day/N`, `/api/days`, `/api/holder/A`, `/spec.json`, `/calendar.ics`, `/feed.xml`, `/health`.
 - Env for the log scan: `CONTRACT_BLOCK` (first block to scan for `Claimed`; default 50880000 on mainnet, 46399490 set on the test app), `LOG_CHUNK` (default 10000). `V4_FROM_EPOCH` (default 20702) tells the site which days to render with v4. Legacy Polish paths (`/doba/N`, `/dzis.svg`, `/format`, `/zdrowie`) redirect with 301.

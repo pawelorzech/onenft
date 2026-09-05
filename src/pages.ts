@@ -168,8 +168,8 @@ ${cards.length ? `<div class="strip">${cards.join("")}</div>` : `<p>No days here
 
 export function assetsPage(today: Day, chain: ChainState | null = null): string {
   const k = knotFor(today.epoch);
-  const iframe = esc(`<iframe src="https://${SITE}/embed" width="320" height="380" style="border:0" title="Today's knot from onenft.click" loading="lazy"></iframe>`);
-  const img = esc(`<img src="https://${SITE}/today.svg" width="256" height="256" alt="Today's knot from onenft.click">`);
+  const iframe = esc(`<iframe src="https://${SITE}/embed" width="320" height="380" style="border:0" title="Today's knot from knot.onenft.click" loading="lazy"></iframe>`);
+  const img = esc(`<img src="https://${SITE}/today.svg" width="256" height="256" alt="Today's knot from knot.onenft.click">`);
   const body = `<main class="prose">
 ${topBar()}
 <h2 class="syne">Take it. It is yours.</h2>
@@ -208,6 +208,6 @@ export function embedPage(today: Day, chain: ChainState | null = null, names: Na
 
 /** The domain as an SVG wordmark in a palette's colors. */
 export function wordmarkSvg(k: Knot): string {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="160" viewBox="0 0 640 160"><rect width="640" height="160" fill="${k.palette.bg}"/><text x="40" y="104" font-family="Syne, system-ui, sans-serif" font-weight="800" font-size="72" letter-spacing="-2" fill="${k.palette.cord}">${SITE}</text></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="880" height="160" viewBox="0 0 880 160"><rect width="880" height="160" fill="${k.palette.bg}"/><text x="40" y="104" font-family="Syne, system-ui, sans-serif" font-weight="800" font-size="72" letter-spacing="-2" fill="${k.palette.cord}">${SITE}</text></svg>`;
 }
 
