@@ -6,7 +6,7 @@ import {KnotRenderer} from "../src/KnotRenderer.sol";
 import {OneNFT} from "../src/OneNFT.sol";
 
 /// forge script script/Deploy.s.sol --rpc-url base_sepolia --broadcast --verify
-/// env: START_EPOCH, AUTHOR (właściciel i odbiorca co dziesiątej doby)
+/// env: START_EPOCH (unix days; 20701 = 2026-09-05 UTC), AUTHOR (owner and every-tenth-day recipient)
 contract Deploy is Script {
     function run() external {
         uint256 startEpoch = vm.envUint("START_EPOCH");

@@ -6,7 +6,8 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IKnotRenderer} from "./IKnotRenderer.sol";
 
 /// @title OneNFT — jeden splot na dobę
-/// @notice Zegarem jest łańcuch: doba to `block.number / 43200`. W każdej dobie
+/// @notice The chain is the clock: a day is `block.timestamp / 86400`, one calendar
+/// day in UTC. W każdej dobie
 /// można wziąć dokładnie jeden token o numerze równym numerowi doby. Doba, po
 /// którą nikt nie przyszedł, zostaje pusta na zawsze — nie ma dogrywek.
 ///
@@ -17,7 +18,7 @@ import {IKnotRenderer} from "./IKnotRenderer.sol";
 /// wzięcia, więc `setRenderer` dotyka wyłącznie przyszłych dób; raz wzięty splot
 /// nie zmieni się nigdy. `lockRenderer` zamyka nawet tę furtkę, jednokierunkowo.
 contract OneNFT is ERC721, Ownable {
-    uint256 public constant EPOCH_BLOCKS = 43200;
+    uint256 public constant EPOCH_SECONDS = 86400;
     uint256 public constant AUTHOR_UNTIL_DAY = 1000;
 
     uint256 public immutable startEpoch;
@@ -47,7 +48,7 @@ contract OneNFT is ERC721, Ownable {
     ) ERC721(name_, symbol_) Ownable(author_) {
         // Day 1 must be the current epoch or one of the next seven. A late deploy
         // would otherwise skip days silently, and startEpoch is immutable.
-        uint256 now_ = block.number / EPOCH_BLOCKS;
+        uint256 now_ = block.timestamp / EPOCH_SECONDS;
         if (startEpoch_ < now_ || startEpoch_ > now_ + 7) revert BadStartEpoch(startEpoch_, now_);
         _checkRenderer(renderer_);
         startEpoch = startEpoch_;
@@ -67,7 +68,7 @@ contract OneNFT is ERC721, Ownable {
     // ---- zegar ----
 
     function currentEpoch() public view returns (uint256) {
-        return block.number / EPOCH_BLOCKS;
+        return block.timestamp / EPOCH_SECONDS;
     }
 
     /// @return 0 przed pierwszą dobą, potem 1, 2, 3...
@@ -80,9 +81,9 @@ contract OneNFT is ERC721, Ownable {
         return startEpoch + day - 1;
     }
 
-    /// @return Bloki do końca bieżącej doby.
-    function blocksLeft() public view returns (uint256) {
-        return (currentEpoch() + 1) * EPOCH_BLOCKS - block.number;
+    /// @return Seconds until midnight UTC, the end of the current day.
+    function secondsLeft() public view returns (uint256) {
+        return (currentEpoch() + 1) * EPOCH_SECONDS - block.timestamp;
     }
 
     function isAuthorDay(uint256 day) public pure returns (bool) {

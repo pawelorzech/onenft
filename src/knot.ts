@@ -57,11 +57,11 @@ export const PALETTES: Palette[] = [
   { name: "tar",     bg: "#08080a", cord: "#c8c4bc", shade: "#3a3a40" },
 ];
 
-/** Długość epoki w blokach. Base ~2 s/blok → 43200 bloków ≈ doba. */
-export const EPOCH_BLOCKS = 43200n;
+/** One epoch is one calendar day in UTC: unix seconds / 86400. Same on every chain. */
+export const EPOCH_SECONDS = 86400n;
 
-export function epochOf(blockNumber: bigint): bigint {
-  return blockNumber / EPOCH_BLOCKS;
+export function epochOf(unixSeconds: bigint): bigint {
+  return unixSeconds / EPOCH_SECONDS;
 }
 
 export type KnotOptions = {
@@ -101,14 +101,13 @@ function cellPath(state: number, x: number, y: number, s: number): string {
   }
 }
 
-export function renderKnot(blockNumber: bigint, opts: KnotOptions = {}): Knot {
+export function renderKnot(epoch: bigint, opts: KnotOptions = {}): Knot {
   const grid = opts.grid ?? 8;
   const cell = opts.cell ?? 64;
   const size = grid * cell;
-  const epoch = epochOf(blockNumber);
 
-  // Ziarno wyprowadzone z epoki, nie z zegara systemowego — ten sam blok
-  // zawsze daje ten sam obraz, także po latach i przy wyłączonym serwerze.
+  // Ziarno wyprowadzone z numeru dnia — ten sam dzień zawsze daje ten sam
+  // obraz, także po latach i przy wyłączonym serwerze.
   // Licznik strumienia startuje od zmieszanej epoki, żeby sąsiednie doby
   // nie dzieliły początkowego odcinka strumienia.
   let state = nextRandom(epoch & U64);

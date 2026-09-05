@@ -15,7 +15,7 @@ export const ABI = parseAbi([
   "function author() view returns (address)",
   "function renderer() view returns (address)",
   "function rendererLocked() view returns (bool)",
-  "function blocksLeft() view returns (uint256)",
+  "function secondsLeft() view returns (uint256)",
   "function ownerOf(uint256 tokenId) view returns (address)",
   "function isAuthorDay(uint256 day) pure returns (bool)",
   "function claim() returns (uint256)",
@@ -28,7 +28,7 @@ export type ChainState = {
   startEpoch: bigint;
   author: Address;
   rendererLocked: boolean;
-  blocksLeft: number;
+  secondsLeft: number;
   /** doba → właściciel; brak wpisu = doba jeszcze niczyja (dziś) albo dziura (wcześniej). */
   owners: Map<number, Address>;
 };
@@ -48,13 +48,13 @@ export async function chainState(): Promise<ChainState | null> {
   if (!client || !CONTRACT) return null;
   if (cache && Date.now() - cache.at < TTL_MS) return cache.state;
   const c = { address: CONTRACT, abi: ABI } as const;
-  const [dayBn, startEpoch, author, rendererLocked, blocksLeftBn] = await client.multicall({
+  const [dayBn, startEpoch, author, rendererLocked, secondsLeftBn] = await client.multicall({
     contracts: [
       { ...c, functionName: "currentDay" },
       { ...c, functionName: "startEpoch" },
       { ...c, functionName: "author" },
       { ...c, functionName: "rendererLocked" },
-      { ...c, functionName: "blocksLeft" },
+      { ...c, functionName: "secondsLeft" },
     ],
     allowFailure: false,
   });
@@ -70,7 +70,7 @@ export async function chainState(): Promise<ChainState | null> {
       if (r.status === "success") owners.set(i + 1, r.result as Address);
     });
   }
-  const state: ChainState = { address: CONTRACT, chainId: CHAIN_ID, day, startEpoch, author, rendererLocked, blocksLeft: Number(blocksLeftBn), owners };
+  const state: ChainState = { address: CONTRACT, chainId: CHAIN_ID, day, startEpoch, author, rendererLocked, secondsLeft: Number(secondsLeftBn), owners };
   cache = { at: Date.now(), state };
   return state;
 }

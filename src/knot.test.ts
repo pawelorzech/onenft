@@ -1,24 +1,22 @@
 import { expect, test } from "bun:test";
-import { renderKnot, epochOf, EPOCH_BLOCKS } from "./knot.ts";
+import { renderKnot, epochOf, EPOCH_SECONDS } from "./knot.ts";
 
-test("ten sam blok daje ten sam obraz", () => {
-  expect(renderKnot(1_000_000n).svg).toBe(renderKnot(1_000_000n).svg);
+test("ten sam dzień daje ten sam obraz", () => {
+  expect(renderKnot(20701n).svg).toBe(renderKnot(20701n).svg);
 });
 
-test("bloki w tej samej epoce dają ten sam obraz", () => {
-  const a = renderKnot(EPOCH_BLOCKS * 5n);
-  const b = renderKnot(EPOCH_BLOCKS * 5n + 42n);
-  expect(a.svg).toBe(b.svg);
-  expect(a.epoch).toBe(5n);
+test("sekundy w tym samym dniu dają tę samą epokę", () => {
+  expect(epochOf(EPOCH_SECONDS * 5n)).toBe(5n);
+  expect(epochOf(EPOCH_SECONDS * 5n + 42n)).toBe(5n);
 });
 
 test("kolejna epoka daje inny obraz", () => {
-  expect(renderKnot(EPOCH_BLOCKS * 5n).svg).not.toBe(renderKnot(EPOCH_BLOCKS * 6n).svg);
+  expect(renderKnot(5n).svg).not.toBe(renderKnot(6n).svg);
 });
 
 test("1000 kolejnych epok: brak duplikatu obrazu", () => {
   const svgs = new Set<string>();
-  for (let e = 0n; e < 1000n; e++) svgs.add(renderKnot(e * EPOCH_BLOCKS).svg);
+  for (let e = 0n; e < 1000n; e++) svgs.add(renderKnot(e).svg);
   expect(svgs.size).toBe(1000);
 });
 
@@ -27,7 +25,7 @@ test("palety rozkładają się równo, bez serii", () => {
   let runs = 0;
   let prev = "";
   for (let e = 0n; e < 800n; e++) {
-    const name = renderKnot(e * EPOCH_BLOCKS).palette.name;
+    const name = renderKnot(e).palette.name;
     counts.set(name, (counts.get(name) ?? 0) + 1);
     if (name === prev) runs++;
     prev = name;
@@ -44,17 +42,17 @@ test("palety rozkładają się równo, bez serii", () => {
 
 test("stany komórek rozkładają się na cztery warianty", () => {
   const counts = [0, 0, 0, 0];
-  for (let e = 0n; e < 200n; e++) for (const c of renderKnot(e * EPOCH_BLOCKS).cells) counts[c]++;
+  for (let e = 0n; e < 200n; e++) for (const c of renderKnot(e).cells) counts[c]++;
   for (const n of counts) expect(n).toBeGreaterThan(2600);
 });
 
-test("epochOf tnie po granicy bloku", () => {
-  expect(epochOf(EPOCH_BLOCKS - 1n)).toBe(0n);
-  expect(epochOf(EPOCH_BLOCKS)).toBe(1n);
+test("epochOf tnie o północy UTC", () => {
+  expect(epochOf(EPOCH_SECONDS - 1n)).toBe(0n);
+  expect(epochOf(EPOCH_SECONDS)).toBe(1n);
 });
 
 test("stany komórek mieszczą się w 2 bitach i pokrywają wszystkie cztery", () => {
-  const k = renderKnot(7n * EPOCH_BLOCKS);
+  const k = renderKnot(7n);
   expect(k.cells.length).toBe(64);
   expect(Math.max(...k.cells)).toBeLessThanOrEqual(3);
   expect(Math.min(...k.cells)).toBeGreaterThanOrEqual(0);

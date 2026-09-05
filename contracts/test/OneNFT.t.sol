@@ -13,8 +13,8 @@ contract StubRenderer is IKnotRenderer {
 }
 
 contract OneNFTTest is Test {
-    uint256 constant START = 1178;
-    uint256 constant EB = 43200;
+    uint256 constant START = 20701;
+    uint256 constant EB = 86400;
     address author = makeAddr("author");
     address alice = makeAddr("alice");
     address bob = makeAddr("bob");
@@ -22,13 +22,13 @@ contract OneNFTTest is Test {
     OneNFT nft;
 
     function setUp() public {
-        vm.roll(START * EB - 100);
+        vm.warp(START * EB - 100);
         renderer = new KnotRenderer();
         nft = new OneNFT("onenft.click", "ONAD", START, author, address(renderer));
     }
 
     function test_ConstructorRejectsStartEpochInThePastOrTooFar() public {
-        vm.roll(START * EB);
+        vm.warp(START * EB);
         vm.expectRevert(abi.encodeWithSelector(OneNFT.BadStartEpoch.selector, START - 1, START));
         new OneNFT("x", "X", START - 1, author, address(renderer));
         vm.expectRevert(abi.encodeWithSelector(OneNFT.BadStartEpoch.selector, START + 8, START));
@@ -51,11 +51,11 @@ contract OneNFTTest is Test {
     }
 
     function rollToDay(uint256 day, uint256 offset) internal {
-        vm.roll((START + day - 1) * EB + offset);
+        vm.warp((START + day - 1) * EB + offset);
     }
 
     function test_BeforeFirstDayNothingToClaim() public {
-        vm.roll(START * EB - 1);
+        vm.warp(START * EB - 1);
         assertEq(nft.currentDay(), 0);
         vm.prank(alice);
         vm.expectRevert(OneNFT.BeforeFirstDay.selector);
@@ -153,10 +153,10 @@ contract OneNFTTest is Test {
         assertTrue(bytes(nft.preview(5)).length > 3000, "podglad dziala bez tokenu");
     }
 
-    function test_BlocksLeftCountsDownToEpochEdge() public {
+    function test_SecondsLeftCountsDownToMidnight() public {
         rollToDay(1, 0);
-        assertEq(nft.blocksLeft(), EB);
+        assertEq(nft.secondsLeft(), EB);
         rollToDay(1, EB - 1);
-        assertEq(nft.blocksLeft(), 1);
+        assertEq(nft.secondsLeft(), 1);
     }
 }

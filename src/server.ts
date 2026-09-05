@@ -1,5 +1,5 @@
 import { renderKnot } from "./knot.ts";
-import { currentBlock, dayOfBlock, dayByNumber, secondsToStart, setStartEpoch } from "./chain.ts";
+import { nowSeconds, dayOfTime, dayByNumber, secondsToStart, setStartEpoch } from "./chain.ts";
 import { chainState, contractEnabled, CONTRACT, CHAIN_ID } from "./contract.ts";
 import { homePage, dayPage, howPage, notFound, beforeStart } from "./site.ts";
 
@@ -36,34 +36,34 @@ Bun.serve({
     const legacyDay = path.match(/^\/doba\/(\d{1,6})(\.svg)?$/);
     if (legacyDay) return redirect(`/day/${legacyDay[1]}${legacyDay[2] ?? ""}`);
 
-    const { block } = await currentBlock();
+    const now = nowSeconds();
     let chain = null as Awaited<ReturnType<typeof chainState>>;
     try {
       chain = await chainState();
     } catch (e) {
       console.error("contract state unavailable:", (e as Error).message);
     }
-    const today = chain ? (chain.day > 0 ? dayByNumber(chain.day) : null) : dayOfBlock(block);
+    const today = chain ? (chain.day > 0 ? dayByNumber(chain.day) : null) : dayOfTime(now);
 
     if (!today) {
       const dayOne = dayByNumber(1)!;
-      if (path === "/health") return new Response(`ok, before day one, block ${block}`);
+      if (path === "/health") return new Response(`ok, before day one, ${now}`);
       if (path === "/how") return html(howPage(dayOne));
-      if (path === "/today.svg") return svg(renderKnot(dayOne.firstBlock).svg, false);
-      return html(beforeStart(secondsToStart(block), dayOne));
+      if (path === "/today.svg") return svg(renderKnot(dayOne.epoch).svg, false);
+      return html(beforeStart(secondsToStart(now), dayOne));
     }
 
-    if (path === "/") return html(homePage(today, block, chain));
+    if (path === "/") return html(homePage(today, now, chain));
     if (path === "/how") return html(howPage(today));
-    if (path === "/today.svg") return svg(renderKnot(today.firstBlock).svg, false);
-    if (path === "/health") return new Response(`ok, day ${today.n}, block ${block}${chain ? `, contract ${chain.address}` : ""}`);
+    if (path === "/today.svg") return svg(renderKnot(today.epoch).svg, false);
+    if (path === "/health") return new Response(`ok, day ${today.n}, ${now}${chain ? `, contract ${chain.address}` : ""}`);
 
     const m = path.match(/^\/day\/(\d{1,6})(\.svg)?$/);
     if (m) {
       const n = Number(m[1]);
       const d = dayByNumber(n);
       if (!d || n > today.n) return html(notFound(today), 404);
-      if (m[2]) return svg(renderKnot(d.firstBlock).svg, n < today.n);
+      if (m[2]) return svg(renderKnot(d.epoch).svg, n < today.n);
       return html(dayPage(d, today, chain));
     }
     return html(notFound(today), 404);

@@ -7,7 +7,7 @@
  * a reader could misunderstand. Facts (numbers, addresses, paths) stay exact.
  */
 import { renderKnot, type Palette, PALETTES } from "./knot.ts";
-import { dayByNumber, secondsLeft, type Day } from "./chain.ts";
+import { dayByNumber, secondsLeft, dateOf, type Day } from "./chain.ts";
 import type { ChainState } from "./contract.ts";
 
 export const SITE = "onenft.click";
@@ -111,7 +111,7 @@ function layout(title: string, p: Palette, body: string): string {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${title}</title>
-<meta name="description" content="One Truchet knot a day, computed from the Base block number. The drawing exists before anyone sees it.">
+<meta name="description" content="One Truchet knot a day, computed from the clock of the Base chain. The drawing exists before anyone sees it.">
 <meta name="theme-color" content="${p.bg}">
 <link rel="icon" href="/today.svg" type="image/svg+xml">
 ${FONTS}
@@ -176,9 +176,9 @@ btn.addEventListener('click',async function(){
 </script>`;
 }
 
-export function homePage(today: Day, block: bigint, chain: ChainState | null = null): string {
-  const k = renderKnot(today.firstBlock);
-  const left = chain ? chain.blocksLeft * 2 : secondsLeft(block);
+export function homePage(today: Day, now: bigint, chain: ChainState | null = null): string {
+  const k = renderKnot(today.epoch);
+  const left = chain ? chain.secondsLeft : secondsLeft(now);
 
   const rows: string[] = [];
   for (let n = today.n - 1; n >= Math.max(1, today.n - 60); n--) {
@@ -188,7 +188,7 @@ export function homePage(today: Day, block: bigint, chain: ChainState | null = n
       continue;
     }
     const owner = chain?.owners.get(n);
-    const who = owner ? (isAuthor(chain!, owner) ? "the author's" : `taken by ${shortAddr(owner)}`) : `palette ${renderKnot(d.firstBlock).palette.name}`;
+    const who = owner ? (isAuthor(chain!, owner) ? "the author's" : `taken by ${shortAddr(owner)}`) : `palette ${renderKnot(d.epoch).palette.name}`;
     rows.push(`<a class="row" href="/day/${n}"><img src="/day/${n}.svg" alt="" loading="lazy" width="92" height="92"><span><span class="n syne">${n}</span><br><span class="small">${who}</span></span></a>`);
   }
   const older = today.n - 61 > 0 ? `<a class="row" href="/day/${today.n - 61}"><span class="small">earlier days</span></a>` : "";
@@ -227,7 +227,7 @@ export function homePage(today: Day, block: bigint, chain: ChainState | null = n
 <aside><div class="stick">
 <a class="mark syne" href="/">${SITE}</a>
 <h1 class="syne">One<br>continuous<br>fabric</h1>
-<p class="lead">Every day the contract ties one Truchet knot from the Base block number. Nobody draws it and nobody can delay it. Every knot comes out of the same machine, so the fabric runs without a seam.</p>
+<p class="lead">Every day at midnight UTC the contract ties one Truchet knot from the day number. Nobody draws it and nobody can delay it. Every knot comes out of the same machine, so the fabric runs without a seam.</p>
 <hr>
 <div><div class="big syne">${today.n}</div><div class="small">${plural(today.n, "day woven", "days woven")}</div></div>
 ${chain ? `<div style="display:flex;gap:34px"><div><div class="syne" style="font-weight:700;font-size:26px;line-height:1">${taken}</div><div class="small">taken</div></div><div><div class="syne" style="font-weight:700;font-size:26px;line-height:1">${gaps}</div><div class="small">${plural(gaps, "gap", "gaps")}</div></div></div>` : ""}
@@ -240,9 +240,9 @@ ${cta}
 <div class="knot">${stripSize(k.svg)}</div>
 <div style="display:flex;flex-direction:column;gap:18px;padding-top:6px">
 <div><div class="num syne">${today.n}</div><div class="lead" style="margin-top:8px;font-size:19px">${todayState}</div></div>
-<p class="lead" style="max-width:330px">The contract tied this knot at block ${num(today.firstBlock)}. It ties the next one in <span data-left="${left}">${fmtLeft(left)}</span>.</p>
+<p class="lead" style="max-width:330px">The contract tied this knot at midnight UTC, ${dateOf(today.epoch)}. It ties the next one in <span data-left="${left}">${fmtLeft(left)}</span>.</p>
 <hr>
-<p class="small" style="line-height:1.7">palette ${k.palette.name}, ${paletteIndex(k.palette)} of ${PALETTES.length}<br>${num(k.svg.length)} bytes of SVG<br>epoch ${today.epoch}${chain ? `<br>contract <a href="${explorer(chain.chainId)}/address/${chain.address}">${shortAddr(chain.address)}</a>, renderer ${chain.rendererLocked ? "frozen for good" : "can still change for future days"}` : ""}</p>
+<p class="small" style="line-height:1.7">palette ${k.palette.name}, ${paletteIndex(k.palette)} of ${PALETTES.length}<br>${num(k.svg.length)} bytes of SVG<br>day number ${today.epoch} since 1970${chain ? `<br>contract <a href="${explorer(chain.chainId)}/address/${chain.address}">${shortAddr(chain.address)}</a>, renderer ${chain.rendererLocked ? "frozen for good" : "can still change for future days"}` : ""}</p>
 ${today.n === 1 ? `<p class="small">This is day one. Tomorrow a second row appears under it, and so on, with no end.</p>` : ""}
 </div>
 </section>
@@ -258,7 +258,7 @@ ${COUNTDOWN}`;
 }
 
 export function dayPage(d: Day, today: Day, chain: ChainState | null = null): string {
-  const k = renderKnot(d.firstBlock);
+  const k = renderKnot(d.epoch);
   const prev = d.n > 1 ? `<a href="/day/${d.n - 1}">previous</a>` : "";
   const next = d.n < today.n ? `<a href="/day/${d.n + 1}">next</a>` : "";
   let state = d.n === today.n ? "today" : `day ${d.n} of ${today.n}`;
@@ -271,33 +271,33 @@ export function dayPage(d: Day, today: Day, chain: ChainState | null = null): st
 <a class="mark syne" href="/">${SITE}</a>
 <div class="knot">${stripSize(k.svg)}</div>
 <div><div class="num syne">${d.n}</div><p class="lead">${state}</p></div>
-<p class="small" style="line-height:1.7">palette ${k.palette.name}, ${paletteIndex(k.palette)} of ${PALETTES.length}<br>first block ${num(d.firstBlock)}<br>epoch ${d.epoch}<br>${num(k.svg.length)} bytes of SVG</p>
+<p class="small" style="line-height:1.7">palette ${k.palette.name}, ${paletteIndex(k.palette)} of ${PALETTES.length}<br>${dateOf(d.epoch)}, UTC<br>day number ${d.epoch} since 1970<br>${num(k.svg.length)} bytes of SVG</p>
 <nav class="nav">${prev}<a href="/day/${d.n}.svg" download="onenft-day-${d.n}.svg">download SVG</a>${next}<a href="/">whole fabric</a></nav>
 </main>`;
   return layout(`Day ${d.n} | ${SITE}`, k.palette, body);
 }
 
 export function howPage(today: Day): string {
-  const k = renderKnot(today.firstBlock);
+  const k = renderKnot(today.epoch);
   const body = `<main class="prose">
 <a class="mark syne" href="/">${SITE}</a>
 <h2 class="syne">From one number to one knot</h2>
-<p>The only input is the Base block number. Nobody sets it and nobody can roll it back.</p>
-<p><strong>A day</strong> is the block number divided by 43,200, rounded down. At two seconds per block that is about a day. The boundary drifts against wall-clock time, because the chain is the clock.</p>
-<p><strong>The seed</strong> is the day run through splitmix64. From it you pull a stream of bits: eight bits pick the palette, then two bits for each of the 64 cells in an 8 by 8 grid.</p>
+<p>The only input is the clock of the Base chain: the timestamp of the current block. Nobody sets it and nobody can roll it back.</p>
+<p><strong>A day</strong> is that timestamp divided by 86,400, rounded down. That gives one calendar day in UTC, with the boundary at midnight UTC. The number itself counts days since 1 January 1970; day one of this project is day number 20701.</p>
+<p><strong>The seed</strong> is that day number run through splitmix64. From it you pull a stream of bits: eight bits pick the palette, then two bits for each of the 64 cells in an 8 by 8 grid.</p>
 ${TILES}
 <p><strong>Four cell states:</strong> two quarter-arcs in one of two orientations, a vertical pass, a horizontal pass. Classic Truchet has arcs and nothing else. The passes break it into longer runs.</p>
 <p><strong>The drawing</strong> is one SVG path drawn twice: a thicker shadow and a thinner cord. The whole file is about five kilobytes. The contract returns it as a <code>data:</code> URI, with no server in between.</p>
 <p><strong>The palette</strong> is one of eight: ink, copper, moss, ash, ultramarine, rust, salt, tar. This page takes its colors from today's palette, so it looks different in each of the eight epochs. Today: ${k.palette.name}.</p>
 <h2 class="syne">Build it yourself</h2>
-<p>The same block number gives the same knot every time, ten years from now and with this page switched off. The generator is in <a href="${REPO}">the repository</a>. The full random stream is below, so you can port it to any language.</p>
+<p>The same day number gives the same knot every time, ten years from now and with this page switched off. The generator is in <a href="${REPO}">the repository</a>. The full random stream is below, so you can port it to any language.</p>
 <pre><code>u64 next(u64 x):
   x += 0x9e3779b97f4a7c15
   x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9
   x = (x ^ (x >> 27)) * 0x94d049bb133111eb
   return x ^ (x >> 31)
 
-counter = next(epoch)
+counter = next(day_number)
 palette = top8(next(++counter)) mod 8
 cell[i] = top2(next(++counter))   for i in 0..63</code></pre>
 <p>If you build it, write to me. That is the one thing I am waiting for here.</p>
@@ -307,11 +307,11 @@ cell[i] = top2(next(++counter))   for i in 0..63</code></pre>
 }
 
 export function beforeStart(seconds: number, dayOne: Day): string {
-  const k = renderKnot(dayOne.firstBlock);
+  const k = renderKnot(dayOne.epoch);
   const body = `<main class="single">
 <a class="mark syne" href="/">${SITE}</a>
 <h2 class="syne" style="font-size:52px;line-height:.9;letter-spacing:-.035em;margin:0">The first day<br>ties in <span data-left="${seconds}">${fmtLeft(seconds)}</span></h2>
-<p class="lead" style="max-width:520px">At Base block ${num(dayOne.firstBlock)} the chain crosses epoch ${dayOne.epoch} and the first knot appears. This page already wears its colors, because you can compute the palette ahead of time.</p>
+<p class="lead" style="max-width:520px">At midnight UTC on ${dateOf(dayOne.epoch)} the first knot appears. This page already wears its colors, because you can compute the palette ahead of time.</p>
 <p class="small">From that day on, one knot a day, with no end. <a href="/how">How it works</a></p>
 </main>
 ${COUNTDOWN}`;
@@ -319,6 +319,6 @@ ${COUNTDOWN}`;
 }
 
 export function notFound(today: Day): string {
-  const k = renderKnot(today.firstBlock);
+  const k = renderKnot(today.epoch);
   return layout(`No such day | ${SITE}`, k.palette, `<main class="single"><a class="mark syne" href="/">${SITE}</a><h2 class="syne" style="font-size:34px;margin:0">No such day</h2><p class="lead">Today is day ${today.n}. Earlier days run from 1 to ${today.n}. Later ones do not exist yet.</p><a href="/">Back to the fabric</a></main>`);
 }

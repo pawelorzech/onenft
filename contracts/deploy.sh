@@ -14,9 +14,8 @@ PK=$(security find-generic-password -a onenft-deployer -s onenft-deployer -w)
 DEPLOYER=$(cast wallet address --private-key "$PK")
 BAL=$(cast balance "$DEPLOYER" --rpc-url "$RPC" --ether)
 echo "network $NET  deployer $DEPLOYER  balance $BAL ETH  author $AUTHOR"
-if [ -z "${START_EPOCH:-}" ]; then
-  if [ "$NET" = mainnet ]; then START_EPOCH=1178; else START_EPOCH=$(( $(cast block-number --rpc-url "$RPC") / 43200 )); fi
-fi
+# Day 1 is 2026-09-05 UTC on every network (the clock is block.timestamp / 86400).
+START_EPOCH="${START_EPOCH:-20701}"
 echo "START_EPOCH=$START_EPOCH"
 START_EPOCH=$START_EPOCH AUTHOR=$AUTHOR forge script script/Deploy.s.sol --rpc-url "$RPC" --broadcast --private-key "$PK" \
   --verify --verifier sourcify 2>&1 | tee "/tmp/onenft-deploy-$NET.log" | grep -E "KnotRenderer|OneNFT|startEpoch|verif|Error" || true

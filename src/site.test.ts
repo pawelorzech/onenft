@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { homePage, dayPage, howPage, mix } from "./site.ts";
 import { dayByNumber } from "./chain.ts";
-import { EPOCH_BLOCKS } from "./knot.ts";
+import { EPOCH_SECONDS } from "./knot.ts";
 
 const today = dayByNumber(7)!;
 
@@ -12,14 +12,14 @@ test("mix interpoluje kolory", () => {
 });
 
 test("strona główna listuje wszystkie wcześniejsze doby, bez dzisiejszej w rzędach", () => {
-  const h = homePage(today, today.firstBlock + 100n);
+  const h = homePage(today, today.startsAt + 100n);
   for (let n = 1; n < 7; n++) expect(h).toContain(`href="/day/${n}"`);
   expect(h).not.toContain(`class="row" href="/day/7"`);
   expect(h).toContain("<title>Day 7 | onenft.click</title>");
 });
 
 test("paleta strony to paleta dzisiejszej doby", () => {
-  const h = homePage(today, today.firstBlock);
+  const h = homePage(today, today.startsAt);
   expect(h).toMatch(/--bg:#[0-9a-f]{6};--fg:#[0-9a-f]{6}/);
   const bg = h.match(/--bg:(#[0-9a-f]{6})/)![1];
   expect(h).toContain(`<meta name="theme-color" content="${bg}">`);
@@ -42,7 +42,7 @@ test("strona formatu nazywa wszystkie osiem palet", () => {
 
 test("pierwsza doba dostaje osobne zdanie zamiast pustej listy", () => {
   const d1 = dayByNumber(1)!;
-  const h = homePage(d1, d1.firstBlock + EPOCH_BLOCKS / 2n);
+  const h = homePage(d1, d1.startsAt + EPOCH_SECONDS / 2n);
   expect(h).toContain("This is day one");
   expect(h).not.toContain('class="row"');
 });
@@ -54,10 +54,10 @@ function fakeChain(day: number, owners: Record<number, string>, extra: Partial<C
     address: "0x1111111111111111111111111111111111111111",
     chainId: 84532,
     day,
-    startEpoch: 1178n,
+    startEpoch: 20701n,
     author: "0xAAAA000000000000000000000000000000000001",
     rendererLocked: false,
-    blocksLeft: 1000,
+    secondsLeft: 2000,
     owners: new Map(Object.entries(owners).map(([k, v]) => [Number(k), v as `0x${string}`])),
     ...extra,
   };
@@ -65,7 +65,7 @@ function fakeChain(day: number, owners: Record<number, string>, extra: Partial<C
 
 test("z kontraktem: wolna doba ma przycisk mintu i skrypt", () => {
   const t = dayByNumber(5)!;
-  const h = homePage(t, t.firstBlock, fakeChain(5, { 1: "0x2222222222222222222222222222222222222222", 3: "0xAAAA000000000000000000000000000000000001" }));
+  const h = homePage(t, t.startsAt, fakeChain(5, { 1: "0x2222222222222222222222222222222222222222", 3: "0xAAAA000000000000000000000000000000000001" }));
   expect(h).toContain('id="mint"');
   expect(h).toContain("0x4e71d92d");
   expect(h).toContain("wallet_switchEthereumChain");
@@ -75,7 +75,7 @@ test("z kontraktem: wolna doba ma przycisk mintu i skrypt", () => {
 
 test("z kontraktem: dziury i właściciele w paskach", () => {
   const t = dayByNumber(5)!;
-  const h = homePage(t, t.firstBlock, fakeChain(5, { 1: "0x2222222222222222222222222222222222222222", 3: "0xAAAA000000000000000000000000000000000001" }));
+  const h = homePage(t, t.startsAt, fakeChain(5, { 1: "0x2222222222222222222222222222222222222222", 3: "0xAAAA000000000000000000000000000000000001" }));
   expect(h).toContain("taken by 0x2222…2222");
   expect(h).toContain("the author's");
   expect((h.match(/class="row hole"/g) ?? []).length).toBe(2);
@@ -84,7 +84,7 @@ test("z kontraktem: dziury i właściciele w paskach", () => {
 
 test("z kontraktem: wzięta dziś doba wyłącza przycisk", () => {
   const t = dayByNumber(5)!;
-  const h = homePage(t, t.firstBlock, fakeChain(5, { 5: "0x3333333333333333333333333333333333333333" }));
+  const h = homePage(t, t.startsAt, fakeChain(5, { 5: "0x3333333333333333333333333333333333333333" }));
   expect(h).toContain("is taken");
   expect(h).not.toContain('id="mint"');
   expect(h).toContain("taken by 0x3333…3333");
@@ -92,7 +92,7 @@ test("z kontraktem: wzięta dziś doba wyłącza przycisk", () => {
 
 test("z kontraktem: doba autora nie ma przycisku dla ludzi", () => {
   const t = dayByNumber(10)!;
-  const h = homePage(t, t.firstBlock, fakeChain(10, {}));
+  const h = homePage(t, t.startsAt, fakeChain(10, {}));
   expect(h).toContain("goes to the author");
   expect(h).not.toContain('id="mint"');
 });
