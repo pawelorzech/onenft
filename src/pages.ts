@@ -42,6 +42,7 @@ function monthGrid(year: number, month: number, today: Day, chain: ChainState | 
       ? `<a class="hole" href="/day/${n}" title="${title}"><span>${dom}</span></a>`
       : `<a href="/day/${n}" title="${title}"><img src="/day/${n}.svg" alt="" loading="lazy"><span>${dom}</span></a>`);
   }
+  while ((cells.length - 7) % 7 !== 0) cells.push(`<div class="blank"></div>`);
   return `<section><h3 class="syne">${MONTHS[month]} ${year}</h3><div class="cal">${cells.join("")}</div></section>`;
 }
 
@@ -130,7 +131,7 @@ export function traitsPage(today: Day, chain: ChainState | null = null): string 
   });
   const body = `<main class="wide">
 ${topBar()}
-<div><h2 class="syne">Traits</h2><p class="lead" style="margin-top:8px">Seven traits, all drawn from the day number, all written into the token's metadata. Odds are the share of days each value gets in the long run. So far counts the ${today.n} ${plural(today.n, "day", "days")} woven to date${chain ? ", taken counts only claimed days" : ""}. Day 1 came from renderer v2 and reads as 8 by 8, passes, no symmetry.</p></div>
+<div><h2 class="syne">Traits</h2><p class="lead" style="margin-top:8px">Seven traits, all drawn from the day number, all written into the token's metadata. Odds are the share of days each value gets in the long run. So far counts the ${today.n} ${plural(today.n, "day", "days")} woven to date${chain ? ", taken counts only claimed days" : ""}. Day 1 came from the first renderer and reads as 8 by 8, passes, no symmetry.</p></div>
 ${sections.join("\n")}
 <p class="small">Tables from <a href="/spec.json">spec.json</a>. <a href="/how">How the machine works</a>.</p>
 </main>`;

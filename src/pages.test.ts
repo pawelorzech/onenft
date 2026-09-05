@@ -28,6 +28,11 @@ test("explore: every day so far is a cell, gaps are hatched, the preview reaches
   expect(h).toContain(`/preview/${5 + PREVIEW_DAYS}.svg`);
   expect(h).not.toContain(`/preview/${6 + PREVIEW_DAYS}.svg`);
   expect(h).toContain("September 2026");
+  // Every month grid is whole weeks: 7 headers plus a multiple of 7 cells.
+  for (const cal of h.split('<div class="cal">').slice(1)) {
+    const cells = (cal.split("</div></section>")[0].match(/class="(blank|later|dow|hole)"|<a href="\/day\//g) ?? []).length;
+    expect(cells % 7).toBe(0);
+  }
 });
 
 test("explore spans every month from day 1 to today", () => {
@@ -72,7 +77,7 @@ test("day JSON carries traits, owner and the claim", () => {
   expect(j.state).toBe("taken");
   expect(j.claim?.secondsAfterMidnight).toBe(1087);
   expect(j.traits.palette).toBe("ultramarine");
-  expect(j.renderer).toBe(2);
+  expect(j.renderer).toBe(1);
   expect(dayJson(dayByNumber(2)!, t, fakeChain(3, { 1: A })).state).toBe("gap");
   expect(dayJson(t, t, fakeChain(3, { 1: A })).state).toBe("free");
   expect(dayJson(dayByNumber(2)!, t, fakeChain(3, { 1: A })).renderer).toBe(3);

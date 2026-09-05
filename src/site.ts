@@ -204,7 +204,7 @@ const YOURS = `<script>
 (function(){var eth=window.ethereum;if(!eth||!eth.request)return;eth.request({method:'eth_accounts'}).then(function(accs){if(!accs||!accs.length)return;var mine={};accs.forEach(function(a){mine[a.toLowerCase()]=1});var n=0;document.querySelectorAll('[data-owner]').forEach(function(el){if(mine[el.getAttribute('data-owner')]){el.classList.add('yours');n++}});var box=document.getElementById('yours');if(box&&n){box.hidden=false;box.querySelector('.syne').textContent=n}}).catch(function(){})})();
 </script>`;
 
-/** The seven traits as a definition list. Day 1 was rendered with v2 and reads as plain 8 by 8. */
+/** The seven traits as a definition list. Day 1 came from the first renderer and reads as plain 8 by 8. */
 export function traitList(k: Knot): string {
   const t = k.traits;
   const rows: [string, string][] = [
@@ -405,7 +405,7 @@ ${TILES}
 <p><strong>Six cell states:</strong> two quarter-arcs in one of two orientations, a vertical pass, a horizontal pass, an empty cell (weave "loose") and a crossing (weave "cross"). Classic Truchet has arcs and nothing else. The passes break it into longer runs.</p>
 <p><strong>The drawing</strong> is one SVG path drawn twice: a thicker shadow and a thinner cord, plus a third path in the accent color when the day has one. The whole file is a few kilobytes. The contract returns it as a <code>data:</code> URI, with no server in between.</p>
 <p><strong>The palette</strong> is one of sixteen. This page takes its colors from today's palette, so it looks different in each epoch. Today: ${k.palette.name}. <a href="/traits">See all traits and how often they come up.</a></p>
-<p><strong>Day 1</strong> was tied by renderer v2: eight palettes, always 8 by 8, arcs and passes, no symmetry. The renderer address is stored on each token when it is claimed, so day 1 never changes. Every day from day 2 uses v3, described here.</p>
+<p><strong>Day 1</strong> was tied by the first renderer: eight palettes, always 8 by 8, arcs and passes, no symmetry. The renderer address is stored on each token when it is claimed, so day 1 never changes. Every day from day 2 uses v3, described here.</p>
 <h2 class="syne">Build it yourself</h2>
 <p>The same day number gives the same knot every time, ten years from now and with this page switched off. The generator is in <a href="${REPO}">the repository</a>, in TypeScript and in Solidity, with a test that keeps the two byte for byte equal. The random stream is below; the trait tables are in <a href="/spec.json">spec.json</a>.</p>
 <pre><code>u64 next(u64 x):

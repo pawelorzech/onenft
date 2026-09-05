@@ -112,7 +112,7 @@ test("v2 stays frozen: day 1 as the chain rendered it", () => {
 
 test("knotFor picks v2 before the switch and v3 from it", () => {
   expect(V3_FROM_EPOCH).toBe(20702n);
-  expect(knotFor(20701n).version).toBe(2);
+  expect(knotFor(20701n).version).toBe(1);
   expect(knotFor(20701n).svg).toBe(renderKnotV2(20701n).svg);
   expect(knotFor(20702n).version).toBe(3);
   expect(knotFor(20702n).svg).toBe(renderKnot(20702n).svg);

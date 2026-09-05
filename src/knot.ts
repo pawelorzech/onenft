@@ -107,7 +107,7 @@ export type Knot = {
   seed: bigint;
   /** Cell states: the full description of the image. See `cellPath`. */
   cells: number[];
-  /** Renderer version that produced this knot: 2 or 3. */
+  /** Renderer version that produced this knot: 1 (the frozen v2 image, day 1) or 3. */
   version: number;
   traits: Traits;
 };
@@ -236,14 +236,15 @@ export function renderKnot(epoch: bigint): Knot {
   return { svg, palette, epoch, seed: epoch, cells, version: 3, traits };
 }
 
-/** First epoch rendered with v3 on the chain. Day 1 (20701) stays v2. */
+/** First epoch rendered with v3 on the chain. Day 1 (20701) keeps the first renderer. */
 export const V3_FROM_EPOCH = BigInt(process.env.V3_FROM_EPOCH ?? "20702");
 
 /** The knot as the chain shows it: v2 before the switch, v3 from then on. */
 export function knotFor(epoch: bigint): Knot {
   if (epoch >= V3_FROM_EPOCH) return renderKnot(epoch);
   const k = renderKnotV2(epoch);
-  return { ...k, version: 2, traits: { palette: k.palette.name, grid: 8, weave: "passes", symmetry: "none", weight: "regular", caps: "round", accent: "none" } };
+  // v1 and v2 draw the same image; v2 only reworded the description. Day 1 carries v1.
+  return { ...k, version: 1, traits: { palette: k.palette.name, grid: 8, weave: "passes", symmetry: "none", weight: "regular", caps: "round", accent: "none" } };
 }
 
 /** The form in which the image leaves the contract. */
