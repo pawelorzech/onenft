@@ -60,11 +60,11 @@ body{margin:0;min-height:100vh}
 a{color:inherit}
 a:focus-visible,button:focus-visible{outline:3px solid var(--fg);outline-offset:3px}
 .syne{font-family:"Syne",system-ui,sans-serif}
-.page{display:grid;grid-template-columns:344px minmax(0,1fr);min-height:100vh}
+.page{display:grid;grid-template-columns:360px minmax(0,1fr);min-height:100vh}
 aside{border-right:1px solid var(--line);padding:38px 32px}
 aside .stick{position:sticky;top:38px;display:flex;flex-direction:column;gap:28px}
 .mark{font-weight:800;font-size:20px;letter-spacing:-.01em;text-decoration:none}
-h1{font-weight:800;font-size:37px;line-height:.94;letter-spacing:-.045em;margin:0}
+h1{font-weight:800;font-size:33px;line-height:.96;letter-spacing:-.045em;margin:0;overflow-wrap:anywhere}
 .lead{color:var(--muted);margin:0}
 hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
 .big{font-weight:700;font-size:40px;line-height:1}
@@ -75,8 +75,9 @@ button.cta{border:0;cursor:pointer;width:100%;font-family:"Syne",system-ui,sans-
 button.cta[disabled]{opacity:.55;cursor:default}
 .msg{font-size:15px;color:var(--muted);min-height:1.5em;margin:0}
 .testnet{display:inline-block;padding:3px 8px;border:1px solid var(--line);font-size:13px;color:var(--muted)}
-.today{padding:38px 34px 34px;border-bottom:1px solid var(--line);display:flex;gap:32px;align-items:flex-start}
-.today .knot{width:396px;height:396px;flex-shrink:0;box-shadow:0 0 0 1px var(--line)}
+.today{padding:38px 34px 34px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:minmax(0,396px) minmax(240px,1fr);gap:32px;align-items:start}
+.today .knot{width:100%;max-width:396px;aspect-ratio:1;box-shadow:0 0 0 1px var(--line)}
+.today .meta{display:flex;flex-direction:column;gap:18px;padding-top:6px}
 .today .knot svg{display:block;width:100%;height:100%}
 .num{font-weight:800;font-size:62px;line-height:.95;letter-spacing:-.03em}
 .row{display:flex;align-items:center;gap:22px;padding:0 34px;height:128px;border-bottom:1px solid var(--line);text-decoration:none}
@@ -99,13 +100,18 @@ footer nav{display:flex;gap:20px;flex-wrap:wrap}
 .single .knot{width:100%;max-width:640px;aspect-ratio:1;box-shadow:0 0 0 1px var(--line)}
 .single .knot svg{display:block;width:100%;height:100%}
 .nav{display:flex;gap:22px;flex-wrap:wrap}
+@media (max-width:1180px){
+ .today{grid-template-columns:1fr}
+ .today .knot{max-width:460px}
+ .today .meta{max-width:520px}
+}
 @media (max-width:900px){
  .page{grid-template-columns:1fr}
  aside{border-right:0;border-bottom:1px solid var(--line);padding:18px 20px}
  aside .stick{position:static;gap:18px}
  h1{font-size:40px}
- .today{padding:20px;flex-direction:column;gap:16px}
- .today .knot{width:100%;height:auto;aspect-ratio:1}
+ .today{padding:20px;gap:16px}
+ .today .knot{max-width:100%}
  .num{font-size:44px}
  .row{height:auto;min-height:64px;padding:14px 20px;gap:16px}
  .row img,.row .ph{width:56px;height:56px}
@@ -267,7 +273,7 @@ ${cta}
 <main>
 <section class="today">
 <div class="knot">${stripSize(k.svg)}</div>
-<div style="display:flex;flex-direction:column;gap:18px;padding-top:6px">
+<div class="meta">
 <div${todayOwner ? ` data-owner="${todayOwner.toLowerCase()}"` : ""}><div class="num syne">${today.n}</div><div class="lead" style="margin-top:8px;font-size:19px">${todayState}</div></div>
 <p class="lead" style="max-width:330px">The contract tied this knot at midnight UTC, ${dateOf(today.epoch)}. It ties the next one in <span data-left="${left}">${fmtLeft(left)}</span>.</p>
 <hr>
