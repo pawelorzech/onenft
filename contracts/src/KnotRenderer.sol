@@ -115,7 +115,7 @@ contract KnotRenderer is IKnotRenderer {
         string memory image = string.concat("data:image/svg+xml;base64,", Base64.encode(bytes(svg(epoch))));
         string memory json = string.concat(
             '{"name":"Day ', day.toString(),
-            '","description":"One Truchet knot a day, computed from the Base block number. Day ',
+            '","description":"One Truchet knot a day, computed from the clock of the Base chain. Day ',
             day.toString(), ", epoch ", epoch.toString(), ". A day nobody claims stays empty forever.",
             '","image":"', image,
             '","attributes":[{"trait_type":"Day","value":', day.toString(),
