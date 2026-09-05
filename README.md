@@ -1,41 +1,49 @@
 # onenft.click
 
-One Truchet knot a day, computed from the clock of the Base chain. Nobody draws it and nobody can delay it.
+One Truchet knot a day, computed on-chain from the clock of the Base chain. Nobody draws it and nobody can delay it. A day nobody claims stays empty forever.
+
+Live: **https://onenft.click** · Contract: [`0xb3b8…E783` on Base](https://basescan.org/address/0xb3b83788b9E6ccCb2379c3445dEF0627cf45E783) · [OpenSea](https://opensea.io/collection/onenft-click) · [RSS](https://onenft.click/feed.xml)
 
 ## How it works
 
-- **A day** is `block.timestamp / 86400`, rounded down: one calendar day in UTC, boundary at midnight UTC. The number counts days since 1970; day one of the project is 20701 (2026-09-05).
-- **The seed** is that day number run through splitmix64. Eight bits pick the palette, then two bits per cell for an 8×8 grid.
+- **A day** is `block.timestamp / 86400`, rounded down: one calendar day in UTC. Day one is 20701 (2026-09-05).
+- **The seed** is that day number run through splitmix64. Eight bits pick one of eight palettes, then two bits per cell fill an 8×8 grid.
 - **Four cell states**: quarter-arcs in two orientations, a vertical pass, a horizontal pass.
-- **Output**: one SVG path drawn twice (shadow and cord), about 5 kB, returned by the contract as a `data:` URI.
-- **The page has no palette of its own.** It takes colors from today's palette, so it looks different in each of the eight epochs.
+- **The image** is one SVG path drawn twice (shadow and cord), about 5 kB, returned by the contract as a `data:` URI. No server in the loop.
+- **The site has no palette of its own.** It takes colors from today's palette, so it looks different in each of the eight epochs.
 
-The full random stream is described on `/how`, so you can port it to any language. All arithmetic fits in uint64; the Solidity renderer reproduces the TypeScript output byte for byte.
+The full random stream is written out on [`/how`](https://onenft.click/how) so you can port it to any language. The TypeScript generator and the Solidity renderer produce the same bytes; a test enforces it.
+
+## Repository
+
+| Path | What |
+|---|---|
+| `src/` | The site (Bun + TypeScript): generator, clock, pages, server, chain reads, autoclaim, PNG cards, ENS. |
+| `contracts/` | Foundry project: `OneNFT.sol`, `KnotRenderer.sol`, tests, deploy scripts. |
+| `assets/fonts/` | Static TTFs used for PNG cards (Syne ExtraBold, Newsreader; OFL). |
+| `design/`, `design2/` | The two design rounds as Claude Design canvases. |
+| `docs/` | [Architecture](docs/ARCHITECTURE.md) · [Decisions](docs/DECISIONS.md) · [Deployments](docs/DEPLOYMENTS.md) · [Operations](docs/OPERATIONS.md) · [Audit](docs/AUDIT.md) · [Roadmap](docs/ROADMAP.md) |
+| `CLAUDE.md` | Working notes for an AI session continuing this project. |
 
 ## Run
 
 ```sh
-bun test
+bun install
+bun test                      # site tests
+cd contracts && forge test    # contract tests, includes TS↔Solidity byte equality
 PORT=3000 bun run src/server.ts
 ```
 
-Env: `PORT`, `BASE_RPC_URL` (RPC for contract reads), `START_EPOCH` (day number of day 1, default 20701), `CONTRACT_ADDRESS` and `CHAIN_ID` (8453 mainnet, 84532 Sepolia) to read state from the contract and enable claiming. Without a contract the site runs as a plain renderer.
+Environment: `PORT`; `CONTRACT_ADDRESS` and `CHAIN_ID` (8453 mainnet, 84532 Sepolia) to read chain state and enable claiming; `BASE_RPC_URL` for chain reads; `START_EPOCH` (default 20701, overridden by the contract); `DEPLOYER_KEY` to run the author-day autoclaim; `ETH_RPC_URL` for ENS lookups. Without a contract the site is a plain renderer.
 
-## Routes
+## Contracts in one paragraph
 
-- `/` the fabric: today and every earlier day
-- `/day/N` one day, `/day/N.svg` the raw file (past days cached for a year)
-- `/today.svg` today's knot
-- `/how` the format
-- `/health` healthcheck
+`OneNFT` is an ERC-721 where `claim()` mints today's day number to the caller, free, gas only. Every tenth day up to 1000 goes to the author. The renderer is a separate contract whose address is stored per token at claim time, so a renderer swap touches future days only and `lockRenderer` can freeze it for good. The token contract itself has no upgrade path. Uses `_mint`, not `_safeMint`, because EIP-7702 accounts break the safe-transfer check. See [docs/AUDIT.md](docs/AUDIT.md) for what was checked before mainnet.
 
-## Contracts (`contracts/`, Foundry)
+## Deploy
 
-- `KnotRenderer.sol` ports `src/knot.ts` one to one. `test_SvgMatchesTypeScriptByteForByte` compares keccak of the SVG against fixtures from `bun run contracts/fixtures.ts`. TypeScript is the source of truth.
-- `OneNFT.sol` is the ERC-721. `claim()` takes today's day (tokenId = day number). A day nobody claims stays empty forever. Every tenth day up to 1000 goes to the author. The renderer address is stored per token at claim time, so `setRenderer` touches future days only; `lockRenderer` is one-way. It uses `_mint`, not `_safeMint`: after EIP-7702 a normal wallet can be an account with delegation code that does not answer `onERC721Received`.
-- The clock is `block.timestamp`, not `block.number`, so a change in Base block time cannot shrink a day. Renderer addresses are checked for live code before use; `startEpoch` must be the current day or within the next seven; ownership cannot be renounced.
-- Deploy: `contracts/deploy.sh sepolia|mainnet` (deployer key from Keychain, author address from `~/.config/onenft/author.json`, Sourcify verification).
+`contracts/deploy.sh sepolia|mainnet` then `contracts/wire.sh sepolia|mainnet`. Details in [docs/OPERATIONS.md](docs/OPERATIONS.md).
 
-## Plan
+## License
 
-Gates: (1) public renderer without a wallet, (2) 90 days under my own name, (3) the format as a spec with code, (4) Base Sepolia, (5) mainnet, once a dozen strangers ask "can I have this".
+Code: MIT. Fonts: SIL Open Font License. The knots belong to whoever claims them.

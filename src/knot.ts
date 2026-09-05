@@ -1,21 +1,20 @@
 /**
- * Deterministyczny generator węzła Truchet.
+ * Deterministic Truchet knot generator. Source of truth for KnotRenderer.sol.
  *
- * Cała arytmetyka jest całkowitoliczbowa i mieści się w uint64, żeby ten sam
- * przebieg dał się przepisać 1:1 na Solidity. Żadnych floatów, żadnego Math.random.
- * SVG powstaje jako string i jest przeznaczony do zwrócenia z `tokenURI` jako
- * `data:image/svg+xml;base64,...` — nigdy jako link do serwera (patrz Blitmap).
+ * All arithmetic is integer and fits in uint64 so the exact same run can be
+ * ported to Solidity. No floats, no Math.random. The SVG is a string meant to
+ * be returned from `tokenURI` as `data:image/svg+xml;base64,...`, never as a
+ * link to a server (see what happened to Blitmap).
  */
 
 const U64 = (1n << 64n) - 1n;
 
 /**
- * splitmix64 — jeden krok strumienia plus finalizer.
+ * splitmix64: one step of the stream plus the finalizer.
  *
- * Sam LCG nie wystarcza: przy małych, kolejnych ziarnach (a epoki to 0,1,2,...)
- * jego górne bity zmieniają się leniwie i paleta trzyma się blokami po kilka dób.
- * Finalizer rozbija te korelacje. W Solidity odpowiednikiem jest
- * `uint256(keccak256(abi.encodePacked(state)))` — tam mieszanie dostajesz za darmo.
+ * A bare LCG is not enough. With small consecutive seeds (day numbers) its top
+ * bits move slowly and the palette sticks for several days in a row. The
+ * finalizer breaks that correlation. The Solidity renderer uses the same steps.
  */
 export function nextRandom(state: bigint): bigint {
   let z = (state + 0x9e3779b97f4a7c15n) & U64;
@@ -25,8 +24,8 @@ export function nextRandom(state: bigint): bigint {
 }
 
 /**
- * Pobiera `bits` bitów. `state` jest licznikiem strumienia — inkrementowanym,
- * nie nadpisywanym wynikiem — bo splitmix64 miesza licznik, a nie sam siebie.
+ * Draws `bits` bits. `state` is a stream counter, incremented rather than
+ * replaced by the output, because splitmix64 mixes a counter, not itself.
  */
 function draw(state: bigint, bits: number): { state: bigint; value: number } {
   const next = (state + 1n) & U64;
@@ -43,8 +42,8 @@ export type Palette = {
 };
 
 /**
- * Palety epok. Epoka wynika z numeru bloku, więc obraz zmienia się sam,
- * bez żadnej akcji autora — to jedyny mechanizm nawyku, który wykonuje się sam.
+ * The eight palettes. The palette follows the day number, so the image changes
+ * on its own, with no action from the author.
  */
 export const PALETTES: Palette[] = [
   { name: "ink",  bg: "#12131a", cord: "#e8e4d9", shade: "#5b6478" },
@@ -65,9 +64,9 @@ export function epochOf(unixSeconds: bigint): bigint {
 }
 
 export type KnotOptions = {
-  /** Liczba komórek na bok. */
+  /** Cells per side. */
   grid?: number;
-  /** Bok komórki w jednostkach SVG. */
+  /** Cell side in SVG units. */
   cell?: number;
 };
 
@@ -76,16 +75,16 @@ export type Knot = {
   palette: Palette;
   epoch: bigint;
   seed: bigint;
-  /** Stany komórek, 2 bity każdy — pełny opis obrazu. */
+  /** Cell states, 2 bits each: the full description of the image. */
   cells: number[];
 };
 
 /**
- * Cztery stany komórki (2 bity):
- *   0,1 — para ćwierćłuków w dwóch orientacjach (splot)
- *   2   — pionowy przelot
- *   3   — poziomy przelot
- * Same łuki dają klasyczny Truchet; przeloty rozbijają go na dłuższe ciągi.
+ * Four cell states (2 bits):
+ *   0, 1: a pair of quarter-arcs in one of two orientations
+ *   2: vertical pass
+ *   3: horizontal pass
+ * Arcs alone give classic Truchet; the passes break it into longer runs.
  */
 function cellPath(state: number, x: number, y: number, s: number): string {
   const h = s / 2;
@@ -106,10 +105,10 @@ export function renderKnot(epoch: bigint, opts: KnotOptions = {}): Knot {
   const cell = opts.cell ?? 64;
   const size = grid * cell;
 
-  // Ziarno wyprowadzone z numeru dnia — ten sam dzień zawsze daje ten sam
-  // obraz, także po latach i przy wyłączonym serwerze.
-  // Licznik strumienia startuje od zmieszanej epoki, żeby sąsiednie doby
-  // nie dzieliły początkowego odcinka strumienia.
+  // The seed is the day number alone: the same day gives the same image,
+  // years later and with the server switched off.
+  // The stream counter starts at the mixed day number so neighbouring days
+  // do not share the beginning of the stream.
   let state = nextRandom(epoch & U64);
 
   const pick = draw(state, 8);
@@ -136,7 +135,7 @@ export function renderKnot(epoch: bigint, opts: KnotOptions = {}): Knot {
   return { svg, palette, epoch, seed: epoch, cells };
 }
 
-/** Postać, w jakiej obraz opuszcza kontrakt. */
+/** The form in which the image leaves the contract. */
 export function toDataUri(svg: string): string {
   return `data:image/svg+xml;base64,${Buffer.from(svg, "utf8").toString("base64")}`;
 }

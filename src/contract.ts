@@ -1,6 +1,6 @@
 /**
- * Odczyt stanu z kontraktu OneNFT. Gdy CONTRACT_ADDRESS nie jest ustawione,
- * strona działa w trybie bramki 1 (sam renderer, bez łańcucha).
+ * Reads state from the OneNFT contract. Without CONTRACT_ADDRESS the site
+ * runs as a plain renderer with no chain.
  */
 import { createPublicClient, http, parseAbi, type Address } from "viem";
 import { base, baseSepolia } from "viem/chains";
@@ -29,7 +29,7 @@ export type ChainState = {
   author: Address;
   rendererLocked: boolean;
   secondsLeft: number;
-  /** doba → właściciel; brak wpisu = doba jeszcze niczyja (dziś) albo dziura (wcześniej). */
+  /** day → owner; a missing entry is today's day still nobody's, or a gap on earlier days. */
   owners: Map<number, Address>;
 };
 

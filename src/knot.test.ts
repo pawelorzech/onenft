@@ -1,26 +1,26 @@
 import { expect, test } from "bun:test";
 import { renderKnot, epochOf, EPOCH_SECONDS } from "./knot.ts";
 
-test("ten sam dzień daje ten sam obraz", () => {
+test("the same day gives the same image", () => {
   expect(renderKnot(20701n).svg).toBe(renderKnot(20701n).svg);
 });
 
-test("sekundy w tym samym dniu dają tę samą epokę", () => {
+test("seconds within one day map to one epoch", () => {
   expect(epochOf(EPOCH_SECONDS * 5n)).toBe(5n);
   expect(epochOf(EPOCH_SECONDS * 5n + 42n)).toBe(5n);
 });
 
-test("kolejna epoka daje inny obraz", () => {
+test("the next epoch gives a different image", () => {
   expect(renderKnot(5n).svg).not.toBe(renderKnot(6n).svg);
 });
 
-test("1000 kolejnych epok: brak duplikatu obrazu", () => {
+test("1000 consecutive epochs: no duplicate image", () => {
   const svgs = new Set<string>();
   for (let e = 0n; e < 1000n; e++) svgs.add(renderKnot(e).svg);
   expect(svgs.size).toBe(1000);
 });
 
-test("palety rozkładają się równo, bez serii", () => {
+test("palettes are evenly spread, no runs", () => {
   const counts = new Map<string, number>();
   let runs = 0;
   let prev = "";
@@ -30,28 +30,28 @@ test("palety rozkładają się równo, bez serii", () => {
     if (name === prev) runs++;
     prev = name;
   }
-  // Wszystkie osiem palet w użyciu, każda w granicach ±60% od 1/8 z 800.
+  // All eight palettes in use, each within ±60% of 1/8 of 800.
   expect(counts.size).toBe(8);
   for (const n of counts.values()) {
     expect(n).toBeGreaterThan(60);
     expect(n).toBeLessThan(160);
   }
-  // Powtórzenie doba-po-dobie zdarza się losowo ~1/8; seria co drugą dobę to bug.
+  // A day-to-day repeat happens by chance about 1/8 of the time; a run every other day is a bug.
   expect(runs).toBeLessThan(160);
 });
 
-test("stany komórek rozkładają się na cztery warianty", () => {
+test("cell states cover all four variants", () => {
   const counts = [0, 0, 0, 0];
   for (let e = 0n; e < 200n; e++) for (const c of renderKnot(e).cells) counts[c]++;
   for (const n of counts) expect(n).toBeGreaterThan(2600);
 });
 
-test("epochOf tnie o północy UTC", () => {
+test("epochOf cuts at midnight UTC", () => {
   expect(epochOf(EPOCH_SECONDS - 1n)).toBe(0n);
   expect(epochOf(EPOCH_SECONDS)).toBe(1n);
 });
 
-test("stany komórek mieszczą się w 2 bitach i pokrywają wszystkie cztery", () => {
+test("cell states fit in 2 bits and cover all four", () => {
   const k = renderKnot(7n);
   expect(k.cells.length).toBe(64);
   expect(Math.max(...k.cells)).toBeLessThanOrEqual(3);

@@ -6,9 +6,10 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IKnotRenderer} from "./IKnotRenderer.sol";
 
 /// @title KnotRenderer
-/// @notice Przepisanie 1:1 `src/knot.ts`. Ten sam strumień splitmix64, ta sama
-/// siatka 8×8, ten sam string SVG — test zgodności porównuje keccak z wzorcami
-/// wygenerowanymi przez TS. Zmiana czegokolwiek tutaj bez zmiany w TS to błąd.
+/// @notice A one-to-one port of `src/knot.ts`: the same splitmix64 stream, the same
+/// 8×8 grid, the same SVG string. The equality test compares keccak hashes against
+/// fixtures generated from TypeScript. Changing anything here without the same
+/// change in TS is a bug.
 contract KnotRenderer is IKnotRenderer {
     using Strings for uint256;
 
@@ -35,7 +36,7 @@ contract KnotRenderer is IKnotRenderer {
         return Palette("tar", "#08080a", "#c8c4bc", "#3a3a40");
     }
 
-    /// @dev splitmix64: jeden krok. W uint64 z zawijaniem, jak `nextRandom` w TS.
+    /// @dev splitmix64, one step, wrapping in uint64 like `nextRandom` in TS.
     function mix(uint64 x) internal pure returns (uint64) {
         unchecked {
             x += 0x9e3779b97f4a7c15;
@@ -45,7 +46,7 @@ contract KnotRenderer is IKnotRenderer {
         }
     }
 
-    /// @dev Pobiera `bits` górnych bitów z kolejnego elementu strumienia.
+    /// @dev Takes the top `bits` bits of the next stream element.
     function draw(uint64 counter, uint256 bits) internal pure returns (uint64 next, uint256 value) {
         unchecked {
             next = counter + 1;
@@ -54,7 +55,7 @@ contract KnotRenderer is IKnotRenderer {
         value = uint256(m >> (64 - bits)) & ((1 << bits) - 1);
     }
 
-    /// @notice Indeks palety i 64 stany komórek dla epoki.
+    /// @notice Palette index and the 64 cell states for an epoch.
     function cells(uint256 epoch) public pure returns (uint256 paletteIdx, uint8[64] memory states) {
         uint64 counter = mix(uint64(epoch));
         uint256 v;

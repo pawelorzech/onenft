@@ -5,18 +5,17 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IKnotRenderer} from "./IKnotRenderer.sol";
 
-/// @title OneNFT — jeden splot na dobę
+/// @title OneNFT, one knot a day
 /// @notice The chain is the clock: a day is `block.timestamp / 86400`, one calendar
-/// day in UTC. W każdej dobie
-/// można wziąć dokładnie jeden token o numerze równym numerowi doby. Doba, po
-/// którą nikt nie przyszedł, zostaje pusta na zawsze — nie ma dogrywek.
+/// day in UTC. Each day exactly one token can be claimed, numbered by the day.
+/// A day nobody claims stays empty forever; there are no second chances.
 ///
-/// Co dziesiąta doba do 1000. włącznie należy do autora: wywołanie `claim()`
-/// w takiej dobie mintuje token autorowi, nie wołającemu. Jawne od dnia 1.
+/// Every tenth day up to and including 1000 belongs to the author: `claim()` on
+/// such a day mints to the author, not to the caller. Stated from day one.
 ///
-/// Renderer jest osobnym kontraktem. Jego adres zapisuje się per token w chwili
-/// wzięcia, więc `setRenderer` dotyka wyłącznie przyszłych dób; raz wzięty splot
-/// nie zmieni się nigdy. `lockRenderer` zamyka nawet tę furtkę, jednokierunkowo.
+/// The renderer is a separate contract. Its address is stored per token at claim
+/// time, so `setRenderer` touches future days only; a claimed knot never changes.
+/// `lockRenderer` closes even that door, one way.
 contract OneNFT is ERC721, Ownable {
     uint256 public constant EPOCH_SECONDS = 86400;
     uint256 public constant AUTHOR_UNTIL_DAY = 1000;
@@ -66,13 +65,13 @@ contract OneNFT is ERC721, Ownable {
         if (!ok || out.length < 96) revert BadRenderer(renderer_);
     }
 
-    // ---- zegar ----
+    // ---- clock ----
 
     function currentEpoch() public view returns (uint256) {
         return block.timestamp / EPOCH_SECONDS;
     }
 
-    /// @return 0 przed pierwszą dobą, potem 1, 2, 3...
+    /// @return 0 before day one, then 1, 2, 3, ...
     function currentDay() public view returns (uint256) {
         uint256 e = currentEpoch();
         return e < startEpoch ? 0 : e - startEpoch + 1;
@@ -91,7 +90,7 @@ contract OneNFT is ERC721, Ownable {
         return day % 10 == 0 && day <= AUTHOR_UNTIL_DAY;
     }
 
-    // ---- odbiór ----
+    // ---- claiming ----
 
     function claimed(uint256 day) public view returns (bool) {
         return _ownerOf(day) != address(0);
@@ -108,8 +107,9 @@ contract OneNFT is ERC721, Ownable {
         if (claimed(day)) revert DayAlreadyClaimed(day);
         address to = isAuthorDay(day) ? author : msg.sender;
         rendererOf[day] = renderer;
-        // _mint, nie _safeMint: odbiorca sam woła claim(), a po EIP-7702 zwykłe portfele
-        // bywają kontem z kodem delegacji, które nie odpowiada na onERC721Received.
+        // _mint, not _safeMint: the receiver calls claim() themselves, and after
+        // EIP-7702 a normal wallet can be an account with delegation code that
+        // does not answer onERC721Received.
         _mint(to, day);
         emit Claimed(day, to, epochOf(day), renderer);
     }
@@ -139,7 +139,7 @@ contract OneNFT is ERC721, Ownable {
         return IKnotRenderer(rendererOf[tokenId]).tokenURI(tokenId, epochOf(tokenId));
     }
 
-    /// @notice Podgląd splotu dowolnej doby, także niewziętej — z bieżącym rendererem.
+    /// @notice Preview of any day's knot, claimed or not, with the current renderer.
     function preview(uint256 day) external view returns (string memory) {
         return IKnotRenderer(renderer).svg(epochOf(day));
     }
