@@ -22,7 +22,7 @@ contract KnotRendererTest is Test {
         for (uint256 i = 0; i < b.length; i++) n = n * 10 + (uint8(b[i]) - 48);
     }
 
-    /// Wzorce z `bun run contracts/fixtures.ts` — TS jest źródłem prawdy.
+    /// Fixtures from `bun run contracts/fixtures.ts`. TypeScript is the source of truth.
     function test_SvgMatchesTypeScriptByteForByte() public view {
         string memory json = vm.readFile("test/fixtures/knots.json");
         bytes memory raw = vm.parseJson(json);

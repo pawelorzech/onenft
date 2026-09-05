@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Wdrożenie OneNFT. Użycie: contracts/deploy.sh sepolia|mainnet
-# Klucz deployera z Keychaina, adres autora z ~/.config/onenft/author.json.
+# Deploys OneNFT. Usage: contracts/deploy.sh sepolia|mainnet
+# Deployer secret from Keychain, author address from ~/.config/onenft/author.json.
 set -euo pipefail
 NET="${1:?sepolia|mainnet}"
 case "$NET" in
