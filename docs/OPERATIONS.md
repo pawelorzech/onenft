@@ -39,3 +39,7 @@ Set `BASE_RPC_URL` in the hosting env to a dedicated endpoint (Alchemy or QuickN
 ## Marketplaces
 - Basescan token pages fetch metadata lazily. "Refresh Metadata" works only from a logged-in Basescan account.
 - OpenSea reads `tokenURI` on its own. Collection settings (name, description, image, creator earnings) are edited by the contract owner in OpenSea's UI.
+
+## Analytics
+
+The site loads a self-hosted Umami script when both `UMAMI_URL` and `UMAMI_WEBSITE_ID` are set in the hosting env. Umami is cookieless and stores no personal data. The test site has neither variable, so it sends nothing. The embed page counts too; its views show under the `/embed` path.

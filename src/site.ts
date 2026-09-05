@@ -152,6 +152,12 @@ pre.snip{margin:0;padding:14px;background:var(--soft);overflow-x:auto;font-size:
 `;
 }
 
+const UMAMI_URL = process.env.UMAMI_URL ?? "";
+const UMAMI_WEBSITE_ID = process.env.UMAMI_WEBSITE_ID ?? "";
+// Umami (self-hosted, cookieless) only when both env vars are set, so the test site stays out of the numbers.
+const ANALYTICS = UMAMI_URL && UMAMI_WEBSITE_ID
+  ? `<script defer src="${UMAMI_URL}/script.js" data-website-id="${UMAMI_WEBSITE_ID}"></script>`
+  : "";
 const FONTS = `<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Newsreader:opsz,wght@6..72,400&display=swap">`;
 
 export function layout(title: string, p: Palette, body: string, image = "/today.png", path = "/"): string {
@@ -173,6 +179,7 @@ export function layout(title: string, p: Palette, body: string, image = "/today.
 <meta property="og:url" content="https://${SITE}${path}">
 <meta name="twitter:card" content="summary_large_image">
 ${FONTS}
+${ANALYTICS}
 <style>${css(p)}</style>
 </head>
 <body>${body}</body>
