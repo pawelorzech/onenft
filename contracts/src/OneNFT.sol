@@ -34,7 +34,9 @@ contract OneNFT is ERC721, Ownable {
     error BeforeFirstDay();
     error DayAlreadyClaimed(uint256 day);
     error RendererIsLocked();
-    error ZeroRenderer();
+    error BadRenderer(address renderer);
+    error BadStartEpoch(uint256 startEpoch, uint256 currentEpoch);
+    error OwnershipIsPermanent();
 
     constructor(
         string memory name_,
@@ -43,11 +45,23 @@ contract OneNFT is ERC721, Ownable {
         address author_,
         address renderer_
     ) ERC721(name_, symbol_) Ownable(author_) {
-        if (renderer_ == address(0)) revert ZeroRenderer();
+        // Day 1 must be the current epoch or one of the next seven. A late deploy
+        // would otherwise skip days silently, and startEpoch is immutable.
+        uint256 now_ = block.number / EPOCH_BLOCKS;
+        if (startEpoch_ < now_ || startEpoch_ > now_ + 7) revert BadStartEpoch(startEpoch_, now_);
+        _checkRenderer(renderer_);
         startEpoch = startEpoch_;
         author = author_;
         renderer = renderer_;
         emit RendererSet(renderer_);
+    }
+
+    /// @dev A renderer address is pinned per token forever, so it must be a live
+    /// contract that answers svg() before we let anyone claim against it.
+    function _checkRenderer(address renderer_) internal view {
+        if (renderer_.code.length == 0) revert BadRenderer(renderer_);
+        (bool ok, bytes memory out) = renderer_.staticcall(abi.encodeCall(IKnotRenderer.svg, (0)));
+        if (!ok || out.length < 64) revert BadRenderer(renderer_);
     }
 
     // ---- zegar ----
@@ -81,7 +95,11 @@ contract OneNFT is ERC721, Ownable {
         return _ownerOf(day) != address(0);
     }
 
-    /// @notice Bierze dzisiejszą dobę. Bez ceny; płacisz tylko gaz.
+    /// @notice Takes today's day. Free; you pay gas only.
+    /// @dev On an author day (day % 10 == 0, day <= 1000) the token goes to `author`
+    /// no matter who calls. The caller pays gas and gets nothing; the site hides the
+    /// button on those days. This keeps author days claimable by anyone, so they are
+    /// never lost because the author was away.
     function claim() external returns (uint256 day) {
         day = currentDay();
         if (day == 0) revert BeforeFirstDay();
@@ -98,9 +116,15 @@ contract OneNFT is ERC721, Ownable {
 
     function setRenderer(address renderer_) external onlyOwner {
         if (rendererLocked) revert RendererIsLocked();
-        if (renderer_ == address(0)) revert ZeroRenderer();
+        _checkRenderer(renderer_);
         renderer = renderer_;
         emit RendererSet(renderer_);
+    }
+
+    /// @dev Giving up ownership would freeze the renderer while `rendererLocked`
+    /// still reads false. `lockRenderer` is the one sanctioned way to freeze.
+    function renounceOwnership() public pure override {
+        revert OwnershipIsPermanent();
     }
 
     function lockRenderer() external onlyOwner {

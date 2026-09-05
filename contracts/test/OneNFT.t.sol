@@ -7,7 +7,7 @@ import {KnotRenderer} from "../src/KnotRenderer.sol";
 import {IKnotRenderer} from "../src/IKnotRenderer.sol";
 
 contract StubRenderer is IKnotRenderer {
-    function svg(uint256) external pure returns (string memory) { return "stub"; }
+    function svg(uint256) external pure returns (string memory) { return "stub-svg-long-enough-to-pass-the-sanity-check-in-the-token-contract-0123456789"; }
     function paletteName(uint256) external pure returns (string memory) { return "stub"; }
     function tokenURI(uint256, uint256) external pure returns (string memory) { return "stub-uri"; }
 }
@@ -22,8 +22,32 @@ contract OneNFTTest is Test {
     OneNFT nft;
 
     function setUp() public {
+        vm.roll(START * EB - 100);
         renderer = new KnotRenderer();
         nft = new OneNFT("onenft.click", "ONAD", START, author, address(renderer));
+    }
+
+    function test_ConstructorRejectsStartEpochInThePastOrTooFar() public {
+        vm.roll(START * EB);
+        vm.expectRevert(abi.encodeWithSelector(OneNFT.BadStartEpoch.selector, START - 1, START));
+        new OneNFT("x", "X", START - 1, author, address(renderer));
+        vm.expectRevert(abi.encodeWithSelector(OneNFT.BadStartEpoch.selector, START + 8, START));
+        new OneNFT("x", "X", START + 8, author, address(renderer));
+        new OneNFT("x", "X", START + 7, author, address(renderer));
+    }
+
+    function test_RendererMustBeALiveContract() public {
+        vm.prank(author);
+        vm.expectRevert(abi.encodeWithSelector(OneNFT.BadRenderer.selector, address(0xdead)));
+        nft.setRenderer(address(0xdead));
+        vm.expectRevert(abi.encodeWithSelector(OneNFT.BadRenderer.selector, address(0)));
+        new OneNFT("x", "X", START, author, address(0));
+    }
+
+    function test_OwnershipCannotBeRenounced() public {
+        vm.prank(author);
+        vm.expectRevert(OneNFT.OwnershipIsPermanent.selector);
+        nft.renounceOwnership();
     }
 
     function rollToDay(uint256 day, uint256 offset) internal {
