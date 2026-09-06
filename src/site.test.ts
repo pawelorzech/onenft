@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { homePage, dayPage, howPage, feedXml, mix, dayState, STATE_TEXT } from "./site.ts";
+import { homePage, dayPage, howPage, legalPage, feedXml, mix, dayState, STATE_TEXT } from "./site.ts";
 import { dayByNumber } from "./chain.ts";
 import { EPOCH_SECONDS } from "./knot.ts";
 
@@ -243,4 +243,15 @@ test("a hostile name in the names map cannot break out of the title or the headi
   const h = holderPage(who, who, t, fakeChain(5, { 1: who }), names);
   expect(h).not.toContain("<script>alert(1)</script>");
   expect(h).toContain("&lt;/title&gt;&lt;script&gt;");
+});
+
+test("terms and privacy pages say what the site does and link back", () => {
+  const t = legalPage("terms", today);
+  expect(t).toContain("Terms of use");
+  expect(t).toContain("CC0");
+  expect(t).toContain('href="/terms"'.replace("/terms", "https://" + "onenft.click"));
+  const p = legalPage("privacy", today);
+  expect(p).toContain("No accounts, no cookies");
+  expect(p).toContain("local storage");
+  for (const f of [t, p]) expect(f).toContain("Last changed");
 });
