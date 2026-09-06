@@ -27,17 +27,20 @@ test("day 1, the longest run, palettes, and claims at the source", () => {
     { day: 4, to: A, at: Number(dayByNumber(4)!.startsAt) + 42 },
   ]));
   const kinds = f.map((x) => x.kind);
-  expect(kinds.slice(0, 5)).toEqual(["first", "run", "source", "fastest", "palettes"]);
+  expect(kinds.slice(0, 6)).toEqual(["first", "run", "claimed", "later", "fastest", "palettes"]);
   expect(f[1].text).toBe("Longest run: 3 days in a row, day 3 to 5.");
   expect(f[1].days).toEqual([3, 4, 5]);
-  expect(f[2].text).toBe("Claimed 2 days at the source, 1 day came later.");
-  expect(f[3].text).toBe("Fastest claim: 42 s after midnight UTC, day 4.");
-  expect(f[4].text).toMatch(/^\d+ of 16 palettes\.$/);
+  expect(f[2].text).toBe("Claimed 2 days at the source.");
+  expect(f[3].text).toBe("Took 1 day from earlier holders.");
+  expect(f[4].figure).toBe("42 s");
+  expect(f[4].text).toBe("Fastest claim: 42 s after midnight UTC, day 4.");
+  expect(f[5].figure).toMatch(/^\d+ of 16$/);
 });
 
 test("only days from earlier holders, and an author day passed on", () => {
   const f = holderFacts(A, dayByNumber(25)!, chain(25, { 10: A, 20: A }, [{ day: 10, to: AUTHOR }, { day: 20, to: AUTHOR }]));
-  expect(f.find((x) => x.kind === "source")!.text).toBe("Took 2 days from earlier holders.");
+  expect(f.find((x) => x.kind === "later")!.text).toBe("Took 2 days from earlier holders.");
+  expect(f.find((x) => x.kind === "claimed")).toBeUndefined();
   expect(f.find((x) => x.kind === "fastest")).toBeUndefined();
   expect(f.find((x) => x.kind === "author-days")!.text).toBe("Holds 2 author days, passed on by the author.");
   // The author's own page never says the author passed days to the author.

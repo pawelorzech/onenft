@@ -151,7 +151,7 @@ export function holderPage(who: Address, handle: string, today: Day, chain: Chai
   const name = esc(rawName);
   const author = isAuthor(chain, who);
   const facts = holderFacts(who, today, chain);
-  const factList = facts.length ? `<ul class="facts" aria-label="About these days">${facts.map((f) => `<li>${esc(f.text)}</li>`).join("")}</ul>` : "";
+  const factList = facts.length ? `<ul class="facts" aria-label="About these days">${facts.map((f) => `<li><span class="fig syne">${esc(f.figure)}</span><span class="lab">${esc(f.label)}</span></li>`).join("")}</ul>` : "";
   const rows = mine.map((n) => {
     const d = dayByNumber(n)!;
     const kk = knotFor(d.epoch);

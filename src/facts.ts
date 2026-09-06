@@ -12,8 +12,12 @@ import { odds } from "./odds.ts";
 import type { Address } from "viem";
 
 export type Fact = {
-  kind: "first" | "run" | "source" | "fastest" | "palettes" | "rare" | "author-days";
-  /** Plain text, no markup. */
+  kind: "first" | "run" | "claimed" | "later" | "fastest" | "palettes" | "rare" | "author-days";
+  /** The big figure of the tile, e.g. "2 of 16". */
+  figure: string;
+  /** The line under the figure, e.g. "palettes". */
+  label: string;
+  /** The same fact as one plain sentence, for JSON and screen readers. */
   text: string;
   /** The days the fact points at, ascending. */
   days: number[];
@@ -47,7 +51,7 @@ export function holderFacts(who: Address, today: Day, chain: ChainState): Fact[]
   const facts: Fact[] = [];
   const author = chain.author.toLowerCase() === me;
 
-  if (mine.includes(1)) facts.push({ kind: "first", text: "Holds day 1, the first knot.", days: [1] });
+  if (mine.includes(1)) facts.push({ kind: "first", figure: "Day 1", label: "the first knot", text: "Holds day 1, the first knot.", days: [1] });
 
   // Longest run of consecutive days.
   let best: [number, number] = [mine[0], mine[0]], cur: [number, number] = [mine[0], mine[0]];
@@ -56,16 +60,14 @@ export function holderFacts(who: Address, today: Day, chain: ChainState): Fact[]
     if (cur[1] - cur[0] > best[1] - best[0]) best = cur;
   }
   const len = best[1] - best[0] + 1;
-  if (len >= 2) facts.push({ kind: "run", text: `Longest run: ${len} days in a row, day ${best[0]} to ${best[1]}.`, days: Array.from({ length: len }, (_, i) => best[0] + i) });
+  if (len >= 2) facts.push({ kind: "run", figure: String(len), label: `days in a row, the longest run, day ${best[0]} to ${best[1]}`, text: `Longest run: ${len} days in a row, day ${best[0]} to ${best[1]}.`, days: Array.from({ length: len }, (_, i) => best[0] + i) });
 
   // Claimed at the source or came later. Only days the log scan has reached count.
   const known = mine.filter((n) => chain.claims.has(n));
   const claimed = known.filter((n) => chain.claims.get(n)!.to.toLowerCase() === me);
   const later = known.filter((n) => chain.claims.get(n)!.to.toLowerCase() !== me);
-  if (known.length) {
-    const parts = [claimed.length ? `Claimed ${claimed.length} ${plural(claimed.length, "day", "days")} at the source` : "", later.length ? `${claimed.length ? "" : "Took "}${later.length} ${plural(later.length, "day", "days")} ${claimed.length ? "came later" : "from earlier holders"}` : ""].filter(Boolean);
-    facts.push({ kind: "source", text: `${parts.join(", ")}.`, days: known });
-  }
+  if (claimed.length) facts.push({ kind: "claimed", figure: String(claimed.length), label: "claimed at the source", text: `Claimed ${claimed.length} ${plural(claimed.length, "day", "days")} at the source.`, days: claimed });
+  if (later.length) facts.push({ kind: "later", figure: String(later.length), label: "from earlier holders", text: `Took ${later.length} ${plural(later.length, "day", "days")} from earlier holders.`, days: later });
 
   // The fastest claim after midnight, among the days this wallet claimed itself.
   if (claimed.length) {
@@ -74,13 +76,13 @@ export function holderFacts(who: Address, today: Day, chain: ChainState): Fact[]
       const s = chain.claims.get(n)!.at - Number(dayByNumber(n)!.startsAt);
       if (s < fastS) { fastS = s; fast = n; }
     }
-    facts.push({ kind: "fastest", text: `Fastest claim: ${afterMidnightShort(fastS)} after midnight UTC, day ${fast}.`, days: [fast] });
+    facts.push({ kind: "fastest", figure: afterMidnightShort(fastS), label: `after midnight UTC, the fastest claim, day ${fast}`, text: `Fastest claim: ${afterMidnightShort(fastS)} after midnight UTC, day ${fast}.`, days: [fast] });
   }
 
   // Palettes covered.
   const knots = mine.map((n) => [n, knotFor(dayByNumber(n)!.epoch)] as const);
   const palettes = new Set(knots.map(([, k]) => k.traits.palette));
-  if (mine.length >= 2) facts.push({ kind: "palettes", text: `${palettes.size} of ${PALETTES.length} palettes.`, days: mine });
+  if (mine.length >= 2) facts.push({ kind: "palettes", figure: `${palettes.size} of ${PALETTES.length}`, label: "palettes", text: `${palettes.size} of ${PALETTES.length} palettes.`, days: mine });
 
   // Rare trait values, one line, at most four.
   const rare = rareValues();
@@ -94,13 +96,14 @@ export function holderFacts(who: Address, today: Day, chain: ChainState): Fact[]
   if (hits.length) {
     const shown = hits.slice(0, 4);
     const rest = hits.length - shown.length;
-    facts.push({ kind: "rare", text: `Rare traits: ${shown.map((h) => h.text).join(", ")}${rest ? ` and ${rest} more` : ""}.`, days: [...new Set(hits.map((h) => h.n))] });
+    const list = `${shown.map((h) => h.text).join(", ")}${rest ? ` and ${rest} more` : ""}`;
+    facts.push({ kind: "rare", figure: String(hits.length), label: `rare ${plural(hits.length, "trait", "traits")}: ${list}`, text: `Rare traits: ${list}.`, days: [...new Set(hits.map((h) => h.n))] });
   }
 
   // Author days held by someone other than the author.
   if (!author) {
     const ad = mine.filter(isAuthorDay);
-    if (ad.length) facts.push({ kind: "author-days", text: `Holds ${ad.length === 1 ? `author day ${ad[0]}` : `${ad.length} author days`}, passed on by the author.`, days: ad });
+    if (ad.length) facts.push({ kind: "author-days", figure: String(ad.length), label: `author ${plural(ad.length, "day", "days")}, passed on by the author`, text: `Holds ${ad.length === 1 ? `author day ${ad[0]}` : `${ad.length} author days`}, passed on by the author.`, days: ad });
   }
 
   return facts;

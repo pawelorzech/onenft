@@ -160,8 +160,8 @@ test("holder page: facts from the chain, none for an empty wallet", () => {
   const t = dayByNumber(5)!;
   const h = holderPage(A, "0x2222…", t, fakeChain(5, { 1: A, 2: A, 4: A }));
   expect(h).toContain('class="facts"');
-  expect(h).toContain("Holds day 1, the first knot.");
-  expect(h).toContain("Longest run: 2 days in a row, day 1 to 2.");
-  expect(h).toContain("Fastest claim: 18 min after midnight UTC, day 1.");
+  expect(h).toContain('<span class="fig syne">Day 1</span><span class="lab">the first knot</span>');
+  expect(h).toContain('<span class="fig syne">2</span><span class="lab">days in a row, the longest run, day 1 to 2</span>');
+  expect(h).toContain('<span class="fig syne">18 min</span>');
   expect(holderPage(A, A, t, fakeChain(5, {}))).not.toContain('class="facts"');
 });
