@@ -134,9 +134,9 @@ aside .stick{position:sticky;top:38px;display:flex;flex-direction:column;gap:28p
 .mark{font-weight:800;font-size:20px;letter-spacing:-.01em;text-decoration:none}
 h1{font-weight:800;font-size:33px;line-height:.96;letter-spacing:-.045em;margin:0;overflow-wrap:normal;hyphens:manual}
 .lead{color:var(--muted);margin:0}
-.facts{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);max-width:1020px}
-.facts li{background:var(--bg);padding:18px 20px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
-.facts .fig{font-weight:800;font-size:30px;line-height:1;letter-spacing:-.03em}
+.facts{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));border-top:1px solid var(--line);border-left:1px solid var(--line);max-width:1120px}
+.facts li{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 20px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.facts .fig{font-weight:800;font-size:28px;line-height:1;letter-spacing:-.03em;white-space:nowrap}
 .facts .lab{font-size:15px;color:var(--muted);line-height:1.35}
 hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
 .big{font-weight:700;font-size:40px;line-height:1}
