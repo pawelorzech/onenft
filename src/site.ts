@@ -18,6 +18,8 @@ export const SITE = "knot.onenft.click";
 export const NAME = "Knot";
 export const PARENT = "onenft.click";
 export const REPO = "https://github.com/pawelorzech/onenft";
+/** App id from dashboard.base.org, verified by this tag on the home page (2026-09-07). */
+export const BASE_APP_ID = "6a9df43972f42e51858701e7";
 
 export function shortAddr(a: string): string {
   return `${a.slice(0, 6)}…${a.slice(-4)}`;
@@ -300,6 +302,7 @@ export function layout(title: string, p: Palette, body: string, image = "/today.
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description ?? DESC)}">
 <meta name="theme-color" content="${p.bg}">
+<meta name="base:app_id" content="${BASE_APP_ID}">
 <link rel="icon" href="/today.svg" type="image/svg+xml">
 <link rel="alternate" type="application/rss+xml" title="knot.onenft.click, one knot a day" href="/feed.xml">
 <link rel="canonical" href="https://${SITE}${esc(path)}">
