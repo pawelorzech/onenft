@@ -134,6 +134,9 @@ aside .stick{position:sticky;top:38px;display:flex;flex-direction:column;gap:28p
 .mark{font-weight:800;font-size:20px;letter-spacing:-.01em;text-decoration:none}
 h1{font-weight:800;font-size:33px;line-height:.96;letter-spacing:-.045em;margin:0;overflow-wrap:normal;hyphens:manual}
 .lead{color:var(--muted);margin:0}
+.facts{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:0 28px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.facts li{padding:12px 0;font-size:16px}
+.facts li::before{content:"";display:inline-block;width:8px;height:8px;background:var(--fg);margin-right:10px;vertical-align:1px}
 hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
 .big{font-weight:700;font-size:40px;line-height:1}
 .small{font-size:15px;color:var(--muted)}

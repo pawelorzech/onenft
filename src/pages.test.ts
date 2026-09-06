@@ -155,3 +155,13 @@ test("every inner page carries the breadcrumb back to the hub", () => {
     expect(h).toContain('href="https://onenft.click">All collections</a>');
   }
 });
+
+test("holder page: facts from the chain, none for an empty wallet", () => {
+  const t = dayByNumber(5)!;
+  const h = holderPage(A, "0x2222…", t, fakeChain(5, { 1: A, 2: A, 4: A }));
+  expect(h).toContain('class="facts"');
+  expect(h).toContain("Holds day 1, the first knot.");
+  expect(h).toContain("Longest run: 2 days in a row, day 1 to 2.");
+  expect(h).toContain("Fastest claim: 18 min after midnight UTC, day 1.");
+  expect(holderPage(A, A, t, fakeChain(5, {}))).not.toContain('class="facts"');
+});

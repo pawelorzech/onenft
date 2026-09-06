@@ -4,6 +4,8 @@
  */
 import { knotFor, renderKnot, PALETTES, ACCENTS, GRIDS, WEAVES, SYMMETRIES, WEIGHTS, CAPS, STYLES, GROUNDS, type Knot } from "./knot.ts";
 import { dayByNumber, dateOf, type Day } from "./chain.ts";
+import { odds } from "./odds.ts";
+import { holderFacts } from "./facts.ts";
 import type { ChainState, ChainStatus } from "./contract.ts";
 import { SITE, PARENT, REPO, FILE_PREFIX, layout, topBar, label, shortAddr, isAuthor, explorer, opensea, openseaCollection, chainName, num, plural, stripSize, esc, afterMidnight, traitList, whoBlock, sizePicker, downloadBar, connectScript, downloadScript, nameHeading, staleNote, dayState, type Names, NO_NAMES } from "./site.ts";
 import type { Address } from "viem";
@@ -77,26 +79,6 @@ ${months.join("\n")}
 
 type Count = Map<string, number>;
 
-function odds(): Record<string, [string, number][]> {
-  const tally = (xs: readonly (string | number)[]) => {
-    const m = new Map<string, number>();
-    for (const x of xs) m.set(String(x), (m.get(String(x)) ?? 0) + 1);
-    return [...m].map(([k, v]) => [k, v / xs.length] as [string, number]);
-  };
-  return {
-    palette: PALETTES.map((p) => [p.name, 1 / PALETTES.length]),
-    grid: tally(GRIDS).map(([g, o]) => [`${g} by ${g}`, o]),
-    weave: tally(WEAVES),
-    symmetry: tally(SYMMETRIES),
-    weight: tally(WEIGHTS),
-    caps: tally(CAPS),
-    accent: [["none", 15 / 16], ...ACCENTS.map((a) => [a.name, 1 / 64] as [string, number])],
-    style: tally(STYLES),
-    ground: tally(GROUNDS),
-    inverted: [["no", 3 / 4], ["yes", 1 / 4]],
-  };
-}
-
 const TRAIT_NOTES: Record<string, string> = {
   palette: "Sixteen palettes. Day 1 could only draw the first eight.",
   grid: "Cells per side. The image is always 512 pixels; a 12 by 12 day has a finer cord.",
@@ -168,6 +150,8 @@ export function holderPage(who: Address, handle: string, today: Day, chain: Chai
   const rawName = names.get(who.toLowerCase()) ?? shortAddr(who);
   const name = esc(rawName);
   const author = isAuthor(chain, who);
+  const facts = holderFacts(who, today, chain);
+  const factList = facts.length ? `<ul class="facts" aria-label="About these days">${facts.map((f) => `<li>${esc(f.text)}</li>`).join("")}</ul>` : "";
   const rows = mine.map((n) => {
     const d = dayByNumber(n)!;
     const kk = knotFor(d.epoch);
@@ -188,6 +172,7 @@ ${downloadBar(n, kk.palette.bg)}
 ${topBar(rawName)}
 ${staleNote(status)}
 <div><h2 class="syne">${nameHeading(rawName)}</h2><p class="lead" style="margin-top:8px">${author ? "The author. Every tenth day up to day 1000 lands here." : `${mine.length} ${plural(mine.length, "day", "days")} of ${today.n}.`}${handle.toLowerCase() !== who.toLowerCase() ? ` <span class="small">${shortAddr(who)}</span>` : ""}</p></div>
+${factList}
 ${whoBlock(chain)}
 ${rows.length ? `${sizePicker()}\n<div>${rows.join("\n")}</div>` : `<p>No days here yet. <a href="/">Today's knot</a> may still be available.</p>`}
 <nav class="nav small" style="padding-top:20px;border-top:1px solid var(--line)" aria-label="Wallet links"><a href="${explorer(chain.chainId)}/address/${who}">Basescan</a><a href="${chain.chainId === 8453 ? `https://opensea.io/${who}` : `https://testnets.opensea.io/${who}`}">OpenSea</a><a href="/api/holder/${who}">JSON</a><a href="https://${PARENT}/wallet/${who}">This wallet on ${PARENT}</a></nav>
