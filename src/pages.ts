@@ -7,7 +7,7 @@ import { dayByNumber, dateOf, type Day } from "./chain.ts";
 import { odds } from "./odds.ts";
 import { holderFacts } from "./facts.ts";
 import type { ChainState, ChainStatus } from "./contract.ts";
-import { SITE, PARENT, REPO, FILE_PREFIX, layout, topBar, label, shortAddr, isAuthor, explorer, opensea, openseaCollection, chainName, num, plural, stripSize, esc, afterMidnight, traitList, whoBlock, sizePicker, downloadBar, connectScript, downloadScript, nameHeading, staleNote, dayState, type Names, NO_NAMES } from "./site.ts";
+import { SITE, PARENT, REPO, FILE_PREFIX, layout, topBar, footer, label, shortAddr, isAuthor, explorer, opensea, openseaCollection, chainName, num, plural, stripSize, esc, afterMidnight, traitList, whoBlock, sizePicker, downloadBar, connectScript, downloadScript, nameHeading, staleNote, dayState, type Names, NO_NAMES } from "./site.ts";
 import type { Address } from "viem";
 
 const DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -68,9 +68,10 @@ export function explorePage(today: Day, chain: ChainState | null = null, status:
   const body = `<main class="wide" id="main">
 ${topBar("Explore")}
 ${staleNote(status)}
-<div><h2 class="syne">Every day so far</h2><p class="lead" style="margin-top:8px">${today.n} ${plural(today.n, "day", "days")} woven${chain ? `, ${taken} claimed, ${gaps} ${plural(gaps, "gap", "gaps")}` : ""}. Hatched days are gaps: the day ended without a claim, and it can no longer be minted. Dimmed days have not happened yet.</p></div>
+<div><h1 class="syne">Every day so far</h1><p class="lead" style="margin-top:8px">${today.n} ${plural(today.n, "day", "days")} woven${chain ? `, ${taken} claimed, ${gaps} ${plural(gaps, "gap", "gaps")}` : ""}. Hatched days are gaps: the day ended without a claim, and it can no longer be minted. Dimmed days have not happened yet.</p></div>
 ${months.join("\n")}
 <section><h3 class="syne">The next ${PREVIEW_DAYS} days</h3><p class="small" style="margin:6px 0 14px">The drawing exists before anyone sees it. One caveat: the drawing rules can still change for days nobody has claimed yet, so a preview is a promise only once its day arrives.</p><div class="strip">${preview.join("")}</div></section>
+${footer(chain)}
 </main>`;
   return layout(`Explore | ${SITE}`, k.palette, body, `/day/${today.n}.png`, "/explore");
 }
@@ -120,9 +121,10 @@ export function traitsPage(today: Day, chain: ChainState | null = null): string 
   });
   const body = `<main class="wide" id="main">
 ${topBar("Traits")}
-<div><h2 class="syne">Traits</h2><p class="lead" style="margin-top:8px">Ten traits, all drawn from the day number, all written into the token's metadata. Odds are the share of days each value gets in the long run. So far counts the ${today.n} ${plural(today.n, "day", "days")} woven to date${chain ? ", claimed counts only claimed days" : ""}. Day 1 came from a simpler machine and reads as 8 by 8, passes, no symmetry, cord, flat.</p></div>
+<div><h1 class="syne">Traits</h1><p class="lead" style="margin-top:8px">Ten traits, all drawn from the day number, all written into the token's metadata. Odds are the share of days each value gets in the long run. So far counts the ${today.n} ${plural(today.n, "day", "days")} woven to date${chain ? ", claimed counts only claimed days" : ""}. Day 1 came from a simpler machine and reads as 8 by 8, passes, no symmetry, cord, flat.</p></div>
 ${sections.join("\n")}
 <p class="small">Tables from <a href="/spec.json">spec.json</a>. <a href="/how">How the machine works</a>.</p>
+${footer(chain)}
 </main>`;
   return layout(`Traits | ${SITE}`, k.palette, body, `/day/${today.n}.png`, "/traits");
 }
@@ -135,10 +137,11 @@ export function yoursPage(today: Day, chain: ChainState | null = null, status: C
   const body = `<main class="wide" id="main">
 ${topBar("Your wallet")}
 ${staleNote(status)}
-<div><h2 class="syne">Your days</h2><p class="lead" style="margin-top:8px">Connect a wallet or type an address, and this page lists every knot it holds, each one ready to save as SVG, PNG or JPEG.</p></div>
+<div><h1 class="syne">Your days</h1><p class="lead" style="margin-top:8px">Connect a wallet or type an address, and this page lists every knot it holds, each one ready to save as SVG, PNG or JPEG.</p></div>
 ${bad !== null ? `<p class="note" role="alert">"${esc(bad)}" is not a wallet address or an ENS name. An address is 42 characters starting with 0x; a name ends in .eth.</p>` : ""}
 ${whoBlock(chain, status)}
 <p class="small">Viewing a wallet needs no transaction and no signature. Its public address appears in the page URL and is sent to this site to load its tokens. The same list is on <a href="https://${PARENT}/wallet">${PARENT}</a> for every collection at once; each site connects on its own.</p>
+${footer(chain)}
 </main>
 ${connectScript("/", true)}`;
   return layout(`Your days | ${SITE}`, k.palette, body, `/day/${today.n}.png`, "/yours");
@@ -171,15 +174,16 @@ ${downloadBar(n, kk.palette.bg)}
   const body = `<main class="wide" id="main">
 ${topBar(rawName)}
 ${staleNote(status)}
-<div><h2 class="syne">${nameHeading(rawName)}</h2><p class="lead" style="margin-top:8px">${author ? "The author. Every tenth day up to day 1000 lands here." : `${mine.length} ${plural(mine.length, "day", "days")} of ${today.n}.`}${handle.toLowerCase() !== who.toLowerCase() ? ` <span class="small">${shortAddr(who)}</span>` : ""}</p></div>
+<div><h1 class="syne">${nameHeading(rawName)}</h1><p class="lead" style="margin-top:8px">${author ? "The author. Every tenth day up to day 1000 lands here." : `${mine.length} ${plural(mine.length, "day", "days")} of ${today.n}.`}${handle.toLowerCase() !== who.toLowerCase() ? ` <span class="small">${shortAddr(who)}</span>` : ""}</p></div>
 ${factList}
 ${whoBlock(chain)}
 ${rows.length ? `${sizePicker()}\n<div>${rows.join("\n")}</div>` : `<p>No days here yet. <a href="/">Today's knot</a> may still be available.</p>`}
 <nav class="nav small" style="padding-top:20px;border-top:1px solid var(--line)" aria-label="Wallet links"><a href="${explorer(chain.chainId)}/address/${who}">Basescan</a><a href="${chain.chainId === 8453 ? `https://opensea.io/${who}` : `https://testnets.opensea.io/${who}`}">OpenSea</a><a href="/api/holder/${who}">JSON</a><a href="https://${PARENT}/wallet/${who}">This wallet on ${PARENT}</a></nav>
+${footer(chain)}
 </main>
 ${connectScript("/")}
 ${rows.length ? downloadScript() : ""}`;
-  return layout(`${rawName} | ${SITE}`, k.palette, body, `/day/${today.n}.png`, `/${handle}`, `${mine.length} ${plural(mine.length, "day", "days")} of ${SITE} held by ${rawName}.`);
+  return layout(`${rawName} | ${SITE}`, k.palette, body, `/day/${today.n}.png`, `/${handle}`, `${mine.length} ${plural(mine.length, "day", "days")} of ${SITE} held by ${rawName}.`, false);
 }
 
 // ---- assets ----
@@ -190,7 +194,7 @@ export function assetsPage(today: Day, chain: ChainState | null = null): string 
   const img = esc(`<img src="https://${SITE}/today.svg" width="256" height="256" alt="Today's knot from knot.onenft.click">`);
   const body = `<main class="prose" id="main">
 ${topBar("Assets")}
-<h2 class="syne">Take it. It is yours.</h2>
+<h1 class="syne">Take it. It is yours.</h1>
 <p>Every knot, the generator, the contracts, the wordmark and the text of this site are <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>: no credit needed, no permission to ask. Print it, remix it, mint it elsewhere, put it on a shirt. Owning a day gives you the token; the image belongs to everyone. The site's code in the repository carries its own license file; the fonts Syne and Newsreader are under the SIL Open Font License; the libraries the site uses keep their own licenses.</p>
 <h2 class="syne">Images</h2>
 <p>Any day as SVG at <code>/day/N.svg</code>, as a 1024 pixel PNG at <code>/day/N-1024.png</code>, and as a 1200 by 630 link card at <code>/day/N.png</code>. Today: <a href="/today.svg" download="${FILE_PREFIX}-today.svg">SVG</a>, <a href="/today.png">card</a>. The SVG is the same file the contract holds.</p>
@@ -207,6 +211,7 @@ ${topBar("Assets")}
 <h2 class="syne">Code and contract</h2>
 <p>The generator in TypeScript and Solidity, the site and the contracts: <a href="${REPO}">${REPO.replace("https://", "")}</a>.${chain ? ` Token contract <a href="${explorer(chain.chainId)}/address/${chain.address}">${chain.address}</a> on ${chainName(chain.chainId)}. <a href="${openseaCollection(chain)}">Collection on OpenSea</a>.` : ""}</p>
 <p class="small"><a href="/">Back to the fabric</a></p>
+${footer(chain)}
 </main>`;
   return layout(`Assets | ${SITE}`, k.palette, body, `/day/${today.n}.png`, "/assets");
 }

@@ -181,17 +181,18 @@ footer nav,.nav{display:flex;gap:6px 20px;flex-wrap:wrap}
 .step .gone{display:inline-flex;min-width:44px;min-height:44px;box-shadow:0 0 0 1px var(--line);opacity:.35}
 footer nav a,.nav a,.top nav a{display:inline-flex;align-items:center;min-height:44px}
 .prose{max-width:640px;padding:38px 34px;display:flex;flex-direction:column;gap:22px}
-.prose h2{font-weight:800;font-size:34px;line-height:1;letter-spacing:-.03em;margin:22px 0 0}
+.prose h1,.prose h2{font-weight:800;font-size:34px;line-height:1;letter-spacing:-.03em;margin:22px 0 0}
 .prose p{margin:0}
 .prose code{font-family:ui-monospace,Menlo,monospace;font-size:.92em}
 .prose pre{margin:0;padding:18px;background:var(--soft);overflow-x:auto;font-size:14px;line-height:1.5}
 .single{padding:38px 34px;display:flex;flex-direction:column;gap:22px;max-width:760px}
 .single .knot{width:100%;max-width:640px;aspect-ratio:1;box-shadow:0 0 0 1px var(--line)}
 .single .knot svg{display:block;width:100%;height:100%}
+.single h1,.single h2{font-weight:800;font-size:34px;line-height:1;letter-spacing:-.03em;margin:0}
 .top{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
 .top nav{display:flex;gap:4px 18px;flex-wrap:wrap;font-size:16px;color:var(--muted)}
 .wide{padding:38px 34px;display:flex;flex-direction:column;gap:28px;max-width:1180px}
-.wide h2{font-weight:800;font-size:34px;line-height:1;letter-spacing:-.03em;margin:0}
+.wide h1,.wide h2{font-weight:800;font-size:34px;line-height:1;letter-spacing:-.03em;margin:0}
 .wide h3{font-weight:700;font-size:20px;margin:0}
 .wide p{margin:0}
 .cal{max-width:900px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
@@ -293,7 +294,7 @@ const ANALYTICS = UMAMI_URL && UMAMI_WEBSITE_ID
 const FONTS = `<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Newsreader:opsz,wght@6..72,400&display=swap">`;
 const DESC = "One Truchet knot a day, computed from the clock of the Base chain. The drawing exists before anyone sees it.";
 
-export function layout(title: string, p: Palette, body: string, image = "/today.png", path = "/", description?: string): string {
+export function layout(title: string, p: Palette, body: string, image = "/today.png", path = "/", description?: string, index = true): string {
   const alt = title.replace(/ \| .*$/, "") + " on " + SITE;
   return `<!doctype html>
 <html lang="en">
@@ -303,7 +304,7 @@ export function layout(title: string, p: Palette, body: string, image = "/today.
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description ?? DESC)}">
 <meta name="theme-color" content="${p.bg}">
-<meta name="base:app_id" content="${BASE_APP_ID}">
+${index ? "" : '<meta name="robots" content="noindex">\n'}<meta name="base:app_id" content="${BASE_APP_ID}">
 <link rel="icon" href="/today.svg" type="image/svg+xml">
 <link rel="alternate" type="application/rss+xml" title="knot.onenft.click, one knot a day" href="/feed.xml">
 <link rel="canonical" href="https://${SITE}${esc(path)}">
@@ -416,6 +417,10 @@ export function menu(extra: [string, string][] = []): string {
 /** Top bar for the inner pages: the breadcrumb and the site nav. */
 export function topBar(current?: string): string {
   return `<div class="top">${crumb(current)}<nav aria-label="Site">${menu([[`https://${PARENT}`, "All collections"]])}</nav></div>`;
+}
+
+export function footer(chain: ChainState | null = null): string {
+  return `<footer><span>This is not an investment and never will be. Images and code are CC0. One of the collections at <a href="https://${PARENT}">${PARENT}</a>.</span><nav aria-label="Footer">${menu([[`https://${PARENT}`, "All collections"]])}${chain ? `<a href="${openseaCollection(chain)}">OpenSea</a><a href="${explorer(chain.chainId)}/address/${chain.address}">Basescan</a>` : ""}<a href="/feed.xml">RSS</a><a href="/calendar.ics">Calendar</a><a href="${REPO}">Code</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></nav></footer>`;
 }
 
 /** Pixel art wants hard edges when the browser rasterizes it. The knot is vector, so no. */
@@ -721,7 +726,7 @@ ${today.n === 1 ? `<p class="small">This is day one. Tomorrow a second row appea
 <section class="format">${TILES}<p style="max-width:520px;margin:0">Every knot is these shapes on a grid, plus ten traits, all drawn from the day number. The format is public and CC0. <a href="/how">See how the machine works</a></p></section>
 ${rows.join("\n")}
 ${older}
-<footer><span>This is not an investment and never will be. Images and code are CC0. One of the collections at <a href="https://${PARENT}">${PARENT}</a>.</span><nav aria-label="Footer">${menu([[`https://${PARENT}`, "All collections"]])}${chain ? `<a href="${openseaCollection(chain)}">OpenSea</a><a href="${explorer(chain.chainId)}/address/${chain.address}">Basescan</a>` : ""}<a href="/feed.xml">RSS</a><a href="/calendar.ics">Calendar</a><a href="${REPO}">Code</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></nav></footer>
+${footer(chain)}
 </main>
 </div>
 ${chain && st === "available" ? mintScript(chain, today.n) : ""}
@@ -755,7 +760,7 @@ export function dayPage(d: Day, today: Day, chain: ChainState | null = null, nam
 ${topBar(`Day ${d.n}`)}
 ${staleNote(status)}
 <div class="knot">${stripSize(k.svg)}</div>
-<div><div class="head"><h2 class="num syne" style="margin:0">${d.n}</h2><nav class="step" aria-label="Neighbouring days">${prev}${next}</nav></div><p class="lead">${state}</p></div>
+<div><div class="head"><h1 class="num syne" style="margin:0">${d.n}</h1><nav class="step" aria-label="Neighbouring days">${prev}${next}</nav></div><p class="lead">${state}</p></div>
 ${came}
 ${traitList(k)}
 <p class="small" style="line-height:1.7">${dateOf(d.epoch)}, UTC${chain ? `<br>Token ${d.n} of <a href="${explorer(chain.chainId)}/address/${chain.address}">${shortAddr(chain.address)}</a> on ${chainName(chain.chainId)}. The image lives in the contract.` : ""}</p>
@@ -763,6 +768,7 @@ ${traitList(k)}
 <nav class="nav small" aria-label="Links">${chain && chain.owners.has(d.n) ? `<a href="${opensea(chain, d.n)}">OpenSea</a><a href="${explorer(chain.chainId)}/nft/${chain.address}/${d.n}">Basescan</a>` : ""}<a href="/day/${d.n}.svg" download="${FILE_PREFIX}-day-${d.n}.svg">SVG</a><a href="/day/${d.n}-1024.png" download="${FILE_PREFIX}-day-${d.n}-1024.png">PNG</a><a href="/day/${d.n}.png">Link card</a></nav>
 ${share}
 <details><summary class="small">Put this knot on your page</summary><pre class="snip">${snippet}</pre><p class="small">CC0. No credit needed.</p></details>
+${footer(chain)}
 </main>
 ${STEP_KEYS}`;
   return layout(`Day ${d.n} | ${SITE}`, k.palette, body, `/day/${d.n}.png`, `/day/${d.n}`, `Day ${d.n} of ${SITE}, ${dateOf(d.epoch)} UTC: palette ${k.traits.palette}, ${k.traits.grid} by ${k.traits.grid}, ${k.traits.weave}, ${k.traits.symmetry === "none" ? "no symmetry" : k.traits.symmetry}. ${STATE_TEXT[st]}.`);
@@ -776,7 +782,7 @@ export function howPage(today: Day): string {
   const k = knotFor(today.epoch);
   const body = `<main class="prose" id="main">
 ${topBar("How it works")}
-<h2 class="syne">From one number to one knot</h2>
+<h1 class="syne">From one number to one knot</h1>
 <p>The only input is the clock of the Base chain: the timestamp of the current block. Nobody sets it and nobody can roll it back.</p>
 <p><strong>A day</strong> is that timestamp divided by 86,400, rounded down. That gives one calendar day in UTC, with the boundary at midnight UTC. The number itself counts days since 1 January 1970; day one of this project is day number 20701.</p>
 <p><strong>The seed</strong> is that day number run through splitmix64. From it you pull a stream of bits. The first draws set ten traits; the rest fill the grid, one cell at a time.</p>
@@ -813,6 +819,7 @@ for each free cell in row order:
 mirrored cells copy their source, arcs flip under a mirror or a quarter turn</code></pre>
 <p>Everything here is CC0. If you build it, write to me. That is the one thing I am waiting for here.</p>
 <p class="small"><a href="/">Back to the fabric</a></p>
+${footer()}
 </main>`;
   return layout(`How it works | ${SITE}`, k.palette, body, "/today.png", "/how");
 }
@@ -821,10 +828,11 @@ export function beforeStart(seconds: number, dayOne: Day): string {
   const k = knotFor(dayOne.epoch);
   const body = `<main class="single" id="main">
 ${crumb()}
-<h2 class="syne" style="font-size:52px;line-height:.9;letter-spacing:-.035em;margin:0">The first day<br>ties in <span data-left="${seconds}">${fmtLeft(seconds)}</span></h2>
+<h1 class="syne" style="font-size:52px;line-height:.9;letter-spacing:-.035em;margin:0">The first day<br>ties in <span data-left="${seconds}">${fmtLeft(seconds)}</span></h1>
 <p class="lead" style="max-width:520px">At midnight UTC on ${dateOf(dayOne.epoch)} the first knot appears. This page already wears its colors, because you can compute the palette ahead of time.</p>
 <p class="small">From that day on, one knot a day, with no end. <a href="/how">How it works</a></p>
 ${NEW_DAY}
+${footer()}
 </main>
 ${COUNTDOWN}`;
   return layout(`Before day one | ${SITE}`, k.palette, body);
@@ -832,13 +840,13 @@ ${COUNTDOWN}`;
 
 export function notFound(today: Day, why?: string): string {
   const k = knotFor(today.epoch);
-  return layout(`Not found | ${SITE}`, k.palette, `<main class="single" id="main">${topBar("Not found")}<h2 class="syne" style="font-size:34px;margin:0">Not found</h2><p class="lead">${why ? esc(why) : `Today is day ${today.n}. Earlier days run from 1 to ${today.n}. Later ones do not exist yet.`}</p><a href="/">Back to the fabric</a></main>`, "/today.png", "/");
+  return layout(`Not found | ${SITE}`, k.palette, `<main class="single" id="main">${topBar("Not found")}<h1 class="syne" style="font-size:34px;margin:0">Not found</h1><p class="lead">${why ? esc(why) : `Today is day ${today.n}. Earlier days run from 1 to ${today.n}. Later ones do not exist yet.`}</p><a href="/">Back to the fabric</a>${footer()}</main>`, "/today.png", "/", undefined, false);
 }
 
 /** Pages that need the chain (holder pages) when the chain did not answer. */
 export function chainDown(today: Day, why = "This page lists a wallet's days, and that needs the chain. Try again in a minute."): string {
   const k = knotFor(today.epoch);
-  return layout(`The chain did not answer | ${SITE}`, k.palette, `<main class="single" id="main">${topBar("Unavailable")}<h2 class="syne" style="font-size:34px;margin:0">The chain did not answer</h2><p class="lead">${esc(why)}</p><a href="/">Back to the fabric</a></main>`, "/today.png", "/");
+  return layout(`The chain did not answer | ${SITE}`, k.palette, `<main class="single" id="main">${topBar("Unavailable")}<h1 class="syne" style="font-size:34px;margin:0">The chain did not answer</h1><p class="lead">${esc(why)}</p><a href="/">Back to the fabric</a>${footer()}</main>`, "/today.png", "/", undefined, false);
 }
 
 export function feedXml(today: Day, chain: ChainState | null): string {
@@ -885,7 +893,7 @@ export function legalPage(kind: "terms" | "privacy", today: Day): string {
   const contact = `<p>Questions go to <a href="${REPO}/issues">the repository</a> or to <a href="https://x.com/onenftclick">@onenftclick</a>.</p>`;
   const terms = `<main class="prose" id="main">
 ${topBar("Terms")}
-<h2 class="syne">Terms of use</h2>
+<h1 class="syne">Terms of use</h1>
 <p class="small">Last changed ${LEGAL_UPDATED}.</p>
 <p><strong>What this is.</strong> This site shows tokens that a contract on the Base chain mints and draws. The site reads the chain and nothing else. It holds no keys, no funds and no account of yours.</p>
 <p><strong>What you sign, you send.</strong> A claim goes from your wallet to the contract. You pay the network gas. A transaction that fails still costs gas. Any fee the contract takes is written on this site before you sign.</p>
@@ -895,10 +903,11 @@ ${topBar("Terms")}
 <p><strong>Licence.</strong> Images and code are CC0. Use them for anything, with or without credit.</p>
 <p><strong>Changes.</strong> These terms can change. The date at the top says when they last did.</p>
 ${contact}
+${footer()}
 </main>`;
   const privacy = `<main class="prose" id="main">
 ${topBar("Privacy")}
-<h2 class="syne">Privacy</h2>
+<h1 class="syne">Privacy</h1>
 <p class="small">Last changed ${LEGAL_UPDATED}.</p>
 <p><strong>No accounts, no cookies.</strong> This site has no sign-up, sets no cookies and runs no advertising. It does not sell data, because it keeps almost none.</p>
 <p><strong>Server logs.</strong> The host keeps standard access logs: address, path, time, browser string. They exist to keep the site running and to find faults, and they are not kept longer than that needs.</p>
@@ -907,6 +916,7 @@ ${topBar("Privacy")}
 <p><strong>Third parties.</strong> Fonts load from Google Fonts. Chain reads go through a Base RPC provider. Links lead to OpenSea, Basescan and GitHub, which have their own rules.</p>
 <p><strong>Changes.</strong> This page can change. The date at the top says when it last did.</p>
 ${contact}
+${footer()}
 </main>`;
   const body = kind === "terms" ? terms : privacy;
   const title = kind === "terms" ? "Terms" : "Privacy";

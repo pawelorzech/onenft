@@ -4,7 +4,7 @@
 
 Paweł wants to open any collection site (knot, blit, chainrun, soon faces) and see the tokens his wallet holds there, then save any of them as SVG, PNG or JPEG in one click. He also wants the same view on onenft.click for every collection at once, and an obvious way back from a collection site to the hub.
 
-What exists today (verified in code): every collection site already has a holder page at `/0x…` and `/name.eth` (`holderPage` in `src/pages.ts`) and JSON at `/api/holder/<who>` (`holderJson` in `src/api.ts`), both filtering the `owners` map built by `ownersUpTo` in `src/contract.ts`. Nothing lets a visitor get there from the site itself: no connect button, no address field, no nav link. Downloads are SVG only, via the `download` attribute. PNG is a 1200 by 630 share card, not the artwork. The hub (`~/Programowanie/onenft-hub`) reads only `/api/today` and `/api/days` and has no wallet view. Contracts are plain ERC721, not Enumerable, so the `ownerOf` multicall sweep stays the source of ownership.
+What exists today (verified in code): every collection site already has a holder page at `/0x…` and `/name.eth` (`holderPage` in `src/pages.ts`) and JSON at `/api/holder/<who>` (`holderJson` in `src/api.ts`), both filtering the `owners` map built by `ownersUpTo` in `src/contract.ts`. Nothing lets a visitor get there from the site itself: no connect button, no address field, no nav link. Downloads are SVG only, via the `download` attribute. PNG is a 1200 by 630 share card, not the artwork. The hub (`~/Programowanie/onenft/hub`) reads only `/api/today` and `/api/days` and has no wallet view. Contracts are plain ERC721, not Enumerable, so the `ownerOf` multicall sweep stays the source of ownership.
 
 Decisions taken with Paweł on 2026-09-05:
 
@@ -27,7 +27,7 @@ Design canvas (view only, served locally while this session runs): `http://local
 
 ## Part 1: collection sites (knot first, then copy to blit and chainrun)
 
-All paths relative to `~/Programowanie/onenft`. Blit and chainrun are byte-for-byte the same layout; apply the same diff with the generator name swapped (`blitFor`, `runnerFor`) and `PIXEL = true` for both.
+All paths relative to `~/Programowanie/onenft/knot`. Blit and chainrun are byte-for-byte the same layout; apply the same diff with the generator name swapped (`blitFor`, `runnerFor`) and `PIXEL = true` for both.
 
 ### 1a. Top bar and footer (`src/site.ts`)
 
@@ -73,9 +73,9 @@ Injected on the holder page. Plain script, no bundler, same style as `mintScript
 
 ### 1f. Copy to blit and chainrun
 
-Same diff in `~/Programowanie/onenft-blit` and `~/Programowanie/onenft-chainrun`: `topBar`, `homePage` nav and footer, `yoursPage`, `holderPage`, `/yours` and `/go` routes, `CONNECT` and `DOWNLOAD` scripts, CSS, tests, docs. Swap `knotFor` for `blitFor` / `runnerFor`, the download filename prefix (`blit-day-N`, `chainrun-day-N`), and set `PIXEL = true`. Blit and chainrun trait lists differ; use each repo's own trait helper.
+Same diff in `~/Programowanie/onenft/blit` and `~/Programowanie/onenft/chainrun`: `topBar`, `homePage` nav and footer, `yoursPage`, `holderPage`, `/yours` and `/go` routes, `CONNECT` and `DOWNLOAD` scripts, CSS, tests, docs. Swap `knotFor` for `blitFor` / `runnerFor`, the download filename prefix (`blit-day-N`, `chainrun-day-N`), and set `PIXEL = true`. Blit and chainrun trait lists differ; use each repo's own trait helper.
 
-## Part 2: the hub (`~/Programowanie/onenft-hub`)
+## Part 2: the hub (`~/Programowanie/onenft/hub`)
 
 ### 2a. Routes (`src/server.ts`)
 
