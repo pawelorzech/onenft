@@ -41,7 +41,7 @@ cd contracts && forge test    # contract tests, includes TS↔Solidity byte equa
 PORT=3000 bun run src/server.ts
 ```
 
-Environment: `PORT`; `CONTRACT_ADDRESS` and `CHAIN_ID` (8453 mainnet, 84532 Sepolia) to read chain state and enable claiming; `BASE_RPC_URL` for chain reads; `START_EPOCH` (default 20701, overridden by the contract); `DEPLOYER_KEY` to run the author-day autoclaim; `ETH_RPC_URL` for ENS lookups. Without a contract the site is a plain renderer.
+Environment: `PORT`; `CONTRACT_ADDRESS` and `CHAIN_ID` (8453 mainnet, 84532 Sepolia) to read chain state and enable claiming; `BASE_RPC_URL` for chain reads, with `BASE_RPC_FALLBACK_URLS` (comma separated; default: the public Base endpoints) tried when it fails or is rate limited; `START_EPOCH` (default 20701, overridden by the contract); `DEPLOYER_KEY` to run the author-day autoclaim; `ETH_RPC_URL` for ENS lookups. Without a contract the site is a plain renderer.
 
 ## Contracts in one paragraph
 
